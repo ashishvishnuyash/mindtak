@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import Link from 'next/link';
 import type { MentalHealthReport, User as UserType } from '@/types';
 
@@ -89,24 +89,27 @@ export default function EmployerDashboard() {
         setLoading(false);
         return;
       }
- // Fetch all reports for company employees
+
+      // Fetch all reports for company employees (without orderBy to avoid composite index requirement)
       const reportsCollectionRef = collection(db, 'mental_health_reports');
       const reportsQuery = query(
- reportsCollectionRef,
- where('employee_id', 'in', employeeIds),
- orderBy('created_at', 'desc')
- );
+        reportsCollectionRef,
+        where('employee_id', 'in', employeeIds)
+      );
 
       const reportsSnapshot = await getDocs(reportsQuery);
- const reports = reportsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as MentalHealthReport[];
+      const reports = reportsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as MentalHealthReport[];
+
+      // Sort reports by created_at in JavaScript (descending order)
+      const sortedReports = reports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       // Calculate statistics
-      const totalReports = reports?.length || 0;
+      const totalReports = sortedReports?.length || 0;
       const averageWellness = totalReports > 0 
-        ? Math.round(reports!.reduce((sum, report) => sum + report.overall_wellness, 0) / totalReports)
+        ? Math.round(sortedReports!.reduce((sum, report) => sum + report.overall_wellness, 0) / totalReports)
         : 0;
 
-      const riskCounts = reports.reduce((acc, report) => {
+      const riskCounts = sortedReports.reduce((acc, report) => {
         acc[report.risk_level]++;
         return acc;
       }, { low: 0, medium: 0, high: 0 }) || { low: 0, medium: 0, high: 0 };
@@ -115,7 +118,7 @@ export default function EmployerDashboard() {
       const departmentStats: { [key: string]: { count: number; avgWellness: number } } = {};
       employees?.forEach(employee => {
         const dept = employee.department ?? 'Unassigned'; // Use nullish coalescing
-        const employeeReports = reports?.filter(r => r.employee_id === employee.id) || [];
+        const employeeReports = sortedReports?.filter(r => r.employee_id === employee.id) || [];
         const avgWellness = employeeReports.length > 0
           ? employeeReports.reduce((sum, r) => sum + r.overall_wellness, 0) / employeeReports.length
           : 0;
@@ -131,14 +134,14 @@ export default function EmployerDashboard() {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const recentReports = reports.filter(r =>
+      const recentReports = sortedReports.filter(r =>
         new Date(r.created_at) >= thirtyDaysAgo
       ) || [];
 
       const trendData = [];
       for (let i = 29; i >= 0; i--) {
         const date = new Date();
- date.setDate(date.getDate() - i);
+        date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
         
         const dayReports = recentReports.filter(r => 
@@ -156,17 +159,17 @@ export default function EmployerDashboard() {
       }
 
       setStats({
- totalEmployees: employees.length,
+        totalEmployees: employees.length,
         totalReports,
         averageWellness,
         highRiskCount: riskCounts.high,
         mediumRiskCount: riskCounts.medium,
         lowRiskCount: riskCounts.low,
-        recentReports: reports?.slice(0, 10) || [],
+        recentReports: sortedReports?.slice(0, 10) || [],
         departmentStats,
         trendData,
       });
- setLoading(false); // Set loading to false after data is fetched
+      setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -499,8 +502,8 @@ export default function EmployerDashboard() {
                       </p>
                       <p className="text-sm text-gray-600">
                         {new Date(report.created_at).toLocaleDateString()} at{' '}
- {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {/* Format time */}
- </p>
+                        {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {/* Format time */}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
