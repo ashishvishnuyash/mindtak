@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,133 +24,46 @@ import {
   PhoneOff,
   Loader2
 } from 'lucide-react';
-import { useUser } from '@/hooks/use-user';
-import { useAudioRecorder } from '@/hooks/use-audio-recorder';
-import { useAudioPlayer } from '@/hooks/use-audio-player';
 import { toast } from 'sonner';
-import type { ChatMessage, ChatSession } from '@/types/index';
-import { GeminiLiveConversation } from '@/lib/gemini-live';
-
-import {
-  collection,
-  doc,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
-} from 'firebase/firestore';
+import { useUser } from '@/hooks/use-user';
+import { AvatarSystem, useAvatarController, mapEmotionToAvatar } from '@/components/avatar/avatar-system';
+import { GeminiLiveConversation } from '@/lib/ai/gemini-live';
+import { emotionDetector } from '@/lib/ai/emotion-detection';
+import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { v4 as uuidv4 } from 'uuid';
+
+interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp: Date | string;
+  emotion_detected?: string;
+  sentiment_score?: number;
+}
 
 export default function EmployeeChatPage() {
-  const generateAIResponse = (userMessage: string) => {
-    const message = userMessage.toLowerCase();
-    
-    // Simple emotion detection
-    let emotion = 'neutral';
-    let sentiment = 0;
-    
-    if (message.includes('sad') || message.includes('depressed') || message.includes('down')) {
-      emotion = 'sad';
-      sentiment = -0.7;
-    } else if (message.includes('angry') || message.includes('frustrated') || message.includes('mad')) {
-      emotion = 'angry';
-      sentiment = -0.5;
-    } else if (message.includes('happy') || message.includes('good') || message.includes('great')) {
-      emotion = 'happy';
-      sentiment = 0.8;
-    } else if (message.includes('anxious') || message.includes('worried') || message.includes('nervous')) {
-      emotion = 'anxious';
-      sentiment = -0.6;
-    } else if (message.includes('stressed') || message.includes('overwhelmed')) {
-      emotion = 'stressed';
-      sentiment = -0.8;
-    }
-
-    // Generate contextual responses
-    const responses = {
-      sad: [
-        "I'm sorry to hear you're feeling sad. It's completely normal to have these feelings. Would you like to talk about what's been bothering you?",
-        "Sadness is a natural emotion, and it's okay to feel this way. Remember that these feelings are temporary. What usually helps you feel better?",
-        "I understand you're going through a difficult time. Sometimes talking about it can help. I'm here to listen without judgment."
-      ],
-      angry: [
-        "I can sense you're feeling frustrated. Anger is a valid emotion. What's been causing these feelings?",
-        "It sounds like something has really upset you. Would you like to share what happened? Sometimes expressing anger in a safe space can be helpful.",
-        "I hear that you're angry. Let's work through this together. What would help you feel more calm right now?"
-      ],
-      happy: [
-        "It's wonderful to hear you're feeling good! What's been going well for you lately?",
-        "I'm glad you're in a positive mood! Celebrating good moments is important for our mental health.",
-        "That's great to hear! Positive emotions are so valuable. What's been bringing you joy?"
-      ],
-      anxious: [
-        "I understand you're feeling anxious. Anxiety can be overwhelming, but you're not alone. What's been on your mind?",
-        "Anxiety is very common, and it's brave of you to acknowledge it. Have you tried any breathing exercises or grounding techniques?",
-        "I hear that you're feeling worried. Let's take this one step at a time. What specific thoughts are causing you anxiety?"
-      ],
-      stressed: [
-        "Stress can be really challenging to deal with. What's been the main source of your stress lately?",
-        "I understand you're feeling overwhelmed. It's important to take breaks and practice self-care. What usually helps you relax?",
-        "Stress affects us all differently. You're taking a positive step by talking about it. What support do you need right now?"
-      ],
-      neutral: [
-        "Thank you for sharing that with me. How has your day been overall?",
-        "I appreciate you opening up. Is there anything specific you'd like to discuss about your mental health?",
-        "I'm here to support you. What's been on your mind lately regarding your wellbeing?",
-        "How are you taking care of yourself these days? Self-care is so important for mental health."
-      ]
-    };
-
-    const emotionResponses = responses[emotion as keyof typeof responses] || responses.neutral;
-    const response = emotionResponses[Math.floor(Math.random() * emotionResponses.length)];
-
-    return {
-      content: response,
-      emotion,
-      sentiment
-    };
-  };
-
   const { user, loading: userLoading } = useUser();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const [liveConversation, setLiveConversation] = useState<GeminiLiveConversation | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [liveConversation, setLiveConversation] = useState<GeminiLiveConversation | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const avatarController = useAvatarController();
 
-  // Audio hooks
-  const audioRecorder = useAudioRecorder({
-    onDataAvailable: async (audioData) => {
-      if (liveConversation && isConnected) {
-        try {
-          await liveConversation.sendAudio(audioData);
-        } catch (error) {
-          console.error('Failed to send audio:', error);
-          toast.error('Failed to send audio message');
-        }
-      }
-    },
-    onError: (error) => {
-      console.error('Audio recording error:', error);
-      toast.error('Audio recording failed');
-    }
-  });
-
-  const audioPlayer = useAudioPlayer({
-    onEnded: () => {
-      console.log('Audio playback ended');
-    },
-    onError: (error) => {
-      console.error('Audio playback error:', error);
-      toast.error('Audio playback failed');
-    }
-  });
+  // Audio recording setup
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -168,12 +80,15 @@ export default function EmployeeChatPage() {
       initializeChat();
     }
 
+    // Initialize emotion detection
+    emotionDetector.initialize();
+
     // Cleanup on unmount
     return () => {
       if (liveConversation) {
         liveConversation.disconnect();
       }
-      audioRecorder.cleanup();
+      stopAudioProcessing();
     };
   }, [user, userLoading, router]);
 
@@ -192,17 +107,37 @@ export default function EmployeeChatPage() {
       // Create a new chat session
       const sessionRef = collection(db, 'chat_sessions');
       const newSessionDoc = await addDoc(sessionRef, {
-        employee_id: user!.id,
+        employee_id: user.id,
         session_type: 'text',
         created_at: serverTimestamp(),
       });
 
       setSessionId(newSessionDoc.id);
 
-      // Add welcome message to the session subcollection
-      const messagesRef = collection(db, 'chat_sessions', newSessionDoc.id, 'messages');
-      const welcomeMessageContent = `Hello ${user!.first_name || 'there'}! I'm your AI wellness assistant. I'm here to listen, provide support, and help you with your mental health journey. How are you feeling today?`;
+      // Add welcome message
+      const welcomeMessageContent = `Hello ${user.first_name || 'there'}! I'm your AI wellness assistant. I'm here to listen, provide support, and help you with your mental health journey. How are you feeling today?`;
       
+      const welcomeMessage: ChatMessage = {
+        id: uuidv4(),
+        content: welcomeMessageContent,
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+
+      setMessages([welcomeMessage]);
+
+      // Set avatar to empathetic state
+      avatarController.updateEmotion('empathetic', 0.7);
+      avatarController.setSpeaking(true);
+
+      // Simulate AI speaking
+      setTimeout(() => {
+        avatarController.setSpeaking(false);
+        avatarController.setListening(true);
+      }, 3000);
+
+      // Add message to Firestore
+      const messagesRef = collection(db, 'chat_sessions', newSessionDoc.id, 'messages');
       await addDoc(messagesRef, {
         session_id: newSessionDoc.id,
         content: welcomeMessageContent,
@@ -213,15 +148,21 @@ export default function EmployeeChatPage() {
       // Set up real-time listener for messages in this session
       const q = query(messagesRef, orderBy('timestamp'));
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const messagesData: ChatMessage[] = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data() as Omit<ChatMessage, 'id'>,
-          timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString(),
-        }));
+        const messagesData: ChatMessage[] = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            content: data.content,
+            sender: data.sender,
+            timestamp: data.timestamp?.toDate() || new Date(),
+            emotion_detected: data.emotion_detected,
+            sentiment_score: data.sentiment_score,
+          };
+        });
         setMessages(messagesData);
       });
 
-      // Cleanup listener on unmount
+      // Return cleanup function
       return () => unsubscribe();
 
     } catch (error: any) {
@@ -239,6 +180,9 @@ export default function EmployeeChatPage() {
     setIsConnecting(true);
 
     try {
+      // Get user's emotional state from recent reports
+      const emotionalState = await getUserEmotionalState();
+
       const conversation = new GeminiLiveConversation({
         apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
         voiceName: 'Zephyr',
@@ -247,10 +191,16 @@ export default function EmployeeChatPage() {
           if (sessionId) {
             addMessageToChat(message, 'ai');
           }
-        },
-        onAudioReceived: (audioData) => {
-          // Play received audio
-          audioPlayer.playAudioFromBase64(audioData, 'audio/wav');
+          
+          // Update avatar to speaking state
+          avatarController.setSpeaking(true);
+          avatarController.setListening(false);
+          
+          // After AI response, set back to listening
+          setTimeout(() => {
+            avatarController.setSpeaking(false);
+            avatarController.setListening(true);
+          }, 1000);
         },
         onError: (error) => {
           console.error('Live conversation error:', error);
@@ -265,19 +215,96 @@ export default function EmployeeChatPage() {
             setIsVoiceMode(false);
             toast.info('Voice chat disconnected');
           }
+        },
+        onEmotionDetected: (emotion) => {
+          // Update avatar emotion based on AI's detected emotion
+          const avatarEmotion = mapEmotionToAvatar(emotion);
+          avatarController.updateEmotion(avatarEmotion, emotion.confidence || 0.5);
         }
       });
 
-      await conversation.connect();
+      // Create conversation context
+      const context = {
+        employeeId: user!.id,
+        sessionId: sessionId!,
+        conversationHistory: messages.map(msg => ({
+          id: msg.id,
+          content: msg.content,
+          sender: msg.sender,
+          timestamp: new Date(msg.timestamp),
+          emotionData: msg.emotion_detected ? {
+            primaryEmotion: msg.emotion_detected,
+            sentimentScore: msg.sentiment_score
+          } : undefined
+        })),
+        emotionalState: {
+          primaryEmotion: emotionalState.primaryEmotion,
+          confidence: 0.7,
+          sentiment: emotionalState.sentiment,
+          stressLevel: emotionalState.stressLevel,
+          engagementLevel: emotionalState.engagementLevel
+        },
+        riskLevel: emotionalState.riskLevel
+      };
+
+      await conversation.connect(context);
       setLiveConversation(conversation);
       setIsVoiceMode(true);
       toast.success('Voice chat connected!');
+
+      // Start audio recording
+      startAudioRecording();
 
     } catch (error) {
       console.error('Failed to initialize live conversation:', error);
       toast.error('Failed to connect voice chat');
       setIsConnecting(false);
       setIsVoiceMode(false);
+    }
+  };
+
+  const getUserEmotionalState = async () => {
+    try {
+      // Get user's recent reports to determine emotional state
+      const reportsRef = collection(db, 'mental_health_reports');
+      const q = query(reportsRef, 
+        orderBy('created_at', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const reports = querySnapshot.docs.map(doc => doc.data());
+      
+      if (reports.length > 0) {
+        const latestReport = reports[0];
+        
+        return {
+          primaryEmotion: latestReport.mood_rating > 7 ? 'happy' : 
+                         latestReport.stress_level > 7 ? 'stressed' : 'neutral',
+          sentiment: latestReport.mood_rating > 6 ? 'positive' : 
+                    latestReport.mood_rating < 4 ? 'negative' : 'neutral',
+          stressLevel: latestReport.stress_level || 5,
+          engagementLevel: latestReport.energy_level || 5,
+          riskLevel: latestReport.risk_level || 'low'
+        };
+      }
+      
+      // Default values if no reports found
+      return {
+        primaryEmotion: 'neutral',
+        sentiment: 'neutral',
+        stressLevel: 5,
+        engagementLevel: 5,
+        riskLevel: 'low'
+      };
+    } catch (error) {
+      console.error('Error getting user emotional state:', error);
+      return {
+        primaryEmotion: 'neutral',
+        sentiment: 'neutral',
+        stressLevel: 5,
+        engagementLevel: 5,
+        riskLevel: 'low'
+      };
     }
   };
 
@@ -288,11 +315,11 @@ export default function EmployeeChatPage() {
     }
     setIsVoiceMode(false);
     setIsConnected(false);
-    audioRecorder.cleanup();
+    stopAudioRecording();
     toast.info('Voice chat disconnected');
   };
 
-  const addMessageToChat = async (content: string, sender: 'user' | 'ai', emotion?: string, sentiment?: number) => {
+  const addMessageToChat = async (content: string, sender: 'user' | 'ai', emotionData?: any) => {
     if (!sessionId) return;
 
     try {
@@ -300,8 +327,8 @@ export default function EmployeeChatPage() {
       await addDoc(messagesRef, {
         content,
         sender,
-        emotion_detected: emotion,
-        sentiment_score: sentiment,
+        emotion_detected: emotionData?.primaryEmotion,
+        sentiment_score: emotionData?.sentimentScore,
         timestamp: serverTimestamp(),
       });
     } catch (error) {
@@ -317,20 +344,40 @@ export default function EmployeeChatPage() {
     setLoading(true);
 
     try {
+      // Analyze emotion in user message
+      const emotionData = await emotionDetector.analyzeTextEmotion(userMessage);
+      
+      // Update avatar based on user emotion
+      const avatarEmotion = mapEmotionToAvatar(emotionData);
+      avatarController.updateEmotion(avatarEmotion, emotionData.confidence);
+      
       // Add user message to chat
-      await addMessageToChat(userMessage, 'user');
+      await addMessageToChat(userMessage, 'user', emotionData);
 
       if (isVoiceMode && liveConversation && isConnected) {
         // Send to Gemini Live
-        await liveConversation.sendMessage(userMessage);
+        avatarController.setListening(false);
+        avatarController.setSpeaking(true);
+        await liveConversation.sendMessage(userMessage, emotionData);
       } else {
         // Use fallback AI response
-        const aiResponse = generateAIResponse(userMessage);
+        const aiResponse = await generateAIResponse(userMessage, emotionData);
         
+        // Simulate typing delay
         setTimeout(async () => {
-          await addMessageToChat(aiResponse.content, 'ai', aiResponse.emotion, aiResponse.sentiment);
+          await addMessageToChat(aiResponse, 'ai');
           setLoading(false);
-        }, 1000 + Math.random() * 2000);
+          
+          // Update avatar to speaking state
+          avatarController.setSpeaking(true);
+          avatarController.setListening(false);
+          
+          // After AI response, set back to listening
+          setTimeout(() => {
+            avatarController.setSpeaking(false);
+            avatarController.setListening(true);
+          }, 2000);
+        }, 1000 + Math.random() * 1000);
       }
 
     } catch (error) {
@@ -340,11 +387,181 @@ export default function EmployeeChatPage() {
     }
   };
 
+  const generateAIResponse = async (userMessage: string, emotionData: any) => {
+    try {
+      // Call the Gemini API endpoint
+      const response = await fetch('/api/ai/gemini-emotion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: userMessage })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+      
+      const data = await response.json();
+      
+      // Generate contextual responses based on emotion
+      const responses = {
+        happy: [
+          "I'm glad to hear you're feeling positive! What's been going well for you?",
+          "That's wonderful to hear! Positive emotions are so important for our wellbeing. Would you like to share more about what's making you feel this way?"
+        ],
+        sad: [
+          "I'm sorry to hear you're feeling down. Would you like to talk about what's bothering you?",
+          "It sounds like you're going through a difficult time. Remember that it's okay to feel sad sometimes. Is there anything specific that's troubling you?"
+        ],
+        angry: [
+          "I can sense you're feeling frustrated. Would it help to talk through what's causing these feelings?",
+          "It seems like something has upset you. Sometimes expressing our feelings can help us process them better. Would you like to share more?"
+        ],
+        anxious: [
+          "I notice you might be feeling anxious. Let's take a moment to breathe together. Would that help?",
+          "Anxiety can be challenging to deal with. Is there something specific that's making you feel this way?"
+        ],
+        stressed: [
+          "It sounds like you're under a lot of pressure. What's contributing to your stress right now?",
+          "I can understand feeling overwhelmed. Let's break down what's causing your stress and see if we can find some solutions together."
+        ],
+        neutral: [
+          "Thank you for sharing that with me. How has your day been overall?",
+          "I appreciate you opening up. Is there anything specific you'd like to discuss about your wellbeing today?"
+        ]
+      };
+
+      // Select response based on detected emotion
+      const emotion = data.primaryEmotion?.toLowerCase() || emotionData.primaryEmotion?.toLowerCase() || 'neutral';
+      const emotionCategory = Object.keys(responses).find(key => emotion.includes(key)) || 'neutral';
+      const emotionResponses = responses[emotionCategory as keyof typeof responses];
+      const response = emotionResponses[Math.floor(Math.random() * emotionResponses.length)];
+
+      return response;
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+      return "I'm having trouble processing that right now. How are you feeling today?";
+    }
+  };
+
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Create audio context
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = audioContext;
+      
+      // Create analyzer for audio levels
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyserRef.current = analyser;
+      
+      // Connect microphone to analyzer
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      
+      // Create media recorder
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      // Set up data handling
+      audioChunksRef.current = [];
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = async () => {
+        if (audioChunksRef.current.length === 0) return;
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        
+        if (liveConversation && isConnected) {
+          try {
+            await liveConversation.sendAudio(arrayBuffer);
+          } catch (error) {
+            console.error('Failed to send audio:', error);
+          }
+        }
+        
+        audioChunksRef.current = [];
+      };
+      
+      // Start recording
+      mediaRecorder.start(1000); // Collect data every second
+      setIsRecording(true);
+      
+      // Start audio level monitoring
+      startAudioLevelMonitoring();
+      
+    } catch (error) {
+      console.error('Failed to start audio recording:', error);
+      toast.error('Could not access microphone');
+    }
+  };
+
+  const stopAudioRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+    
+    stopAudioProcessing();
+  };
+
+  const startAudioLevelMonitoring = () => {
+    if (!analyserRef.current) return;
+    
+    const analyser = analyserRef.current;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    
+    const updateAudioLevel = () => {
+      if (!analyserRef.current) return;
+      
+      analyser.getByteFrequencyData(dataArray);
+      
+      // Calculate average volume level
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const average = sum / dataArray.length;
+      const normalizedLevel = average / 255; // Normalize to 0-1
+      
+      setAudioLevel(normalizedLevel);
+      
+      animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
+    };
+    
+    updateAudioLevel();
+  };
+
+  const stopAudioProcessing = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    setAudioLevel(0);
+    setIsRecording(false);
+  };
+
   const toggleVoiceRecording = () => {
-    if (audioRecorder.isRecording) {
-      audioRecorder.stopRecording();
+    if (isRecording) {
+      stopAudioRecording();
     } else {
-      audioRecorder.startRecording();
+      startAudioRecording();
     }
   };
 
@@ -376,10 +593,8 @@ export default function EmployeeChatPage() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -390,9 +605,7 @@ export default function EmployeeChatPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">AI Wellness Assistant</h1>
@@ -401,196 +614,219 @@ export default function EmployeeChatPage() {
           </p>
         </div>
 
-        {/* Chat Interface */}
-        <Card className="h-[600px] flex flex-col">
-          <CardHeader className="border-b">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Bot className="h-6 w-6 text-blue-600" />
-                <span>Wellness Assistant</span>
-                <Badge className={isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}>
-                  {isConnected ? 'Connected' : 'Online'}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                {/* Voice Mode Toggle */}
-                <Button
-                  variant={isVoiceMode ? "default" : "outline"}
-                  size="sm"
-                  onClick={isVoiceMode ? disconnectLiveConversation : initializeLiveConversation}
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : isVoiceMode ? (
-                    <PhoneOff className="h-4 w-4" />
-                  ) : (
-                    <Phone className="h-4 w-4" />
-                  )}
-                  <span className="ml-2">
-                    {isConnecting ? 'Connecting...' : isVoiceMode ? 'End Voice Chat' : 'Start Voice Chat'}
-                  </span>
-                </Button>
-              </div>
-            </CardTitle>
-          </CardHeader>
-
-          {/* Messages */}
-          <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex space-x-3 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      {message.sender === 'user' ? (
-                        <User className="h-4 w-4" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Avatar Section */}
+          <div className="lg:col-span-1">
+            <Card className="h-[500px] overflow-hidden">
+              <CardHeader className="border-b">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Brain className="h-5 w-5 text-blue-600" />
+                    <span>Wellness Assistant</span>
+                  </div>
+                  <Badge className={isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}>
+                    {isConnected ? 'Connected' : 'Online'}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 h-full">
+                <div className="h-full w-full">
+                  <AvatarSystem 
+                    state={avatarController.state} 
+                    audioLevel={audioLevel}
+                    className="h-full"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Voice Mode Controls */}
+            <Card className="mt-4">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Voice Interaction</h3>
+                    <p className="text-sm text-gray-600">Talk directly with the AI assistant</p>
+                  </div>
+                  <Button
+                    variant={isVoiceMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={isVoiceMode ? disconnectLiveConversation : initializeLiveConversation}
+                    disabled={isConnecting}
+                  >
+                    {isConnecting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : isVoiceMode ? (
+                      <PhoneOff className="h-4 w-4 mr-2" />
+                    ) : (
+                      <Phone className="h-4 w-4 mr-2" />
+                    )}
+                    <span>
+                      {isConnecting ? 'Connecting...' : isVoiceMode ? 'End Voice Chat' : 'Start Voice Chat'}
+                    </span>
+                  </Button>
+                </div>
+                
+                {isVoiceMode && (
+                  <div className="mt-4 flex items-center justify-center">
+                    <Button
+                      variant={isRecording ? "destructive" : "outline"}
+                      size="lg"
+                      className="rounded-full w-16 h-16 flex items-center justify-center"
+                      onClick={toggleVoiceRecording}
+                    >
+                      {isRecording ? (
+                        <MicOff className="h-6 w-6" />
                       ) : (
-                        <Bot className="h-4 w-4" />
+                        <Mic className="h-6 w-6" />
                       )}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className={`rounded-lg p-3 ${
-                    message.sender === 'user' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-900'
-                  }`}>
-                    <p className="text-sm">{message.content}</p>
-                    
-                    {message.sender === 'ai' && (message.emotion_detected || message.sentiment_score) && (
-                      <div className="flex items-center space-x-2 mt-2 pt-2 border-t border-gray-200">
-                        {message.emotion_detected && (
-                          <div className="flex items-center space-x-1">
-                            {getEmotionIcon(message.emotion_detected)}
-                            <span className="text-xs text-gray-600 capitalize">
-                              {message.emotion_detected}
-                            </span>
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Chat Interface */}
+          <div className="lg:col-span-2">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader className="border-b">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Bot className="h-6 w-6 text-blue-600" />
+                    <span>Wellness Assistant</span>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+
+              {/* Messages */}
+              <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`flex space-x-3 max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {message.sender === 'user' ? (
+                            <User className="h-4 w-4" />
+                          ) : (
+                            <Bot className="h-4 w-4" />
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className={`rounded-lg p-3 ${
+                        message.sender === 'user' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-900'
+                      }`}>
+                        <p className="text-sm">{message.content}</p>
+                        
+                        {message.sender === 'ai' && (message.emotion_detected || message.sentiment_score) && (
+                          <div className="flex items-center space-x-2 mt-2 pt-2 border-t border-gray-200">
+                            {message.emotion_detected && (
+                              <div className="flex items-center space-x-1">
+                                {getEmotionIcon(message.emotion_detected)}
+                                <span className="text-xs text-gray-600 capitalize">
+                                  {message.emotion_detected}
+                                </span>
+                              </div>
+                            )}
+                            {getSentimentBadge(message.sentiment_score)}
                           </div>
                         )}
-                        {getSentimentBadge(message.sentiment_score)}
+                        
+                        <div className="text-xs text-gray-500 mt-1">
+                          {typeof message.timestamp === 'string' 
+                            ? new Date(message.timestamp).toLocaleTimeString() 
+                            : message.timestamp.toLocaleTimeString()}
+                        </div>
                       </div>
-                    )}
-                    
-                    <div className="text-xs text-gray-500 mt-1">
-                      {new Date(message.timestamp).toLocaleTimeString()}
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
-            
-            {loading && (
-              <div className="flex justify-start">
-                <div className="flex space-x-3 max-w-[80%]">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      <Bot className="h-4 w-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="bg-gray-100 rounded-lg p-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                ))}
+                
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="flex space-x-3 max-w-[80%]">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          <Bot className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="bg-gray-100 rounded-lg p-3">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </CardContent>
-
-          {/* Input Area */}
-          <div className="border-t p-4">
-            <div className="flex space-x-2">
-              <Input
-                placeholder={isVoiceMode ? "Type or use voice..." : "Type your message..."}
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={loading}
-                className="flex-1"
-              />
-              <Button
-                onClick={sendMessage}
-                disabled={loading || !currentMessage.trim()}
-                size="sm"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-              <span>Press Enter to send, Shift+Enter for new line</span>
-              <div className="flex items-center space-x-2">
-                {/* Voice Recording Button */}
-                {isVoiceMode && (
-                  <Button
-                    variant={audioRecorder.isRecording ? "destructive" : "ghost"}
-                    size="sm"
-                    onClick={toggleVoiceRecording}
-                    disabled={!isConnected}
-                  >
-                    {audioRecorder.isRecording ? (
-                      <MicOff className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
                 )}
                 
-                {/* Audio Status */}
-                <Button variant="ghost" size="sm" disabled>
-                  {audioPlayer.isPlaying ? (
-                    <Volume2 className="h-4 w-4" />
-                  ) : (
-                    <VolumeX className="h-4 w-4" />
-                  )}
-                </Button>
+                <div ref={messagesEndRef} />
+              </CardContent>
+
+              {/* Input Area */}
+              <div className="border-t p-4">
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder={isVoiceMode ? "Type or use voice..." : "Type your message..."}
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    disabled={loading}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={loading || !currentMessage.trim()}
+                    size="sm"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                  <span>Press Enter to send, Shift+Enter for new line</span>
+                  <div className="flex items-center space-x-2">
+                    {isVoiceMode && (
+                      <Button
+                        variant={isRecording ? "destructive" : "ghost"}
+                        size="sm"
+                        onClick={toggleVoiceRecording}
+                        disabled={!isConnected}
+                      >
+                        {isRecording ? (
+                          <MicOff className="h-4 w-4" />
+                        ) : (
+                          <Mic className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Privacy Notice */}
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <Heart className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-blue-900">Confidential Support</h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Your conversations are private and encrypted. This AI assistant provides general wellness support 
+                    and is not a replacement for professional mental health care. If you're experiencing a crisis, 
+                    please contact emergency services or a mental health professional immediately.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </Card>
-
-        {/* Privacy Notice */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <div className="flex items-start space-x-3">
-            <Heart className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-blue-900">Confidential Support</h3>
-              <p className="text-sm text-blue-700 mt-1">
-                Your conversations are private and encrypted. This AI assistant provides general wellness support 
-                and is not a replacement for professional mental health care. If you're experiencing a crisis, 
-                please contact emergency services or a mental health professional immediately.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer">
-            <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-            <h3 className="font-medium text-gray-900">Stress Management</h3>
-            <p className="text-sm text-gray-600">Learn coping strategies</p>
-          </Card>
-          
-          <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer">
-            <Heart className="h-8 w-8 text-red-600 mx-auto mb-2" />
-            <h3 className="font-medium text-gray-900">Mood Tracking</h3>
-            <p className="text-sm text-gray-600">Monitor your emotions</p>
-          </Card>
-          
-          <Card className="p-4 text-center hover:shadow-md transition-shadow cursor-pointer">
-            <Smile className="h-8 w-8 text-green-600 mx-auto mb-2" />
-            <h3 className="font-medium text-gray-900">Wellness Tips</h3>
-            <p className="text-sm text-gray-600">Daily self-care advice</p>
-          </Card>
         </div>
       </div>
     </div>
