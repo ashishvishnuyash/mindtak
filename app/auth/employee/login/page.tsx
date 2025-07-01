@@ -26,9 +26,10 @@ export default function EmployeeLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    try { // Sign in with email and password using Firebase
+    
+    try {
+      // Sign in with email and password using Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-
       const user = userCredential.user;
 
       // Fetch user document from Firestore
@@ -48,9 +49,10 @@ export default function EmployeeLoginPage() {
         return;
       }
 
-        toast.success(`Welcome back, ${userData.first_name}!`);
-        router.push('/employee/dashboard');
-    } catch (err) {
+      toast.success(`Welcome back, ${userData.first_name}!`);
+      router.push('/employee/dashboard');
+      
+    } catch (err: any) {
       setError(err.message); // Display Firebase error message
     } finally {
       setLoading(false);
