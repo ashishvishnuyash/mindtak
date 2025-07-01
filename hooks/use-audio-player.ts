@@ -66,22 +66,6 @@ export function useAudioPlayer(config: AudioPlayerConfig = {}) {
     }
   }, [config]);
 
-  const playAudioFromBuffer = useCallback(async (buffer: Buffer, mimeType: string = 'audio/wav') => {
-    try {
-      setIsLoading(true);
-
-      // Convert Buffer to base64
-      const base64Data = buffer.toString('base64');
-      await playAudioFromBase64(base64Data, mimeType);
-
-    } catch (error) {
-      console.error('Failed to play audio from buffer:', error);
-      setIsLoading(false);
-      setIsPlaying(false);
-      config.onError?.(error instanceof Error ? error.message : 'Failed to play audio');
-    }
-  }, [playAudioFromBase64, config]);
-
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -106,7 +90,6 @@ export function useAudioPlayer(config: AudioPlayerConfig = {}) {
     isPlaying,
     isLoading,
     playAudioFromBase64,
-    playAudioFromBuffer,
     stopAudio,
     pauseAudio,
     resumeAudio

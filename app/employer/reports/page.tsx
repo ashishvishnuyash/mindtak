@@ -24,44 +24,12 @@ import {
 import { useUser } from '@/hooks/use-user';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Link from 'next/link';
-
-interface MentalHealthReport {
-  id: string;
-  employee_id: string;
-  company_id: string;
-  mood_rating: number;
-  stress_level: number;
-  energy_level: number;
-  work_satisfaction: number;
-  work_life_balance: number;
-  anxiety_level: number;
-  confidence_level: number;
-  sleep_quality: number;
-  overall_wellness: number;
-  risk_level: 'low' | 'medium' | 'high';
-  ai_analysis?: string;
-  comments?: string;
-  created_at: string;
-}
-
-interface UserType {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: 'employee' | 'employer';
-  company_id: string;
-  department?: string;
-}
-
 interface ReportWithEmployee extends MentalHealthReport {
   employee?: UserType;
 }
 
 export default function EmployerReportsPage() {
   const { user, loading: userLoading } = useUser();
-  const router = useRouter();
   const [reports, setReports] = useState<ReportWithEmployee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,7 +44,7 @@ export default function EmployerReportsPage() {
     }
 
     if (user?.role !== 'employer') {
-      // Don't redirect, just return early
+      router.push('/employee/dashboard');
       return;
     }
 
@@ -208,29 +176,7 @@ export default function EmployerReportsPage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to access this page.</p>
-          <Link href="/auth/signin">
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.role !== 'employer') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Access denied. This page is for employers only.</p>
-          <Link href="/employee/dashboard">
-            <Button>Go to Employee Dashboard</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

@@ -31,7 +31,6 @@ import { useAudioPlayer } from '@/hooks/use-audio-player';
 import { toast } from 'sonner';
 import type { ChatMessage, ChatSession } from '@/types/index';
 import { GeminiLiveConversation } from '@/lib/gemini-live';
-import Link from 'next/link';
 
 import {
   collection,
@@ -123,7 +122,6 @@ export default function EmployeeChatPage() {
   const [liveConversation, setLiveConversation] = useState<GeminiLiveConversation | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [chatInitialized, setChatInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -156,22 +154,17 @@ export default function EmployeeChatPage() {
   });
 
   useEffect(() => {
-    console.log('Chat useEffect - userLoading:', userLoading, 'user:', user);
-    
     if (!userLoading && !user) {
-      console.log('No user found, redirecting to signin');
       router.push('/auth/signin');
       return;
     }
 
-    if (user && user.role !== 'employee') {
-      console.log('User is not employee, redirecting to employer dashboard');
+    if (user?.role !== 'employee') {
       router.push('/employer/dashboard');
       return;
     }
 
-    if (user && user.role === 'employee' && !chatInitialized) {
-      console.log('Employee user found, initializing chat');
+    if (user) {
       initializeChat();
     }
 
@@ -182,7 +175,7 @@ export default function EmployeeChatPage() {
       }
       audioRecorder.cleanup();
     };
-  }, [user, userLoading, router, chatInitialized]);
+  }, [user, userLoading, router]);
 
   useEffect(() => {
     scrollToBottom();
@@ -193,25 +186,22 @@ export default function EmployeeChatPage() {
   };
 
   const initializeChat = async () => {
-    if (!user || chatInitialized) return;
-
-    console.log('Initializing chat for user:', user.id);
+    if (!user) return;
 
     try {
       // Create a new chat session
       const sessionRef = collection(db, 'chat_sessions');
       const newSessionDoc = await addDoc(sessionRef, {
-        employee_id: user.id,
+        employee_id: user!.id,
         session_type: 'text',
         created_at: serverTimestamp(),
       });
 
-      console.log('Created chat session:', newSessionDoc.id);
       setSessionId(newSessionDoc.id);
 
       // Add welcome message to the session subcollection
       const messagesRef = collection(db, 'chat_sessions', newSessionDoc.id, 'messages');
-      const welcomeMessageContent = `Hello ${user.first_name || 'there'}! I'm your AI wellness assistant. I'm here to listen, provide support, and help you with your mental health journey. How are you feeling today?`;
+      const welcomeMessageContent = `Hello ${user!.first_name || 'there'}! I'm your AI wellness assistant. I'm here to listen, provide support, and help you with your mental health journey. How are you feeling today?`;
       
       await addDoc(messagesRef, {
         session_id: newSessionDoc.id,
@@ -220,22 +210,16 @@ export default function EmployeeChatPage() {
         timestamp: serverTimestamp(),
       });
 
-      console.log('Added welcome message');
-
       // Set up real-time listener for messages in this session
       const q = query(messagesRef, orderBy('timestamp'));
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const messagesData: ChatMessage[] = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data() as Omit<ChatMessage, 'id'>,
-          timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString(),
+          timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString(),
         }));
-        console.log('Messages updated:', messagesData.length);
         setMessages(messagesData);
       });
-
-      setChatInitialized(true);
-      console.log('Chat initialized successfully');
 
       // Cleanup listener on unmount
       return () => unsubscribe();
@@ -390,62 +374,19 @@ export default function EmployeeChatPage() {
     }
   };
 
-  console.log('Render state - userLoading:', userLoading, 'user:', user, 'chatInitialized:', chatInitialized);
-
   if (userLoading) {
-    console.log('Showing user loading spinner');
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Loading user data...</p>
         </div>
       </div>
     );
   }
 
   if (!user) {
-    console.log('No user, showing signin prompt');
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to access the AI assistant.</p>
-          <Link href="/auth/signin">
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return null;
   }
-
-  if (user.role !== 'employee') {
-    console.log('User is not employee, showing access denied');
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Access denied. This page is for employees only.</p>
-          <Link href="/employer/dashboard">
-            <Button>Go to Employer Dashboard</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (!chatInitialized) {
-    console.log('Chat not initialized, showing loading');
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Initializing AI assistant...</p>
-        </div>
-      </div>
-    );
-  }
-
-  console.log('Rendering chat interface');
 
   return (
     <div className="min-h-screen bg-gray-50">

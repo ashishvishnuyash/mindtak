@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge'; // Keep this import
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,7 +19,7 @@ import {
   Calendar,
   AlertTriangle,
   CheckCircle,
-  Clock,
+  Clock, // Keep this import
   MoreVertical,
   Eye,
   Edit,
@@ -29,7 +29,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { collection, query, where, getDocs, orderBy, DocumentSnapshot, DocumentData } from 'firebase/firestore';
 import type { User as UserType, MentalHealthReport as MentalHealthReportType, Company } from '@/types';
 import { useUser } from '@/hooks/use-user';
-import { db } from '@/lib/firebase';
+import { db } from '@/lib/firebase'; // Import db from Firebase
+// import { DocumentSnapshot, DocumentData } from 'firebase/firestore';
 
 interface EmployeeWithStats extends UserType {
   latest_report?: MentalHealthReportType;
@@ -45,7 +46,7 @@ export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
   const [filterRisk, setFilterRisk] = useState<string>('all');
-  const router = useRouter();
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -54,6 +55,7 @@ export default function EmployeesPage() {
     }
 
     if (user?.role !== 'employer') {
+      router.push('/employee/dashboard');
       return;
     }
 
@@ -62,20 +64,22 @@ export default function EmployeesPage() {
     }
   }, [user, userLoading, router]);
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async () => { // Added async keyword
     try {
+      // Fetch company employees
       const employeesRef = collection(db, 'users');
       const employeesQuery = query(
         employeesRef,
-        where('company_id', '==', (user as UserType & { company_id: string }).company_id),
-        where('role', '==', 'employee')
+        where('company_id', '==', (user as UserType & { company_id: string }).company_id), // Cast user to ensure company_id is present
+        where('role', '==', 'employee'),
+        orderBy('createdAt', 'desc') // Assuming you have a 'createdAt' field in Firestore
       );
 
       const employeeSnapshot = await getDocs(employeesQuery);
 
       const employeesData: UserType[] = employeeSnapshot.docs.map(doc => ({
-        ...doc.data() as UserType,
-        id: doc.id,
+ ...doc.data() as UserType,
+ id: doc.id, // Explicitly assign id from doc.id
       }));
 
       if (!employeesData) {
@@ -83,43 +87,43 @@ export default function EmployeesPage() {
         return;
       }
 
+      // Fetch reports for each employee
       const employeesWithStats: EmployeeWithStats[] = [];
       
       const reportPromises = employeesData.map(async (employee) => {
-        const reportsRef = collection(db, 'mentalHealthReports');
+        const reportsRef = collection(db, 'mentalHealthReports'); // Assuming 'mentalHealthReports' collection
         const reportsQuery = query(
           reportsRef,
-          where('employeeId', '==', employee.id)
+          where('employeeId', '==', employee.id), // Assuming 'employeeId' field
+          orderBy('createdAt', 'desc') // Assuming 'createdAt' field
         );
 
         const reportSnapshot = await getDocs(reportsQuery);
         
         const reports: MentalHealthReportType[] = reportSnapshot.docs.map(doc => ({
-          ...doc.data() as MentalHealthReportType,
-          id: doc.id,
+ ...doc.data() as MentalHealthReportType,
+ id: doc.id,
         }));
 
-        const sortedReports = reports.sort((a, b) => {
-          const dateA = new Date(a.created_at || a.createdAt || 0);
-          const dateB = new Date(b.created_at || b.createdAt || 0);
-          return dateB.getTime() - dateA.getTime();
-        });
-
-        const reportsCount = sortedReports.length || 0;
+        const reportsCount = reports.length || 0;
         const averageWellness = reportsCount > 0 
-          ? Math.round(sortedReports.reduce((sum: number, report: MentalHealthReportType) => sum + report.overall_wellness, 0) / reportsCount)
-          : 0;
+          ? Math.round(reports.reduce((sum: number, report: MentalHealthReportType) => sum + report.overall_wellness, 0) / reportsCount)
+          : 0; // Explicitly type sum and report parameters
+
 
         employeesWithStats.push({
           ...employee,
-          latest_report: sortedReports?.[0],
+          latest_report: reports?.[0],
           reports_count: reportsCount,
           average_wellness: averageWellness,
-          last_report_date: sortedReports?.[0]?.created_at || sortedReports?.[0]?.createdAt,
+          last_report_date: reports?.[0]?.created_at,
         });
       });
 
+      // Wait for all report fetches to complete
       await Promise.all(reportPromises);
+
+
 
       setEmployees(employeesWithStats);
     } catch (error) {
@@ -179,29 +183,7 @@ export default function EmployeesPage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to access this page.</p>
-          <Link href="/auth/signin">
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.role !== 'employer') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Access denied. This page is for employers only.</p>
-          <Link href="/employee/dashboard">
-            <Button>Go to Employee Dashboard</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

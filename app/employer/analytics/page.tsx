@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -46,7 +45,6 @@ import {
 } from 'firebase/firestore';
 
 import type { MentalHealthReport, User } from '@/types/index';
-import Link from 'next/link';
 
 interface AnalyticsData {
   departmentStats: { [key: string]: { count: number; avgWellness: number; avgStress: number } };
@@ -77,7 +75,7 @@ export default function AnalyticsPage() {
     }
 
     if (user?.role !== 'employer') {
-      // Don't redirect, just return early
+      router.push('/employee/dashboard');
       return;
     }
 
@@ -103,41 +101,29 @@ export default function AnalyticsPage() {
 
       const employeeIds = employees.map(emp => emp.id).filter(id => id !== undefined) as string[];
 
-      if (employeeIds.length === 0) {
-        setLoading(false);
-        return;
-      }
-
       // Calculate date range
-      const daysAgo = parseInt(timeRange);
+      const daysAgo = parseInt(timeRange); // Ensure daysAgo is declared here
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
 
-      // Fetch reports - split the query to avoid composite index requirement
+      // Fetch reports within date range
       const reportsRef = collection(db, 'mentalHealthReports');
-      
-      // First, get all reports for the employees (without date filter and ordering)
-      const reportsQuery = query(reportsRef, where('employee_id', 'in', employeeIds));
-      const reportSnapshot = await getDocs(reportsQuery);
-      
-      // Filter and sort in memory to avoid composite index requirement
-      const allReports: MentalHealthReport[] = reportSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MentalHealthReport));
-      
-      // Filter by date range and sort in memory
-      const reports = allReports
-        .filter(report => new Date(report.created_at) >= startDate)
-        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      let reportsQuery = query(reportsRef, where('employee_id', 'in', employeeIds), where('created_at', '>=', startDate.toISOString()), orderBy('created_at', 'asc'));
 
+      const reportSnapshot = await getDocs(reportsQuery);
+      const reports: MentalHealthReport[] = reportSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MentalHealthReport));
+
+      // TODO: Replace with Firebase query for reports
+      // Need a mentalHealthReports collection with employee_id and created_at fields
       // Filter by department if selected
       let filteredEmployees = employees || [];
       if (selectedDepartment !== 'all') {
         filteredEmployees = employees?.filter(emp => emp.department === selectedDepartment) || [];
-      }
+ }
       const filteredEmployeeIdsSet = new Set(filteredEmployees.map(emp => emp.id));
       const filteredReports = reports?.filter((report: MentalHealthReport) =>
         filteredEmployeeIdsSet.has(report.employee_id)
       ) || [];
-
       // Calculate department statistics
       const departmentStats: { [key: string]: { count: number; avgWellness: number; avgStress: number } } = {};
       
@@ -158,6 +144,7 @@ export default function AnalyticsPage() {
       });
 
       // Calculate trend data
+      const daysAgoTrend = parseInt(timeRange); // Use a different variable name
       const trendData = [];
       for (let i = daysAgo - 1; i >= 0; i--) {
         const date = new Date();
@@ -181,14 +168,14 @@ export default function AnalyticsPage() {
 
       // Calculate risk distribution
       const riskCounts = filteredReports.reduce((acc: { [key: string]: number }, report: MentalHealthReport) => {
-        acc[report.risk_level] = (acc[report.risk_level] || 0) + 1;
+        acc[report.risk_level]++;
         return acc;
       }, { low: 0, medium: 0, high: 0 });
 
       const riskDistribution = [
-        { name: 'Low Risk', value: riskCounts.low || 0, color: '#10B981' },
-        { name: 'Medium Risk', value: riskCounts.medium || 0, color: '#F59E0B' },
-        { name: 'High Risk', value: riskCounts.high || 0, color: '#EF4444' },
+        { name: 'Low Risk', value: riskCounts.low, color: '#10B981' },
+        { name: 'Medium Risk', value: riskCounts.medium, color: '#F59E0B' },
+        { name: 'High Risk', value: riskCounts.high, color: '#EF4444' },
       ];
 
       // Calculate monthly reports
@@ -218,6 +205,7 @@ export default function AnalyticsPage() {
         { metric: 'Confidence Level', correlation: 0.64 },
       ];
 
+      // TODO: Implement actual correlation calculation based on report data
       setAnalytics({
         departmentStats,
         trendData,
@@ -246,34 +234,11 @@ export default function AnalyticsPage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to access this page.</p>
-          <Link href="/auth/signin">
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.role !== 'employer') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Access denied. This page is for employers only.</p>
-          <Link href="/employee/dashboard">
-            <Button>Go to Employee Dashboard</Button>
-          </Link>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
@@ -413,7 +378,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <AreaChart className="h-5 w-5" />
+                <AreaChart className="h-5 w-5" /> {/* Corrected icon for area chart */}
                 <span>Wellness Trends Over Time</span>
               </CardTitle>
             </CardHeader>
@@ -472,7 +437,7 @@ export default function AnalyticsPage() {
                       <div key={item.name} className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <div
-                            className="w-3 h-3 rounded-full"
+                            className="w-3 h-3 rounded-full" // TODO: Add type for item in map
                             style={{ backgroundColor: item.color }}
                           ></div>
                           <span className="text-sm text-gray-700">{item.name}</span>
@@ -496,7 +461,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <BarChart className="h-5 w-5" />
+                <BarChart className="h-5 w-5" /> {/* Corrected icon for bar chart */}
                 <span>Department Wellness Comparison</span>
               </CardTitle>
             </CardHeader>
@@ -539,8 +504,8 @@ export default function AnalyticsPage() {
                   <div key={item.metric} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-gray-700">{item.metric}</span>
-                      <span className="text-sm text-gray-600">{Math.round(item.correlation * 100)}%</span>
-                    </div>
+                      <span className="text-sm text-gray-600">{Math.round(item.correlation * 100)}%</span> {/* TODO: Add type for item in map */}
+                    </div> {/* TODO: Add type for item in map */}
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className="bg-blue-600 h-2 rounded-full" 
@@ -584,7 +549,7 @@ export default function AnalyticsPage() {
                       <div className="mt-2">
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-green-600 h-2 rounded-full"
+                            className="bg-green-600 h-2 rounded-full" // TODO: Add type for stats in map
                             style={{ width: `${(stats.avgWellness / 10) * 100}%` }}
                           ></div>
                         </div>

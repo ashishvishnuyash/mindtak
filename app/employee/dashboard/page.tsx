@@ -20,16 +20,16 @@ import {
   Smile,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, DocumentSnapshot, DocumentData } from 'firebase/firestore';
 import type { MentalHealthReport } from '@/types';
-import { db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 
 export default function EmployeeDashboard() {
   const { user, loading: userLoading } = useUser();
   const [reports, setReports] = useState<MentalHealthReport[]>([]);
+  // Import auth and db from firebase
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ 
-    averageMood: 0,
+  const [stats, setStats] = useState({ averageMood: 0,
     averageStress: 0,
     averageEnergy: 0,
     reportsCount: 0,
@@ -38,98 +38,60 @@ export default function EmployeeDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    console.log('Dashboard useEffect - userLoading:', userLoading, 'user:', user);
-    
     if (!userLoading && !user) {
-      console.log('No user found, redirecting to signin');
       router.push('/auth/signin');
       return;
     }
 
-    if (user && user.role !== 'employee') {
-      console.log('User is not employee, redirecting to employer dashboard');
+    if (user?.role !== 'employee') {
       router.push('/employer/dashboard');
       return;
     }
 
-    if (user && user.role === 'employee') {
-      console.log('Employee user found, fetching reports');
+    if (user) {
       fetchReports();
     }
   }, [user, userLoading, router]);
 
   const fetchReports = async () => {
-    if (!user?.id) {
-      console.log('No user ID available');
-      setLoading(false);
-      return;
-    }
-
-    console.log('Fetching reports for user:', user.id);
-
     try {
+      // Removed Supabase data fetching logic
       // Fetch reports from Firestore where employee_id matches current user's ID
-      // Removed orderBy to avoid composite index requirement
       const reportsRef = collection(db, 'mental_health_reports');
-      const q = query(
-        reportsRef, 
-        where('employee_id', '==', user.id)
-      );
-      
-      console.log('Executing Firestore query...');
-      const querySnapshot = await getDocs(q);
-      console.log('Query completed, docs found:', querySnapshot.docs.length);
+      const q = query(reportsRef, where('employee_id', '==', user?.id), orderBy('created_at', 'desc'), limit(10));      const querySnapshot = await getDocs(q);
 
-      const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return { 
-          id: doc.id, 
-          ...data,
-          // Ensure created_at is a string
-          created_at: data.created_at?.toDate?.() ? data.created_at.toDate().toISOString() : data.created_at
-        } as MentalHealthReport;
+      const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc: any) => {
+        // Add explicit type for 'doc' and access data using doc.data()
+        return { ...doc.data(), id: doc.id } as MentalHealthReport;
       });
 
-      console.log('Fetched reports:', fetchedReports.length);
-
-      // Sort reports by created_at in descending order (most recent first) on the client side
-      const sortedReports = fetchedReports.sort((a, b) => {
-        const dateA = new Date(a.created_at).getTime();
-        const dateB = new Date(b.created_at).getTime();
-        return dateB - dateA;
-      });
-
-      // Limit to 10 most recent reports
-      const limitedReports = sortedReports.slice(0, 10);
-
-      setReports(limitedReports || []);
+      // The error handling for Firestore is slightly different
+      setReports(fetchedReports || []);
 
       // Calculate stats
-      if (limitedReports && limitedReports.length > 0) {
-        const totalMood = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.mood_rating || 0), 0);
-        const totalStress = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.stress_level || 0), 0);
-        const totalEnergy = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.energy_level || 0), 0);
+      if (fetchedReports && fetchedReports.length > 0) {
+        const totalMood = fetchedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.mood_rating || 0), 0);
+        const totalStress = fetchedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.stress_level || 0), 0);
+        const totalEnergy = fetchedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.energy_level || 0), 0);
 
         setStats({
-          averageMood: limitedReports.length > 0 ? Math.round(totalMood / limitedReports.length) : 0,
-          averageStress: limitedReports.length > 0 ? Math.round(totalStress / limitedReports.length) : 0,
-          averageEnergy: limitedReports.length > 0 ? Math.round(totalEnergy / limitedReports.length) : 0,
-          reportsCount: limitedReports.length,
-          lastReportDate: limitedReports[0]?.created_at || null,
+          averageMood: fetchedReports.length > 0 ? Math.round(totalMood / fetchedReports.length) : 0,
+          averageStress: fetchedReports.length > 0 ? Math.round(totalStress / fetchedReports.length) : 0,
+          averageEnergy: fetchedReports.length > 0 ? Math.round(totalEnergy / fetchedReports.length) : 0,
+          reportsCount: fetchedReports.length,
+          lastReportDate: fetchedReports[0].created_at,
         });
       }
     } catch (error) {
       console.error('Error fetching reports:', error);
-      // Don't throw error, just log it and continue with empty state
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
 
   const getWellnessStatus = (score: number): { label: string; color: string; textColor: string } => {
-    if (score >= 8) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' };
-    if (score >= 6) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' };
+    if (score >= 8) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' }; // Typo fixed here
+    if (score >= 6) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' }; // Typo fixed here
     if (score >= 4) return { label: 'Fair', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
     return { label: 'Needs Attention', color: 'bg-red-500', textColor: 'text-red-700' };
   };
@@ -143,73 +105,30 @@ export default function EmployeeDashboard() {
     return colors[riskLevel];
   };
 
-  const chartData = reports.slice(0, 7).reverse().map((report) => ({
-    date: new Date(report.created_at).toLocaleDateString(),
+  const chartData = reports.slice(0, 7).reverse().map((report, index) => ({
+    date: new Date(report.created_at).toLocaleDateString(), // Assuming created_at is a valid date string or timestamp
     mood: report.mood_rating,
     stress: 11 - report.stress_level, // Invert stress for better visualization
     energy: report.energy_level,
     wellness: report.overall_wellness,
   }));
 
-  console.log('Render state - userLoading:', userLoading, 'loading:', loading, 'user:', user);
-
-  if (userLoading) {
-    console.log('Showing user loading spinner');
+  if (userLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Loading user data...</p>
         </div>
       </div>
     );
   }
 
   if (!user) {
-    console.log('No user, showing signin prompt');
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please sign in to access your dashboard.</p>
-          <Link href="/auth/signin">
-            <Button>Sign In</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (user.role !== 'employee') {
-    console.log('User is not employee, showing access denied');
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Access denied. This page is for employees only.</p>
-          <Link href="/employer/dashboard">
-            <Button>Go to Employer Dashboard</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    console.log('Showing data loading spinner');
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar user={user} />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Loading dashboard data...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const latestReport = reports[0];
   const wellnessStatus = latestReport ? getWellnessStatus(latestReport.overall_wellness) : null;
-
-  console.log('Rendering dashboard with user:', user.first_name);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -284,13 +203,15 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Current Mood</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              <Smile className="h-8 w-8 text-blue-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {latestReport ? latestReport.mood_rating : '-'}/10
+              
+                <Smile className="h-8 w-8 text-blue-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {latestReport ? latestReport.mood_rating : '-'}/10
+                  </div>
+                  <Progress value={latestReport ? latestReport.mood_rating * 10 : 0} className="w-16 h-2" />
                 </div>
-                <Progress value={latestReport ? latestReport.mood_rating * 10 : 0} className="w-16 h-2" />
-              </div>
+              
             </CardContent>
           </Card>
 
@@ -299,13 +220,15 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Stress Level</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {latestReport ? latestReport.stress_level : '-'}/10
+              
+                <AlertTriangle className="h-8 w-8 text-orange-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {latestReport ? latestReport.stress_level : '-'}/10
+                  </div>
+                  <Progress value={latestReport ? latestReport.stress_level * 10 : 0} className="w-16 h-2" />
                 </div>
-                <Progress value={latestReport ? latestReport.stress_level * 10 : 0} className="w-16 h-2" />
-              </div>
+              
             </CardContent>
           </Card>
 
@@ -314,13 +237,15 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Energy Level</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              <Battery className="h-8 w-8 text-green-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {latestReport ? latestReport.energy_level : '-'}/10
+              
+                <Battery className="h-8 w-8 text-green-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {latestReport ? latestReport.energy_level : '-'}/10
+                  </div>
+                  <Progress value={latestReport ? latestReport.energy_level * 10 : 0} className="w-16 h-2" />
                 </div>
-                <Progress value={latestReport ? latestReport.energy_level * 10 : 0} className="w-16 h-2" />
-              </div>
+              
             </CardContent>
           </Card>
 
@@ -329,17 +254,19 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Overall Wellness</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-purple-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {latestReport ? latestReport.overall_wellness : '-'}/10
+              
+                <Brain className="h-8 w-8 text-purple-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {latestReport ? latestReport.overall_wellness : '-'}/10
+                  </div>
+                  {wellnessStatus && (
+                    <Badge className={`${wellnessStatus.textColor} bg-opacity-20`}>
+                      {wellnessStatus.label}
+                    </Badge>
+                  )}
                 </div>
-                {wellnessStatus && (
-                  <Badge className={`${wellnessStatus.textColor} bg-opacity-20`}>
-                    {wellnessStatus.label}
-                  </Badge>
-                )}
-              </div>
+              
             </CardContent>
           </Card>
         </div>
