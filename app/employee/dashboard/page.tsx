@@ -20,7 +20,7 @@ import {
   Smile,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { MentalHealthReport } from '@/types';
 import { db } from '@/lib/firebase';
 
@@ -61,12 +61,11 @@ export default function EmployeeDashboard() {
 
     try {
       // Fetch reports from Firestore where employee_id matches current user's ID
+      // Removed orderBy to avoid composite index requirement
       const reportsRef = collection(db, 'mental_health_reports');
       const q = query(
         reportsRef, 
-        where('employee_id', '==', user.id), 
-        orderBy('created_at', 'desc'), 
-        limit(10)
+        where('employee_id', '==', user.id)
       );
       
       const querySnapshot = await getDocs(q);
@@ -81,20 +80,30 @@ export default function EmployeeDashboard() {
         } as MentalHealthReport;
       });
 
-      setReports(fetchedReports || []);
+      // Sort reports by created_at in descending order (most recent first) on the client side
+      const sortedReports = fetchedReports.sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return dateB - dateA;
+      });
+
+      // Limit to 10 most recent reports
+      const limitedReports = sortedReports.slice(0, 10);
+
+      setReports(limitedReports || []);
 
       // Calculate stats
-      if (fetchedReports && fetchedReports.length > 0) {
-        const totalMood = fetchedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.mood_rating || 0), 0);
-        const totalStress = fetchedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.stress_level || 0), 0);
-        const totalEnergy = fetchedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.energy_level || 0), 0);
+      if (limitedReports && limitedReports.length > 0) {
+        const totalMood = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.mood_rating || 0), 0);
+        const totalStress = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.stress_level || 0), 0);
+        const totalEnergy = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.energy_level || 0), 0);
 
         setStats({
-          averageMood: fetchedReports.length > 0 ? Math.round(totalMood / fetchedReports.length) : 0,
-          averageStress: fetchedReports.length > 0 ? Math.round(totalStress / fetchedReports.length) : 0,
-          averageEnergy: fetchedReports.length > 0 ? Math.round(totalEnergy / fetchedReports.length) : 0,
-          reportsCount: fetchedReports.length,
-          lastReportDate: fetchedReports[0]?.created_at || null,
+          averageMood: limitedReports.length > 0 ? Math.round(totalMood / limitedReports.length) : 0,
+          averageStress: limitedReports.length > 0 ? Math.round(totalStress / limitedReports.length) : 0,
+          averageEnergy: limitedReports.length > 0 ? Math.round(totalEnergy / limitedReports.length) : 0,
+          reportsCount: limitedReports.length,
+          lastReportDate: limitedReports[0]?.created_at || null,
         });
       }
     } catch (error) {
