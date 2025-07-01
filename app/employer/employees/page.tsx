@@ -474,7 +474,7 @@ export default function EmployeesPage() {
                     Add Your First Employee
                   </Button>
                 </Link>
-              </div>
+              )}
             </CardContent>
           </Card>
         )}
