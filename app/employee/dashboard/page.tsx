@@ -20,16 +20,16 @@ import {
   Smile,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { collection, query, where, orderBy, limit, getDocs, DocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import type { MentalHealthReport } from '@/types';
-import { auth, db } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 
 export default function EmployeeDashboard() {
   const { user, loading: userLoading } = useUser();
   const [reports, setReports] = useState<MentalHealthReport[]>([]);
-  // Import auth and db from firebase
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ averageMood: 0,
+  const [stats, setStats] = useState({ 
+    averageMood: 0,
     averageStress: 0,
     averageEnergy: 0,
     reportsCount: 0,
@@ -54,18 +54,33 @@ export default function EmployeeDashboard() {
   }, [user, userLoading, router]);
 
   const fetchReports = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Removed Supabase data fetching logic
       // Fetch reports from Firestore where employee_id matches current user's ID
       const reportsRef = collection(db, 'mental_health_reports');
-      const q = query(reportsRef, where('employee_id', '==', user?.id), orderBy('created_at', 'desc'), limit(10));      const querySnapshot = await getDocs(q);
+      const q = query(
+        reportsRef, 
+        where('employee_id', '==', user.id), 
+        orderBy('created_at', 'desc'), 
+        limit(10)
+      );
+      
+      const querySnapshot = await getDocs(q);
 
-      const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc: any) => {
-        // Add explicit type for 'doc' and access data using doc.data()
-        return { ...doc.data(), id: doc.id } as MentalHealthReport;
+      const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          // Ensure created_at is a string
+          created_at: data.created_at?.toDate?.() ? data.created_at.toDate().toISOString() : data.created_at
+        } as MentalHealthReport;
       });
 
-      // The error handling for Firestore is slightly different
       setReports(fetchedReports || []);
 
       // Calculate stats
@@ -79,19 +94,20 @@ export default function EmployeeDashboard() {
           averageStress: fetchedReports.length > 0 ? Math.round(totalStress / fetchedReports.length) : 0,
           averageEnergy: fetchedReports.length > 0 ? Math.round(totalEnergy / fetchedReports.length) : 0,
           reportsCount: fetchedReports.length,
-          lastReportDate: fetchedReports[0].created_at,
+          lastReportDate: fetchedReports[0]?.created_at || null,
         });
       }
     } catch (error) {
       console.error('Error fetching reports:', error);
+      // Don't throw error, just log it and continue with empty state
     } finally {
       setLoading(false);
     }
   };
 
   const getWellnessStatus = (score: number): { label: string; color: string; textColor: string } => {
-    if (score >= 8) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' }; // Typo fixed here
-    if (score >= 6) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' }; // Typo fixed here
+    if (score >= 8) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' };
+    if (score >= 6) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' };
     if (score >= 4) return { label: 'Fair', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
     return { label: 'Needs Attention', color: 'bg-red-500', textColor: 'text-red-700' };
   };
@@ -105,8 +121,8 @@ export default function EmployeeDashboard() {
     return colors[riskLevel];
   };
 
-  const chartData = reports.slice(0, 7).reverse().map((report, index) => ({
-    date: new Date(report.created_at).toLocaleDateString(), // Assuming created_at is a valid date string or timestamp
+  const chartData = reports.slice(0, 7).reverse().map((report) => ({
+    date: new Date(report.created_at).toLocaleDateString(),
     mood: report.mood_rating,
     stress: 11 - report.stress_level, // Invert stress for better visualization
     energy: report.energy_level,
@@ -124,7 +140,29 @@ export default function EmployeeDashboard() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Please sign in to access your dashboard.</p>
+          <Link href="/auth/signin">
+            <Button>Sign In</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'employee') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Access denied. This page is for employees only.</p>
+          <Link href="/employer/dashboard">
+            <Button>Go to Employer Dashboard</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const latestReport = reports[0];
@@ -203,15 +241,13 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Current Mood</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              
-                <Smile className="h-8 w-8 text-blue-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {latestReport ? latestReport.mood_rating : '-'}/10
-                  </div>
-                  <Progress value={latestReport ? latestReport.mood_rating * 10 : 0} className="w-16 h-2" />
+              <Smile className="h-8 w-8 text-blue-600" />
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {latestReport ? latestReport.mood_rating : '-'}/10
                 </div>
-              
+                <Progress value={latestReport ? latestReport.mood_rating * 10 : 0} className="w-16 h-2" />
+              </div>
             </CardContent>
           </Card>
 
@@ -220,15 +256,13 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Stress Level</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              
-                <AlertTriangle className="h-8 w-8 text-orange-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {latestReport ? latestReport.stress_level : '-'}/10
-                  </div>
-                  <Progress value={latestReport ? latestReport.stress_level * 10 : 0} className="w-16 h-2" />
+              <AlertTriangle className="h-8 w-8 text-orange-600" />
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {latestReport ? latestReport.stress_level : '-'}/10
                 </div>
-              
+                <Progress value={latestReport ? latestReport.stress_level * 10 : 0} className="w-16 h-2" />
+              </div>
             </CardContent>
           </Card>
 
@@ -237,15 +271,13 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Energy Level</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              
-                <Battery className="h-8 w-8 text-green-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {latestReport ? latestReport.energy_level : '-'}/10
-                  </div>
-                  <Progress value={latestReport ? latestReport.energy_level * 10 : 0} className="w-16 h-2" />
+              <Battery className="h-8 w-8 text-green-600" />
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {latestReport ? latestReport.energy_level : '-'}/10
                 </div>
-              
+                <Progress value={latestReport ? latestReport.energy_level * 10 : 0} className="w-16 h-2" />
+              </div>
             </CardContent>
           </Card>
 
@@ -254,19 +286,17 @@ export default function EmployeeDashboard() {
               <CardTitle className="text-sm font-medium text-gray-600">Overall Wellness</CardTitle>
             </CardHeader>
             <CardContent className="flex items-center space-x-2">
-              
-                <Brain className="h-8 w-8 text-purple-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {latestReport ? latestReport.overall_wellness : '-'}/10
-                  </div>
-                  {wellnessStatus && (
-                    <Badge className={`${wellnessStatus.textColor} bg-opacity-20`}>
-                      {wellnessStatus.label}
-                    </Badge>
-                  )}
+              <Brain className="h-8 w-8 text-purple-600" />
+              <div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {latestReport ? latestReport.overall_wellness : '-'}/10
                 </div>
-              
+                {wellnessStatus && (
+                  <Badge className={`${wellnessStatus.textColor} bg-opacity-20`}>
+                    {wellnessStatus.label}
+                  </Badge>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
