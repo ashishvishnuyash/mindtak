@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge'; // Keep this import
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -19,7 +19,7 @@ import {
   Calendar,
   AlertTriangle,
   CheckCircle,
-  Clock, // Keep this import
+  Clock,
   MoreVertical,
   Eye,
   Edit,
@@ -29,8 +29,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { collection, query, where, getDocs, orderBy, DocumentSnapshot, DocumentData } from 'firebase/firestore';
 import type { User as UserType, MentalHealthReport as MentalHealthReportType, Company } from '@/types';
 import { useUser } from '@/hooks/use-user';
-import { db } from '@/lib/firebase'; // Import db from Firebase
-// import { DocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface EmployeeWithStats extends UserType {
   latest_report?: MentalHealthReportType;
@@ -46,7 +45,7 @@ export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
   const [filterRisk, setFilterRisk] = useState<string>('all');
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -55,7 +54,6 @@ export default function EmployeesPage() {
     }
 
     if (user?.role !== 'employer') {
-      // Don't redirect, just return early
       return;
     }
 
@@ -64,21 +62,20 @@ export default function EmployeesPage() {
     }
   }, [user, userLoading, router]);
 
-  const fetchEmployees = async () => { // Added async keyword
+  const fetchEmployees = async () => {
     try {
-      // Fetch company employees
       const employeesRef = collection(db, 'users');
       const employeesQuery = query(
         employeesRef,
-        where('company_id', '==', (user as UserType & { company_id: string }).company_id), // Cast user to ensure company_id is present
+        where('company_id', '==', (user as UserType & { company_id: string }).company_id),
         where('role', '==', 'employee')
       );
 
       const employeeSnapshot = await getDocs(employeesQuery);
 
       const employeesData: UserType[] = employeeSnapshot.docs.map(doc => ({
- ...doc.data() as UserType,
- id: doc.id, // Explicitly assign id from doc.id
+        ...doc.data() as UserType,
+        id: doc.id,
       }));
 
       if (!employeesData) {
@@ -86,35 +83,32 @@ export default function EmployeesPage() {
         return;
       }
 
-      // Fetch reports for each employee
       const employeesWithStats: EmployeeWithStats[] = [];
       
       const reportPromises = employeesData.map(async (employee) => {
-        const reportsRef = collection(db, 'mentalHealthReports'); // Assuming 'mentalHealthReports' collection
+        const reportsRef = collection(db, 'mentalHealthReports');
         const reportsQuery = query(
           reportsRef,
-          where('employeeId', '==', employee.id) // Remove orderBy to avoid composite index requirement
+          where('employeeId', '==', employee.id)
         );
 
         const reportSnapshot = await getDocs(reportsQuery);
         
         const reports: MentalHealthReportType[] = reportSnapshot.docs.map(doc => ({
- ...doc.data() as MentalHealthReportType,
- id: doc.id,
+          ...doc.data() as MentalHealthReportType,
+          id: doc.id,
         }));
 
-        // Sort reports by createdAt in JavaScript instead of Firestore
         const sortedReports = reports.sort((a, b) => {
           const dateA = new Date(a.created_at || a.createdAt || 0);
           const dateB = new Date(b.created_at || b.createdAt || 0);
-          return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+          return dateB.getTime() - dateA.getTime();
         });
 
         const reportsCount = sortedReports.length || 0;
         const averageWellness = reportsCount > 0 
           ? Math.round(sortedReports.reduce((sum: number, report: MentalHealthReportType) => sum + report.overall_wellness, 0) / reportsCount)
-          : 0; // Explicitly type sum and report parameters
-
+          : 0;
 
         employeesWithStats.push({
           ...employee,
@@ -125,10 +119,7 @@ export default function EmployeesPage() {
         });
       });
 
-      // Wait for all report fetches to complete
       await Promise.all(reportPromises);
-
-
 
       setEmployees(employeesWithStats);
     } catch (error) {
