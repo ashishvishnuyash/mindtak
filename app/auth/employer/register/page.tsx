@@ -12,8 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Brain, Building, Mail, User, Phone, MapPin, Eye, EyeOff, Shield } from 'lucide-react';
 import { auth, db } from '@/lib/firebase'; // Import Firebase auth and db
 import { collection, doc, addDoc, setDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, AuthError } from 'firebase/auth';
-import { getAuthErrorMessage } from '@/lib/firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { toast } from 'sonner';
 
 export default function EmployerRegisterPage() {
@@ -136,7 +135,7 @@ export default function EmployerRegisterPage() {
         router.push('/employer/dashboard');
       }
     } catch (err) {
-      setError(getAuthErrorMessage(err as AuthError));
+      setError('An unexpected error occurred. Please try again.');
       console.error('Registration error:', err);
     } finally {
       setLoading(false);

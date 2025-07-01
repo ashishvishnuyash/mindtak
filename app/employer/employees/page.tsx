@@ -72,7 +72,7 @@ export default function EmployeesPage() {
         employeesRef,
         where('company_id', '==', (user as UserType & { company_id: string }).company_id), // Cast user to ensure company_id is present
         where('role', '==', 'employee'),
-        orderBy('created_at', 'desc') // Fixed field name from 'createdAt' to 'created_at'
+        orderBy('createdAt', 'desc') // Assuming you have a 'createdAt' field in Firestore
       );
 
       const employeeSnapshot = await getDocs(employeesQuery);
@@ -91,11 +91,11 @@ export default function EmployeesPage() {
       const employeesWithStats: EmployeeWithStats[] = [];
       
       const reportPromises = employeesData.map(async (employee) => {
-        const reportsRef = collection(db, 'mental_health_reports'); // Updated collection name to match index
+        const reportsRef = collection(db, 'mentalHealthReports'); // Assuming 'mentalHealthReports' collection
         const reportsQuery = query(
           reportsRef,
-          where('employee_id', '==', employee.id), // Updated field name to match index
-          orderBy('created_at', 'desc') // Fixed field name from 'createdAt' to 'created_at'
+          where('employeeId', '==', employee.id), // Assuming 'employeeId' field
+          orderBy('createdAt', 'desc') // Assuming 'createdAt' field
         );
 
         const reportSnapshot = await getDocs(reportsQuery);
