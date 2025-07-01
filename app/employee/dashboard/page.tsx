@@ -38,26 +38,34 @@ export default function EmployeeDashboard() {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('Dashboard useEffect - userLoading:', userLoading, 'user:', user);
+    
     if (!userLoading && !user) {
+      console.log('No user found, redirecting to signin');
       router.push('/auth/signin');
       return;
     }
 
-    if (user?.role !== 'employee') {
+    if (user && user.role !== 'employee') {
+      console.log('User is not employee, redirecting to employer dashboard');
       router.push('/employer/dashboard');
       return;
     }
 
-    if (user) {
+    if (user && user.role === 'employee') {
+      console.log('Employee user found, fetching reports');
       fetchReports();
     }
   }, [user, userLoading, router]);
 
   const fetchReports = async () => {
     if (!user?.id) {
+      console.log('No user ID available');
       setLoading(false);
       return;
     }
+
+    console.log('Fetching reports for user:', user.id);
 
     try {
       // Fetch reports from Firestore where employee_id matches current user's ID
@@ -68,7 +76,9 @@ export default function EmployeeDashboard() {
         where('employee_id', '==', user.id)
       );
       
+      console.log('Executing Firestore query...');
       const querySnapshot = await getDocs(q);
+      console.log('Query completed, docs found:', querySnapshot.docs.length);
 
       const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc) => {
         const data = doc.data();
@@ -79,6 +89,8 @@ export default function EmployeeDashboard() {
           created_at: data.created_at?.toDate?.() ? data.created_at.toDate().toISOString() : data.created_at
         } as MentalHealthReport;
       });
+
+      console.log('Fetched reports:', fetchedReports.length);
 
       // Sort reports by created_at in descending order (most recent first) on the client side
       const sortedReports = fetchedReports.sort((a, b) => {
@@ -110,6 +122,7 @@ export default function EmployeeDashboard() {
       console.error('Error fetching reports:', error);
       // Don't throw error, just log it and continue with empty state
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
@@ -138,17 +151,22 @@ export default function EmployeeDashboard() {
     wellness: report.overall_wellness,
   }));
 
-  if (userLoading || loading) {
+  console.log('Render state - userLoading:', userLoading, 'loading:', loading, 'user:', user);
+
+  if (userLoading) {
+    console.log('Showing user loading spinner');
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="ml-4 text-gray-600">Loading user data...</p>
         </div>
       </div>
     );
   }
 
   if (!user) {
+    console.log('No user, showing signin prompt');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -162,6 +180,7 @@ export default function EmployeeDashboard() {
   }
 
   if (user.role !== 'employee') {
+    console.log('User is not employee, showing access denied');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -174,8 +193,23 @@ export default function EmployeeDashboard() {
     );
   }
 
+  if (loading) {
+    console.log('Showing data loading spinner');
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar user={user} />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <p className="ml-4 text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
   const latestReport = reports[0];
   const wellnessStatus = latestReport ? getWellnessStatus(latestReport.overall_wellness) : null;
+
+  console.log('Rendering dashboard with user:', user.first_name);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -14,11 +14,14 @@ export function useUser() {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       try {
         if (authUser) {
+          console.log('Auth user found:', authUser.uid);
+          
           // Fetch additional user data from Firestore
           const userDocRef = doc(db, 'users', authUser.uid);
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
+            console.log('User document found in Firestore');
             // Merge auth user data with Firestore user data
             const userDataFromFirestore = userDocSnap.data();
             const combinedUserData: User = {
@@ -27,13 +30,15 @@ export function useUser() {
               ...userDataFromFirestore, // Spread data from Firestore
             } as User;
 
+            console.log('Combined user data:', combinedUserData);
             setUser(combinedUserData);
           } else {
             // Handle case where user document doesn't exist
-            console.warn('User document not found in Firestore');
+            console.warn('User document not found in Firestore for UID:', authUser.uid);
             setUser(null);
           }
         } else {
+          console.log('No auth user found');
           setUser(null);
         }
       } catch (error) {
