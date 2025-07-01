@@ -93,8 +93,7 @@ export default function EmployeesPage() {
         const reportsRef = collection(db, 'mentalHealthReports'); // Assuming 'mentalHealthReports' collection
         const reportsQuery = query(
           reportsRef,
-          where('employeeId', '==', employee.id), // Assuming 'employeeId' field
-          orderBy('createdAt', 'desc') // Assuming 'createdAt' field
+          where('employeeId', '==', employee.id) // Remove orderBy to avoid composite index requirement
         );
 
         const reportSnapshot = await getDocs(reportsQuery);
@@ -104,18 +103,25 @@ export default function EmployeesPage() {
  id: doc.id,
         }));
 
-        const reportsCount = reports.length || 0;
+        // Sort reports by createdAt in JavaScript instead of Firestore
+        const sortedReports = reports.sort((a, b) => {
+          const dateA = new Date(a.created_at || a.createdAt || 0);
+          const dateB = new Date(b.created_at || b.createdAt || 0);
+          return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+        });
+
+        const reportsCount = sortedReports.length || 0;
         const averageWellness = reportsCount > 0 
-          ? Math.round(reports.reduce((sum: number, report: MentalHealthReportType) => sum + report.overall_wellness, 0) / reportsCount)
+          ? Math.round(sortedReports.reduce((sum: number, report: MentalHealthReportType) => sum + report.overall_wellness, 0) / reportsCount)
           : 0; // Explicitly type sum and report parameters
 
 
         employeesWithStats.push({
           ...employee,
-          latest_report: reports?.[0],
+          latest_report: sortedReports?.[0],
           reports_count: reportsCount,
           average_wellness: averageWellness,
-          last_report_date: reports?.[0]?.created_at,
+          last_report_date: sortedReports?.[0]?.created_at || sortedReports?.[0]?.createdAt,
         });
       });
 
@@ -468,7 +474,7 @@ export default function EmployeesPage() {
                     Add Your First Employee
                   </Button>
                 </Link>
-              )}
+              </div>
             </CardContent>
           </Card>
         )}
