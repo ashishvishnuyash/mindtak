@@ -55,7 +55,7 @@ export default function EmployeesPage() {
     }
 
     if (user?.role !== 'employer') {
-      router.push('/employee/dashboard');
+      // Don't redirect, just return early
       return;
     }
 
@@ -71,8 +71,7 @@ export default function EmployeesPage() {
       const employeesQuery = query(
         employeesRef,
         where('company_id', '==', (user as UserType & { company_id: string }).company_id), // Cast user to ensure company_id is present
-        where('role', '==', 'employee'),
-        orderBy('createdAt', 'desc') // Assuming you have a 'createdAt' field in Firestore
+        where('role', '==', 'employee')
       );
 
       const employeeSnapshot = await getDocs(employeesQuery);
@@ -183,7 +182,29 @@ export default function EmployeesPage() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Please sign in to access this page.</p>
+          <Link href="/auth/signin">
+            <Button>Sign In</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'employer') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Access denied. This page is for employers only.</p>
+          <Link href="/employee/dashboard">
+            <Button>Go to Employee Dashboard</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

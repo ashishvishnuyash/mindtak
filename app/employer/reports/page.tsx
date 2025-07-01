@@ -24,6 +24,7 @@ import {
 import { useUser } from '@/hooks/use-user';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Link from 'next/link';
 
 interface MentalHealthReport {
   id: string;
@@ -75,7 +76,7 @@ export default function EmployerReportsPage() {
     }
 
     if (user?.role !== 'employer') {
-      router.push('/employee/dashboard');
+      // Don't redirect, just return early
       return;
     }
 
@@ -207,7 +208,29 @@ export default function EmployerReportsPage() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Please sign in to access this page.</p>
+          <Link href="/auth/signin">
+            <Button>Sign In</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'employer') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Access denied. This page is for employers only.</p>
+          <Link href="/employee/dashboard">
+            <Button>Go to Employee Dashboard</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
