@@ -418,7 +418,7 @@ export default function EmployeeDashboard() {
               </div>
             </div>
           </CardContent>
-        </div>
+        </Card>
       </div>
     </div>
   );
