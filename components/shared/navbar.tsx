@@ -21,7 +21,7 @@ export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
 
   const handleSignOut = async () => {
-    const error = await signOut(auth).catch((err) => err); // Catch potential errors from signOut
+    const error = await signOut(auth).catch((err) => err);
     if (error) {
       toast.error('Failed to sign out');
     } else {
@@ -65,7 +65,7 @@ export function Navbar({ user }: NavbarProps) {
                   <Link 
                     href="/employee/reports" 
                     className={`text-sm font-medium transition-colors ${
-                      pathname === '/employee/reports' 
+                      pathname === '/employee/reports' || pathname === '/employee/reports/new'
                         ? 'text-blue-600' 
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
@@ -100,7 +100,7 @@ export function Navbar({ user }: NavbarProps) {
                   <Link 
                     href="/employer/employees" 
                     className={`text-sm font-medium transition-colors ${
-                      pathname === '/employer/employees' 
+                      pathname.startsWith('/employer/employees')
                         ? 'text-blue-600' 
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
@@ -116,6 +116,16 @@ export function Navbar({ user }: NavbarProps) {
                     }`}
                   >
                     Analytics
+                  </Link>
+                  <Link 
+                    href="/employer/reports" 
+                    className={`text-sm font-medium transition-colors ${
+                      pathname === '/employer/reports' 
+                        ? 'text-blue-600' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Reports
                   </Link>
                 </>
               )}
