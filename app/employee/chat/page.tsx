@@ -20,11 +20,17 @@ import {
   Brain,
   Smile,
   Frown,
-  Meh
+  Meh,
+  Phone,
+  PhoneOff,
+  Loader2
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
+import { useAudioRecorder } from '@/hooks/use-audio-recorder';
+import { useAudioPlayer } from '@/hooks/use-audio-player';
 import { toast } from 'sonner';
 import type { ChatMessage, ChatSession } from '@/types/index';
+import { GeminiLiveConversation } from '@/lib/gemini-live';
 
 import {
   collection,
@@ -38,7 +44,6 @@ import {
 import { db } from '@/lib/firebase';
 
 export default function EmployeeChatPage() {
-
   const generateAIResponse = (userMessage: string) => {
     const message = userMessage.toLowerCase();
     
@@ -107,15 +112,46 @@ export default function EmployeeChatPage() {
       sentiment
     };
   };
+
   const { user, loading: userLoading } = useUser();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [liveConversation, setLiveConversation] = useState<GeminiLiveConversation | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // Audio hooks
+  const audioRecorder = useAudioRecorder({
+    onDataAvailable: async (audioData) => {
+      if (liveConversation && isConnected) {
+        try {
+          await liveConversation.sendAudio(audioData);
+        } catch (error) {
+          console.error('Failed to send audio:', error);
+          toast.error('Failed to send audio message');
+        }
+      }
+    },
+    onError: (error) => {
+      console.error('Audio recording error:', error);
+      toast.error('Audio recording failed');
+    }
+  });
+
+  const audioPlayer = useAudioPlayer({
+    onEnded: () => {
+      console.log('Audio playback ended');
+    },
+    onError: (error) => {
+      console.error('Audio playback error:', error);
+      toast.error('Audio playback failed');
+    }
+  });
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -131,6 +167,14 @@ export default function EmployeeChatPage() {
     if (user) {
       initializeChat();
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (liveConversation) {
+        liveConversation.disconnect();
+      }
+      audioRecorder.cleanup();
+    };
   }, [user, userLoading, router]);
 
   useEffect(() => {
@@ -148,9 +192,9 @@ export default function EmployeeChatPage() {
       // Create a new chat session
       const sessionRef = collection(db, 'chat_sessions');
       const newSessionDoc = await addDoc(sessionRef, {
-          employee_id: user!.id,
-          session_type: 'text',
-          created_at: serverTimestamp(),
+        employee_id: user!.id,
+        session_type: 'text',
+        created_at: serverTimestamp(),
       });
 
       setSessionId(newSessionDoc.id);
@@ -172,7 +216,7 @@ export default function EmployeeChatPage() {
         const messagesData: ChatMessage[] = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data() as Omit<ChatMessage, 'id'>,
-          timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString(), // Convert Firestore Timestamp to ISO string
+          timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString(),
         }));
         setMessages(messagesData);
       });
@@ -181,71 +225,126 @@ export default function EmployeeChatPage() {
       return () => unsubscribe();
 
     } catch (error: any) {
-        console.error('Error creating chat session:', error);
+      console.error('Error creating chat session:', error);
       toast.error('Failed to initialize chat');
+    }
+  };
+
+  const initializeLiveConversation = async () => {
+    if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+      toast.error('Gemini API key not configured');
+      return;
+    }
+
+    setIsConnecting(true);
+
+    try {
+      const conversation = new GeminiLiveConversation({
+        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+        voiceName: 'Zephyr',
+        onMessage: (message) => {
+          // Add AI text response to chat
+          if (sessionId) {
+            addMessageToChat(message, 'ai');
+          }
+        },
+        onAudioReceived: (audioData) => {
+          // Play received audio
+          audioPlayer.playAudioFromBase64(audioData, 'audio/wav');
+        },
+        onError: (error) => {
+          console.error('Live conversation error:', error);
+          toast.error(`Voice chat error: ${error}`);
+          setIsVoiceMode(false);
+          setIsConnected(false);
+        },
+        onConnectionChange: (connected) => {
+          setIsConnected(connected);
+          setIsConnecting(false);
+          if (!connected && isVoiceMode) {
+            setIsVoiceMode(false);
+            toast.info('Voice chat disconnected');
+          }
+        }
+      });
+
+      await conversation.connect();
+      setLiveConversation(conversation);
+      setIsVoiceMode(true);
+      toast.success('Voice chat connected!');
+
+    } catch (error) {
+      console.error('Failed to initialize live conversation:', error);
+      toast.error('Failed to connect voice chat');
+      setIsConnecting(false);
+      setIsVoiceMode(false);
+    }
+  };
+
+  const disconnectLiveConversation = async () => {
+    if (liveConversation) {
+      await liveConversation.disconnect();
+      setLiveConversation(null);
+    }
+    setIsVoiceMode(false);
+    setIsConnected(false);
+    audioRecorder.cleanup();
+    toast.info('Voice chat disconnected');
+  };
+
+  const addMessageToChat = async (content: string, sender: 'user' | 'ai', emotion?: string, sentiment?: number) => {
+    if (!sessionId) return;
+
+    try {
+      const messagesRef = collection(db, 'chat_sessions', sessionId, 'messages');
+      await addDoc(messagesRef, {
+        content,
+        sender,
+        emotion_detected: emotion,
+        sentiment_score: sentiment,
+        timestamp: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error adding message to chat:', error);
     }
   };
 
   const sendMessage = async () => {
     if (!currentMessage.trim() || !sessionId || loading) return;
 
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      session_id: sessionId,
-      content: currentMessage,
-      sender: 'user',
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = currentMessage;
     setCurrentMessage('');
     setLoading(true);
 
-    if (!sessionId) {
-        toast.error("Chat session not initialized.");
-        setLoading(false);
-        return;
-    }
-
     try {
-      // Save user message to database
-      const messagesRef = collection(db, 'chat_sessions', sessionId, 'messages');
-      await addDoc(messagesRef, {
-          content: userMessage.content,
-          sender: 'user', // Use 'user' as the sender identifier
-          timestamp: serverTimestamp(),
-      });
+      // Add user message to chat
+      await addMessageToChat(userMessage, 'user');
 
-      // Simulate AI response (in a real app, this would call an AI service)
-      const aiResponse = generateAIResponse(userMessage.content);
-      
-      setTimeout(() => {
-        const aiMessage: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          session_id: sessionId,
-          content: aiResponse.content, // Use 'ai' as the sender identifier
-          sender: 'ai', 
-          emotion_detected: aiResponse.emotion,
-          sentiment_score: aiResponse.sentiment,
-          timestamp: new Date().toISOString(),
-        };
-
-        // Save AI message to database
-        // This message will be added to the state by the real-time listener
-        addDoc(messagesRef, {
-            session_id: sessionId,
-            content: aiMessage.content,
-            sender: 'ai',
-            emotion_detected: aiMessage.emotion_detected,
-            sentiment_score: aiMessage.sentiment_score,
-          });
-        setLoading(false);
-      }, 1000 + Math.random() * 2000); // Simulate thinking time
+      if (isVoiceMode && liveConversation && isConnected) {
+        // Send to Gemini Live
+        await liveConversation.sendMessage(userMessage);
+      } else {
+        // Use fallback AI response
+        const aiResponse = generateAIResponse(userMessage);
+        
+        setTimeout(async () => {
+          await addMessageToChat(aiResponse.content, 'ai', aiResponse.emotion, aiResponse.sentiment);
+          setLoading(false);
+        }, 1000 + Math.random() * 2000);
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
       setLoading(false);
+    }
+  };
+
+  const toggleVoiceRecording = () => {
+    if (audioRecorder.isRecording) {
+      audioRecorder.stopRecording();
+    } else {
+      audioRecorder.startRecording();
     }
   };
 
@@ -305,10 +404,35 @@ export default function EmployeeChatPage() {
         {/* Chat Interface */}
         <Card className="h-[600px] flex flex-col">
           <CardHeader className="border-b">
-            <CardTitle className="flex items-center space-x-2">
-              <Bot className="h-6 w-6 text-blue-600" />
-              <span>Wellness Assistant</span>
-              <Badge className="bg-green-100 text-green-700">Online</Badge>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Bot className="h-6 w-6 text-blue-600" />
+                <span>Wellness Assistant</span>
+                <Badge className={isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}>
+                  {isConnected ? 'Connected' : 'Online'}
+                </Badge>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                {/* Voice Mode Toggle */}
+                <Button
+                  variant={isVoiceMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={isVoiceMode ? disconnectLiveConversation : initializeLiveConversation}
+                  disabled={isConnecting}
+                >
+                  {isConnecting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : isVoiceMode ? (
+                    <PhoneOff className="h-4 w-4" />
+                  ) : (
+                    <Phone className="h-4 w-4" />
+                  )}
+                  <span className="ml-2">
+                    {isConnecting ? 'Connecting...' : isVoiceMode ? 'End Voice Chat' : 'Start Voice Chat'}
+                  </span>
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
 
@@ -385,7 +509,7 @@ export default function EmployeeChatPage() {
           <div className="border-t p-4">
             <div className="flex space-x-2">
               <Input
-                placeholder="Type your message..."
+                placeholder={isVoiceMode ? "Type or use voice..." : "Type your message..."}
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -404,11 +528,29 @@ export default function EmployeeChatPage() {
             <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
               <span>Press Enter to send, Shift+Enter for new line</span>
               <div className="flex items-center space-x-2">
+                {/* Voice Recording Button */}
+                {isVoiceMode && (
+                  <Button
+                    variant={audioRecorder.isRecording ? "destructive" : "ghost"}
+                    size="sm"
+                    onClick={toggleVoiceRecording}
+                    disabled={!isConnected}
+                  >
+                    {audioRecorder.isRecording ? (
+                      <MicOff className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+                )}
+                
+                {/* Audio Status */}
                 <Button variant="ghost" size="sm" disabled>
-                  <Mic className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" disabled>
-                  <Volume2 className="h-4 w-4" />
+                  {audioPlayer.isPlaying ? (
+                    <Volume2 className="h-4 w-4" />
+                  ) : (
+                    <VolumeX className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
