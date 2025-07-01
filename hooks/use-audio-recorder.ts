@@ -39,9 +39,20 @@ export function useAudioRecorder(config: AudioRecorderConfig = {}) {
       streamRef.current = stream;
       chunksRef.current = [];
 
-      // Create MediaRecorder
+      // Create MediaRecorder with appropriate format
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = ''; // Let browser choose
+          }
+        }
+      }
+
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+        mimeType: mimeType || undefined
       });
 
       mediaRecorderRef.current = mediaRecorder;
@@ -55,7 +66,9 @@ export function useAudioRecorder(config: AudioRecorderConfig = {}) {
 
       // Handle recording stop
       mediaRecorder.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm;codecs=opus' });
+        const blob = new Blob(chunksRef.current, { 
+          type: mimeType || 'audio/webm' 
+        });
         const arrayBuffer = await blob.arrayBuffer();
         config.onDataAvailable?.(arrayBuffer);
         
