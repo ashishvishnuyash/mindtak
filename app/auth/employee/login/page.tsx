@@ -53,8 +53,8 @@ export default function EmployeeLoginPage() {
     } catch (err) {
       setError(err.message); // Display Firebase error message
     } finally {
-    } // This finally block seemed misplaced and unnecessary
- setLoading(false);
+      setLoading(false);
+    }
   };
 
   return (
