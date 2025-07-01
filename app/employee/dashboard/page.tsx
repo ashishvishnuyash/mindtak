@@ -56,19 +56,31 @@ export default function EmployeeDashboard() {
   const fetchReports = async () => {
     try {
       if (!user?.id) {
+        console.log('No user ID available');
         setLoading(false);
         return;
       }
 
+      console.log('Fetching reports for user:', user.id);
+
       // Fetch reports from Firestore where employee_id matches current user's ID
-      // Remove orderBy to avoid composite index requirement
       const reportsRef = collection(db, 'mental_health_reports');
       const q = query(reportsRef, where('employee_id', '==', user.id));
       const querySnapshot = await getDocs(q);
 
+      console.log('Query snapshot size:', querySnapshot.size);
+
       const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc: any) => {
-        return { ...doc.data(), id: doc.id } as MentalHealthReport;
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          // Ensure created_at is a string
+          created_at: data.created_at || new Date().toISOString()
+        } as MentalHealthReport;
       });
+
+      console.log('Fetched reports:', fetchedReports.length);
 
       // Sort reports by created_at in JavaScript (descending order)
       const sortedReports = fetchedReports.sort((a, b) => 
@@ -78,25 +90,44 @@ export default function EmployeeDashboard() {
       // Limit to 10 most recent reports
       const limitedReports = sortedReports.slice(0, 10);
 
-      setReports(limitedReports || []);
+      setReports(limitedReports);
 
       // Calculate stats
-      if (limitedReports && limitedReports.length > 0) {
+      if (limitedReports.length > 0) {
         const totalMood = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.mood_rating || 0), 0);
         const totalStress = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.stress_level || 0), 0);
         const totalEnergy = limitedReports.reduce((sum: number, report: MentalHealthReport) => sum + (report.energy_level || 0), 0);
 
         setStats({
-          averageMood: limitedReports.length > 0 ? Math.round(totalMood / limitedReports.length) : 0,
-          averageStress: limitedReports.length > 0 ? Math.round(totalStress / limitedReports.length) : 0,
-          averageEnergy: limitedReports.length > 0 ? Math.round(totalEnergy / limitedReports.length) : 0,
+          averageMood: Math.round(totalMood / limitedReports.length),
+          averageStress: Math.round(totalStress / limitedReports.length),
+          averageEnergy: Math.round(totalEnergy / limitedReports.length),
           reportsCount: limitedReports.length,
           lastReportDate: limitedReports[0].created_at,
+        });
+      } else {
+        // Set default stats when no reports
+        setStats({
+          averageMood: 0,
+          averageStress: 0,
+          averageEnergy: 0,
+          reportsCount: 0,
+          lastReportDate: null,
         });
       }
     } catch (error) {
       console.error('Error fetching reports:', error);
+      // Set default stats on error
+      setStats({
+        averageMood: 0,
+        averageStress: 0,
+        averageEnergy: 0,
+        reportsCount: 0,
+        lastReportDate: null,
+      });
+      setReports([]);
     } finally {
+      // Always set loading to false
       setLoading(false);
     }
   };
@@ -387,7 +418,7 @@ export default function EmployeeDashboard() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );
