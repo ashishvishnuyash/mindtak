@@ -5,9 +5,14 @@ import OpenAI from 'openai';
 import type { ChatMessage } from '@/types/index';
 import { getRecentReports, generateReportsAnalytics, formatReportsForAI, getPersonalHistory, formatPersonalHistoryForAI } from '@/lib/reports-service';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI client only when needed
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is required');
+  }
+  return new OpenAI({ apiKey });
+}
 
 // Perplexity AI configuration
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
@@ -274,6 +279,7 @@ DEEP SEARCH MODE: You have access to real-time web search capabilities. When the
       } catch (perplexityError) {
         console.error('Perplexity API failed, falling back to OpenAI:', perplexityError);
         // Fallback to OpenAI if Perplexity fails
+        const openai = getOpenAIClient();
         const completion = await openai.chat.completions.create({
           model: 'gpt-4',
           messages: [
@@ -288,6 +294,7 @@ DEEP SEARCH MODE: You have access to real-time web search capabilities. When the
       }
     } else {
       // Use OpenAI (default)
+      const openai = getOpenAIClient();
       const completion = await openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
@@ -357,6 +364,7 @@ Guidelines:
 - Consider the ${sessionType} format in your analysis
 - Focus on patterns and themes in their responses`;
 
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
