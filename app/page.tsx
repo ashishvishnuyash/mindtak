@@ -19,15 +19,21 @@ import {
   Check,
   ChevronRight,
   Plus,
-  Minus
+  Minus,
+  ChevronDown
 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const toggleProducts = () => {
+    setIsProductsOpen(!isProductsOpen);
   };
 
   const faqs = [
@@ -76,12 +82,48 @@ export default function HomePage() {
               <span className="text-2xl font-bold text-white">Diltak.ai</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth/login">
+              <Link href="/">
                 <Button variant="ghost" className="text-white hover:bg-gray-800">
-                  Login
+                  Home
                 </Button>
               </Link>
-              <Link href="/demo">
+              
+              <Link href="#about">
+                <Button variant="ghost" className="text-white hover:bg-gray-800">
+                  Benefits
+                </Button>
+              </Link>
+              
+              {/* Products Dropdown */}
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:bg-gray-800 flex items-center space-x-1"
+                  onClick={toggleProducts}
+                >
+                  <span>Products</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isProductsOpen ? 'rotate-180' : ''}`} />
+                </Button>
+                
+                {isProductsOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+                    <div className="py-2">
+                      <Link href="/wellness-hub">
+                        <div className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                          Wellness Hub
+                        </div>
+                      </Link>
+                      <Link href="/ai-friend">
+                        <div className="px-4 py-2 text-white hover:bg-gray-700 cursor-pointer">
+                          AI Friend
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <Link href="/contact">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   Book Demo
                 </Button>
@@ -135,7 +177,7 @@ export default function HomePage() {
       </section>
 
             {/* WellnessHub Solution Section */}
-      <section className="py-20 bg-gray-900">
+      <section id="about" className="py-20 bg-gray-900">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title */}
           <div className="text-center mb-8">

@@ -49,7 +49,7 @@ export default function ContactPage() {
               <CardHeader>
                 <CardTitle className="text-2xl">Send us a message</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll get back to you within 24 hours.
+                  Fill out the form below and we&apos;ll get back to you within 24 hours.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -145,89 +145,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Information */}
-          <div className="space-y-8">
-            {/* Contact Details */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <Mail className="h-5 w-5 text-blue-600 mt-1" />
-                  <div>
-                    <p className="font-medium text-gray-900">Email</p>
-                    <p className="text-gray-600">hello@mindcareanalytics.com</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <Phone className="h-5 w-5 text-blue-600 mt-1" />
-                  <div>
-                    <p className="font-medium text-gray-900">Phone</p>
-                    <p className="text-gray-600">+1 (555) 123-4567</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <MapPin className="h-5 w-5 text-blue-600 mt-1" />
-                  <div>
-                    <p className="font-medium text-gray-900">Address</p>
-                    <p className="text-gray-600">
-                      123 Wellness Street<br />
-                      San Francisco, CA 94105
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <Clock className="h-5 w-5 text-blue-600 mt-1" />
-                  <div>
-                    <p className="font-medium text-gray-900">Business Hours</p>
-                    <p className="text-gray-600">
-                      Monday - Friday: 9:00 AM - 6:00 PM PST<br />
-                      Saturday - Sunday: Closed
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Schedule a Demo
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Users className="h-4 w-4 mr-2" />
-                  Talk to Sales
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Start Free Trial
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Response Time */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Fast Response</h3>
-                  <p className="text-sm text-gray-600">
-                    We typically respond to all inquiries within 24 hours during business days.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        
         </div>
 
         {/* FAQ Section */}
