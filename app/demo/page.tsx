@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Brain, 
-  Users, 
-  Building, 
-  Shield, 
+import {
+  Brain,
+  Users,
+  Building,
+  Shield,
   ArrowLeft,
   User,
   Play,
@@ -23,19 +23,14 @@ import {
   Zap,
   Heart,
   TrendingUp,
-  Clock,
   CheckCircle,
   ArrowRight,
-  Star,
   Target,
   Activity
 } from 'lucide-react';
 
 export default function DemoPage() {
-  const router = useRouter();
-  const [selectedDemo, setSelectedDemo] = useState<string>('');
   const [hoveredCard, setHoveredCard] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const demos = [
     {
@@ -158,12 +153,8 @@ export default function DemoPage() {
     }
   ];
 
-  const handleDemoStart = async (route: string) => {
-    setIsLoading(true);
-    // Simulate loading for better UX
-    await new Promise(resolve => setTimeout(resolve, 500));
+  const handleDemoStart = () => {
     // Demo buttons are now static - no navigation
-    setIsLoading(false);
   };
 
   const containerVariants = {
@@ -179,10 +170,10 @@ export default function DemoPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6, ease: "easeOut" as const }
     }
   };
 
@@ -191,14 +182,14 @@ export default function DemoPage() {
     transition: {
       duration: 4,
       repeat: Infinity,
-      ease: "easeInOut"
+      ease: "easeInOut" as const
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <motion.header 
+      <motion.header
         className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -216,8 +207,8 @@ export default function DemoPage() {
               <span className="text-2xl font-bold text-gray-900">WellnessHub</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="hover:bg-green-50 hover:text-green-600 cursor-not-allowed opacity-50"
                 disabled
               >
@@ -236,7 +227,7 @@ export default function DemoPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial="hidden"
           whileInView="visible"
@@ -255,13 +246,13 @@ export default function DemoPage() {
               </span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Explore our comprehensive wellness platform with realistic sample data. 
+              Explore our comprehensive wellness platform with realistic sample data.
               No registration required - jump right into any role or feature.
             </p>
           </motion.div>
 
           {/* Feature Highlights */}
-          <motion.div 
+          <motion.div
             className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
             variants={itemVariants}
           >
@@ -280,7 +271,7 @@ export default function DemoPage() {
         </motion.div>
 
         {/* Quick Actions */}
-        <motion.div 
+        <motion.div
           className="mb-16"
           initial="hidden"
           whileInView="visible"
@@ -291,8 +282,8 @@ export default function DemoPage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Quick Start</h2>
             <p className="text-lg text-gray-600">Jump into any feature instantly</p>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-5 gap-4"
             variants={containerVariants}
           >
@@ -303,9 +294,9 @@ export default function DemoPage() {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Card 
+                <Card
                   className={`hover:shadow-xl transition-all duration-300 cursor-not-allowed opacity-75 ${action.bgColor} border-0`}
-                  onClick={() => handleDemoStart(action.route)}
+                  onClick={handleDemoStart}
                 >
                   <CardContent className="p-6 text-center">
                     <motion.div
@@ -340,7 +331,7 @@ export default function DemoPage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Detailed Demos</h2>
             <p className="text-lg text-gray-600">Explore comprehensive role-based experiences</p>
           </motion.div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {demos.map((demo, index) => (
               <motion.div
@@ -352,7 +343,7 @@ export default function DemoPage() {
               >
                 <Card className="h-full bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden">
                   <CardHeader className="text-center pb-4">
-                    <motion.div 
+                    <motion.div
                       className={`mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-4 bg-gradient-to-br ${demo.color} shadow-lg`}
                       animate={hoveredCard === demo.id ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }}
                       transition={{ duration: 0.3 }}
@@ -391,14 +382,14 @@ export default function DemoPage() {
                         ))}
                       </div>
                     </div>
-                    
+
                     <motion.div
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <Button 
+                      <Button
                         className={`w-full bg-gradient-to-r ${demo.color} hover:opacity-90 text-white font-semibold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-not-allowed opacity-75`}
-                        onClick={() => handleDemoStart(demo.route)}
+                        onClick={handleDemoStart}
                         disabled={true}
                       >
                         <Play className="h-5 w-5 mr-2" />
@@ -413,7 +404,7 @@ export default function DemoPage() {
         </motion.div>
 
         {/* Demo Information */}
-        <motion.div 
+        <motion.div
           className="mt-16"
           initial="hidden"
           whileInView="visible"
@@ -422,7 +413,7 @@ export default function DemoPage() {
         >
           <Card className="max-w-5xl mx-auto bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-xl">
             <CardContent className="p-8">
-              <motion.div 
+              <motion.div
                 className="text-center mb-8"
                 whileHover={{ scale: 1.05 }}
               >
@@ -434,11 +425,11 @@ export default function DemoPage() {
                 </motion.div>
                 <h3 className="text-3xl font-bold text-gray-900 mb-4">Interactive Demo Experience</h3>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                  This comprehensive demo showcases the complete WellnessHub platform with realistic sample data, 
+                  This comprehensive demo showcases the complete WellnessHub platform with realistic sample data,
                   allowing you to experience every feature without any setup.
                 </p>
               </motion.div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <motion.div
                   whileHover={{ y: -5 }}
@@ -450,7 +441,7 @@ export default function DemoPage() {
                     Pre-populated with realistic employee wellness data, team structures, and comprehensive analytics
                   </p>
                 </motion.div>
-                
+
                 <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-white/60 backdrop-blur-sm rounded-xl p-6"
@@ -461,7 +452,7 @@ export default function DemoPage() {
                     Access all platform features including AI chat, analytics, org charts, and management tools
                   </p>
                 </motion.div>
-                
+
                 <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-white/60 backdrop-blur-sm rounded-xl p-6"
@@ -474,7 +465,7 @@ export default function DemoPage() {
                 </motion.div>
               </div>
 
-              <motion.div 
+              <motion.div
                 className="mt-8 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -483,7 +474,7 @@ export default function DemoPage() {
                 <div className="flex flex-wrap justify-center gap-3">
                   {[
                     'AI-Powered Chat',
-                    'Team Management', 
+                    'Team Management',
                     'Wellness Analytics',
                     'Org Chart',
                     'Role-Based Access',
@@ -497,8 +488,8 @@ export default function DemoPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className="bg-white/80 text-gray-700 hover:bg-green-100 hover:text-green-700 transition-colors cursor-default"
                       >
                         {badge}

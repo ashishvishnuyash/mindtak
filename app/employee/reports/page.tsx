@@ -10,12 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Calendar, 
+import {
+  Calendar,
   Plus,
   Search,
   Filter,
-  TrendingUp, 
+  TrendingUp,
   TrendingDown,
   Minus,
   AlertTriangle,
@@ -71,17 +71,17 @@ export default function EmployeeReportsPage() {
         where('employee_id', '==', user.id)
       );
       const querySnapshot = await getDocs(q);
-      
+
       const data = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as MentalHealthReport[];
-      
+
       // Sort by created_at in JavaScript to avoid Firestore index requirements
-      const sortedData = data.sort((a, b) => 
+      const sortedData = data.sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
-      
+
       setReports(sortedData);
     } catch (error) {
       console.error('Error fetching reports:', error);
@@ -117,12 +117,12 @@ export default function EmployeeReportsPage() {
   };
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       report.comments?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       new Date(report.created_at).toLocaleDateString().includes(searchTerm);
-    
+
     const matchesRisk = filterRisk === 'all' || report.risk_level === filterRisk;
-    
+
     return matchesSearch && matchesRisk;
   });
 
@@ -156,10 +156,10 @@ export default function EmployeeReportsPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6, ease: "easeOut" as const }
     }
   };
 
@@ -168,7 +168,7 @@ export default function EmployeeReportsPage() {
     transition: {
       duration: 4,
       repeat: Infinity,
-      ease: "easeInOut"
+      ease: "easeInOut" as const
     }
   };
 
@@ -201,11 +201,11 @@ export default function EmployeeReportsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
+        <motion.div
           className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
           animate={floatingAnimation}
         />
-        <motion.div 
+        <motion.div
           className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
           animate={{
             ...floatingAnimation,
@@ -215,10 +215,10 @@ export default function EmployeeReportsPage() {
       </div>
 
       <Navbar user={user || undefined} />
-      
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
           initial="hidden"
           animate="visible"
@@ -278,7 +278,7 @@ export default function EmployeeReportsPage() {
                     className="pl-10 bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
                   />
                 </div>
-                
+
                 <Select value={filterRisk} onValueChange={setFilterRisk}>
                   <SelectTrigger className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500">
                     <Filter className="h-4 w-4 mr-2" />
@@ -316,7 +316,7 @@ export default function EmployeeReportsPage() {
 
         {/* Reports List */}
         {sortedReports.length > 0 ? (
-          <motion.div 
+          <motion.div
             className="space-y-6"
             initial="hidden"
             animate="visible"
@@ -353,7 +353,7 @@ export default function EmployeeReportsPage() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-4">
                           {getRiskLevelBadge(report.risk_level)}
                           <div className="text-right">
@@ -367,7 +367,7 @@ export default function EmployeeReportsPage() {
 
                       {/* Main Metrics Grid */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300"
                           whileHover={{ scale: 1.02, y: -2 }}
                         >
@@ -381,7 +381,7 @@ export default function EmployeeReportsPage() {
                           <div className="text-sm text-blue-600 font-medium">Mood</div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-md transition-all duration-300"
                           whileHover={{ scale: 1.02, y: -2 }}
                         >
@@ -395,7 +395,7 @@ export default function EmployeeReportsPage() {
                           <div className="text-sm text-red-600 font-medium">Stress</div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all duration-300"
                           whileHover={{ scale: 1.02, y: -2 }}
                         >
@@ -409,7 +409,7 @@ export default function EmployeeReportsPage() {
                           <div className="text-sm text-green-600 font-medium">Energy</div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-300"
                           whileHover={{ scale: 1.02, y: -2 }}
                         >
@@ -446,7 +446,7 @@ export default function EmployeeReportsPage() {
 
                       {/* Comments */}
                       {report.comments && (
-                        <motion.div 
+                        <motion.div
                           className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -462,7 +462,7 @@ export default function EmployeeReportsPage() {
 
                       {/* AI Analysis */}
                       {report.ai_analysis && (
-                        <motion.div 
+                        <motion.div
                           className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -493,7 +493,7 @@ export default function EmployeeReportsPage() {
                 </motion.div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Reports Found</h3>
                 <p className="text-gray-600 mb-6 text-lg">
-                  {searchTerm || filterRisk !== 'all' 
+                  {searchTerm || filterRisk !== 'all'
                     ? 'No reports match your current filters. Try adjusting your search criteria.'
                     : 'You haven\'t created any wellness reports yet. Start tracking your mental health today!'
                   }

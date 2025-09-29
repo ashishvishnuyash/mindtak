@@ -69,7 +69,7 @@ function EmployerDashboardPage() {
 
   useEffect(() => {
     if (!userLoading && user && user.company_id) {
-        initializeDashboard();
+      initializeDashboard();
     }
   }, [user, userLoading]);
 
@@ -145,7 +145,7 @@ function EmployerDashboardPage() {
       );
       const allUsersSnapshot = await getDocs(allUsersQuery);
       const allUsers = allUsersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
-      
+
       // Filter employees
       const employees = allUsers.filter(u => u.role === 'employee');
       const managers = allUsers.filter(u => u.role === 'manager');
@@ -173,10 +173,10 @@ function EmployerDashboardPage() {
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      const recentReports = allReports.filter(report => 
+      const recentReports = allReports.filter(report =>
         new Date(report.created_at) >= thirtyDaysAgo
       );
-      const weeklyReports = allReports.filter(report => 
+      const weeklyReports = allReports.filter(report =>
         new Date(report.created_at) >= sevenDaysAgo
       );
 
@@ -222,11 +222,11 @@ function EmployerDashboardPage() {
         return reportDate >= previousWeekStart && reportDate < sevenDaysAgo;
       });
 
-      const currentWeekAvg = weeklyReports.length > 0 
-        ? weeklyReports.reduce((sum, r) => sum + (r.overall_wellness || 0), 0) / weeklyReports.length 
+      const currentWeekAvg = weeklyReports.length > 0
+        ? weeklyReports.reduce((sum, r) => sum + (r.overall_wellness || 0), 0) / weeklyReports.length
         : 0;
-      const previousWeekAvg = previousWeekReports.length > 0 
-        ? previousWeekReports.reduce((sum, r) => sum + (r.overall_wellness || 0), 0) / previousWeekReports.length 
+      const previousWeekAvg = previousWeekReports.length > 0
+        ? previousWeekReports.reduce((sum, r) => sum + (r.overall_wellness || 0), 0) / previousWeekReports.length
         : 0;
 
       let wellnessTrend: 'improving' | 'stable' | 'declining' = 'stable';
@@ -252,7 +252,7 @@ function EmployerDashboardPage() {
 
         const employeeReports = recentReports.filter(r => r.employee_id === employee.id);
         departmentStats[dept].reportCount += employeeReports.length;
-        
+
         if (employeeReports.length > 0) {
           const deptWellness = employeeReports.reduce((sum, r) => sum + (r.overall_wellness || 0), 0) / employeeReports.length;
           departmentStats[dept].avgWellness = deptWellness;
@@ -390,10 +390,10 @@ function EmployerDashboardPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6, ease: "easeOut" as const }
     }
   };
 
@@ -402,7 +402,7 @@ function EmployerDashboardPage() {
     transition: {
       duration: 4,
       repeat: Infinity,
-      ease: "easeInOut"
+      ease: "easeInOut" as const
     }
   };
 
@@ -431,11 +431,11 @@ function EmployerDashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
+        <motion.div
           className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
           animate={floatingAnimation}
         />
-        <motion.div 
+        <motion.div
           className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
           animate={{
             ...floatingAnimation,
@@ -448,7 +448,7 @@ function EmployerDashboardPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial="hidden"
           whileInView="visible"
@@ -467,8 +467,8 @@ function EmployerDashboardPage() {
                 <div>
                   <h1 className="text-4xl font-bold text-gray-900">Employer Dashboard</h1>
                   <p className="text-lg text-gray-600 mt-1">
-                Monitor your team's wellness and mental health insights
-              </p>
+                    Monitor your team's wellness and mental health insights
+                  </p>
                 </div>
               </div>
             </div>
@@ -477,23 +477,23 @@ function EmployerDashboardPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
+                <select
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
                   className="px-4 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white/80 backdrop-blur-sm"
-              >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-              </select>
+                >
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                </select>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button 
-                  onClick={handleRefresh} 
-                  variant="outline" 
+                <Button
+                  onClick={handleRefresh}
+                  variant="outline"
                   size="sm"
                   disabled={refreshing}
                   className="bg-white/80 backdrop-blur-sm hover:bg-green-50 hover:text-green-600"
@@ -515,22 +515,22 @@ function EmployerDashboardPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button 
-                  onClick={exportReports} 
-                  variant="outline" 
+                <Button
+                  onClick={exportReports}
+                  variant="outline"
                   size="sm"
                   className="bg-white/80 backdrop-blur-sm hover:bg-green-50 hover:text-green-600"
                 >
-                <Download className="h-4 w-4 mr-2" />
-                Export Reports
-              </Button>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Reports
+                </Button>
               </motion.div>
             </div>
           </motion.div>
         </motion.div>
 
         {/* Stats Cards */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
           initial="hidden"
           whileInView="visible"
@@ -539,7 +539,7 @@ function EmployerDashboardPage() {
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Total Team</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -547,19 +547,19 @@ function EmployerDashboardPage() {
                 >
                   <Users className="h-5 w-5 text-green-600" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-gray-900">{stats?.total_employees || 0}</div>
                 <p className="text-sm text-gray-600">
-                {stats?.total_managers || 0} managers, {stats?.total_employees || 0} employees
-              </p>
-            </CardContent>
-          </Card>
+                  {stats?.total_managers || 0} managers, {stats?.total_employees || 0} employees
+                </p>
+              </CardContent>
+            </Card>
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Participation Rate</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -567,19 +567,19 @@ function EmployerDashboardPage() {
                 >
                   <Activity className="h-5 w-5 text-blue-600" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-gray-900">{stats?.participation_rate || 0}%</div>
                 <p className="text-sm text-gray-600">
-                {stats?.completed_reports || 0} reports this month
-              </p>
-            </CardContent>
-          </Card>
+                  {stats?.completed_reports || 0} reports this month
+                </p>
+              </CardContent>
+            </Card>
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Wellness</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -587,22 +587,22 @@ function EmployerDashboardPage() {
                 >
                   <Target className="h-5 w-5 text-purple-600" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-2">
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-2">
                   <div className="text-3xl font-bold text-gray-900">{stats?.average_wellness_score || 0}/10</div>
-                {stats?.wellness_trend && getTrendIcon(stats.wellness_trend)}
-              </div>
+                  {stats?.wellness_trend && getTrendIcon(stats.wellness_trend)}
+                </div>
                 <p className="text-sm text-gray-600">
-                Team wellness score
-              </p>
-            </CardContent>
-          </Card>
+                  Team wellness score
+                </p>
+              </CardContent>
+            </Card>
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">High Risk</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -610,19 +610,19 @@ function EmployerDashboardPage() {
                 >
                   <AlertTriangle className="h-5 w-5 text-red-600" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-red-600">{stats?.high_risk_employees || 0}</div>
                 <p className="text-sm text-gray-600">
-                Require immediate attention
-              </p>
-            </CardContent>
-          </Card>
+                  Require immediate attention
+                </p>
+              </CardContent>
+            </Card>
           </motion.div>
         </motion.div>
 
         {/* Additional Metrics Row */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
           initial="hidden"
           whileInView="visible"
@@ -631,7 +631,7 @@ function EmployerDashboardPage() {
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Mood</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -639,23 +639,23 @@ function EmployerDashboardPage() {
                 >
                   <Heart className="h-5 w-5 text-green-500" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-gray-900">{stats?.average_mood_score || 0}/10</div>
                 <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
-                  <motion.div 
+                  <motion.div
                     className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-1000"
                     initial={{ width: 0 }}
                     animate={{ width: `${((stats?.average_mood_score || 0) / 10) * 100}%` }}
                   />
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Stress</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -663,23 +663,23 @@ function EmployerDashboardPage() {
                 >
                   <Zap className="h-5 w-5 text-red-500" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-gray-900">{stats?.average_stress_score || 0}/10</div>
                 <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
-                  <motion.div 
+                  <motion.div
                     className="bg-gradient-to-r from-red-500 to-pink-500 h-3 rounded-full transition-all duration-1000"
                     initial={{ width: 0 }}
                     animate={{ width: `${((stats?.average_stress_score || 0) / 10) * 100}%` }}
                   />
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Energy</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
@@ -687,24 +687,24 @@ function EmployerDashboardPage() {
                 >
                   <Star className="h-5 w-5 text-yellow-500" />
                 </motion.div>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-gray-900">{stats?.average_energy_score || 0}/10</div>
                 <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
-                  <motion.div 
+                  <motion.div
                     className="bg-gradient-to-r from-yellow-500 to-orange-500 h-3 rounded-full transition-all duration-1000"
                     initial={{ width: 0 }}
                     animate={{ width: `${((stats?.average_energy_score || 0) / 10) * 100}%` }}
                   />
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
         </motion.div>
 
         {/* High Risk Alert */}
         <AnimatePresence>
-        {stats && stats.high_risk_employees > 0 && (
+          {stats && stats.high_risk_employees > 0 && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -712,44 +712,44 @@ function EmployerDashboardPage() {
               className="mb-8"
             >
               <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-red-900">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-red-900">
                     <motion.div
                       animate={{ scale: [1, 1.1, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
                       <AlertTriangle className="h-6 w-6 mr-3" />
                     </motion.div>
-                High Risk Employees Alert
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+                    High Risk Employees Alert
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <p className="text-red-800 mb-4">
-                {stats.high_risk_employees} employee{stats.high_risk_employees > 1 ? 's' : ''}
-                {stats.high_risk_employees > 1 ? ' have' : ' has'} been flagged as high risk.
-                Consider reaching out for additional support.
-              </p>
+                    {stats.high_risk_employees} employee{stats.high_risk_employees > 1 ? 's' : ''}
+                    {stats.high_risk_employees > 1 ? ' have' : ' has'} been flagged as high risk.
+                    Consider reaching out for additional support.
+                  </p>
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-              <Button
+                    <Button
                       className="bg-red-600 hover:bg-red-700 text-white"
-                size="sm"
-                onClick={() => router.push('/employer/reports?filter=high-risk')}
-              >
-                View High Risk Reports
+                      size="sm"
+                      onClick={() => router.push('/employer/reports?filter=high-risk')}
+                    >
+                      View High Risk Reports
                       <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+                    </Button>
                   </motion.div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
             </motion.div>
-        )}
+          )}
         </AnimatePresence>
 
         {/* Main Content Grid */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           initial="hidden"
           whileInView="visible"
@@ -766,15 +766,15 @@ function EmployerDashboardPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push('/employer/reports')}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push('/employer/reports')}
                       className="bg-white/60 hover:bg-green-50 hover:text-green-600"
-                  >
-                    View All
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                    >
+                      View All
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
                   </motion.div>
                 </CardTitle>
               </CardHeader>
@@ -784,8 +784,8 @@ function EmployerDashboardPage() {
                     {recentReports.map((report, index) => {
                       const employee = employees.find(emp => emp.id === report.employee_id);
                       return (
-                        <motion.div 
-                          key={report.id} 
+                        <motion.div
+                          key={report.id}
                           className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-green-50 hover:to-emerald-50 transition-all duration-300"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -793,7 +793,7 @@ function EmployerDashboardPage() {
                           whileHover={{ scale: 1.02, x: 5 }}
                         >
                           <div className="flex items-center space-x-3">
-                            <motion.div 
+                            <motion.div
                               className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg"
                               whileHover={{ rotate: 360 }}
                               transition={{ duration: 0.6 }}
@@ -822,7 +822,7 @@ function EmployerDashboardPage() {
                     })}
                   </div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     className="text-center py-12"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -862,14 +862,14 @@ function EmployerDashboardPage() {
                     whileHover={{ scale: 1.02, x: 5 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                <Button
+                    <Button
                       className="w-full justify-start bg-white/60 hover:bg-green-50 hover:text-green-600 transition-all duration-300"
-                  variant="outline"
+                      variant="outline"
                       onClick={action.action || (() => router.push(action.route!))}
-                >
+                    >
                       <action.icon className={`h-4 w-4 mr-3 ${action.color}`} />
                       {action.label}
-                </Button>
+                    </Button>
                   </motion.div>
                 ))}
               </CardContent>
@@ -897,7 +897,7 @@ function EmployerDashboardPage() {
                     { label: 'Participation Rate', value: `${stats?.participation_rate || 0}%` },
                     { label: 'High Risk', value: stats?.high_risk_employees || 0, badge: true }
                   ].map((item, index) => (
-                    <motion.div 
+                    <motion.div
                       key={item.label}
                       className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:from-green-50 hover:to-emerald-50 transition-all duration-300"
                       initial={{ opacity: 0, x: -20 }}
@@ -907,9 +907,9 @@ function EmployerDashboardPage() {
                     >
                       <span className="text-sm font-medium text-gray-700">{item.label}</span>
                       {item.badge ? (
-                    <Badge variant={stats?.high_risk_employees ? 'destructive' : 'default'}>
+                        <Badge variant={stats?.high_risk_employees ? 'destructive' : 'default'}>
                           {item.value}
-                    </Badge>
+                        </Badge>
                       ) : (
                         <span className="font-semibold text-gray-900">{item.value}</span>
                       )}
@@ -936,8 +936,8 @@ function EmployerDashboardPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {Object.entries(stats.department_stats).map(([dept, deptStats], index) => (
-                      <motion.div 
-                        key={dept} 
+                      <motion.div
+                        key={dept}
                         className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-blue-50 hover:to-cyan-50 transition-all duration-300"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -960,7 +960,7 @@ function EmployerDashboardPage() {
                         </div>
                         {deptStats.avgWellness > 0 && (
                           <div className="w-full bg-gray-200 rounded-full h-3">
-                            <motion.div 
+                            <motion.div
                               className="bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-1000"
                               initial={{ width: 0 }}
                               animate={{ width: `${(deptStats.avgWellness / 10) * 100}%` }}

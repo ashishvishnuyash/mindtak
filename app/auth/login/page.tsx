@@ -8,32 +8,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Brain, 
+import {
+  Brain,
   ArrowLeft,
   Mail,
   Lock,
   Eye,
   EyeOff,
   Loader2,
-  Users,
-  Building,
   Shield,
   Sparkles,
   Heart,
   TrendingUp,
-  Zap,
-  CheckCircle,
-  ArrowRight,
-  Star,
-  Target,
-  Activity
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
 export default function LoginPage() {
@@ -83,17 +76,16 @@ export default function LoginPage() {
 
     try {
       // Use Firebase Auth directly
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      const user = userCredential.user;
-      
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+
       toast.success('Login successful!');
-      
+
       // The auth context will automatically update with the user data
       // and redirect based on the user's role
-      
+
     } catch (error: any) {
       console.error('Login error:', error);
-      
+
       // Handle specific Firebase Auth errors
       switch (error.code) {
         case 'auth/user-not-found':
@@ -116,10 +108,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = (role: string) => {
-    // Demo login disabled - redirect to regular login
-    toast.info('Demo mode is not available. Please use regular login.');
-  };
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -134,10 +123,10 @@ export default function LoginPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6, ease: "easeOut" as const }
     }
   };
 
@@ -146,7 +135,7 @@ export default function LoginPage() {
     transition: {
       duration: 4,
       repeat: Infinity,
-      ease: "easeInOut"
+      ease: "easeInOut" as const
     }
   };
 
@@ -181,11 +170,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
+        <motion.div
           className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
           animate={floatingAnimation}
         />
-        <motion.div 
+        <motion.div
           className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
           animate={{
             ...floatingAnimation,
@@ -195,7 +184,7 @@ export default function LoginPage() {
       </div>
 
       {/* Header */}
-      <motion.header 
+      <motion.header
         className="relative z-10 border-b bg-white/80 backdrop-blur-sm"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -277,7 +266,7 @@ export default function LoginPage() {
                       )}
                     </AnimatePresence>
 
-                    <motion.div 
+                    <motion.div
                       className="space-y-2"
                       whileFocus={{ scale: 1.02 }}
                     >
@@ -285,9 +274,8 @@ export default function LoginPage() {
                         Email Address
                       </Label>
                       <div className="relative">
-                        <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${
-                          focusedField === 'email' ? 'text-green-500' : 'text-gray-400'
-                        }`} />
+                        <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${focusedField === 'email' ? 'text-green-500' : 'text-gray-400'
+                          }`} />
                         <Input
                           id="email"
                           type="email"
@@ -296,18 +284,17 @@ export default function LoginPage() {
                           onChange={(e) => handleInputChange('email', e.target.value)}
                           onFocus={() => setFocusedField('email')}
                           onBlur={() => setFocusedField('')}
-                          className={`pl-10 transition-all duration-300 ${
-                            focusedField === 'email' 
-                              ? 'border-green-500 ring-2 ring-green-200' 
-                              : 'border-gray-300 hover:border-gray-400'
-                          }`}
+                          className={`pl-10 transition-all duration-300 ${focusedField === 'email'
+                            ? 'border-green-500 ring-2 ring-green-200'
+                            : 'border-gray-300 hover:border-gray-400'
+                            }`}
                           disabled={loading}
                           required
                         />
                       </div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       className="space-y-2"
                       whileFocus={{ scale: 1.02 }}
                     >
@@ -315,9 +302,8 @@ export default function LoginPage() {
                         Password
                       </Label>
                       <div className="relative">
-                        <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${
-                          focusedField === 'password' ? 'text-green-500' : 'text-gray-400'
-                        }`} />
+                        <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${focusedField === 'password' ? 'text-green-500' : 'text-gray-400'
+                          }`} />
                         <Input
                           id="password"
                           type={showPassword ? 'text' : 'password'}
@@ -326,11 +312,10 @@ export default function LoginPage() {
                           onChange={(e) => handleInputChange('password', e.target.value)}
                           onFocus={() => setFocusedField('password')}
                           onBlur={() => setFocusedField('')}
-                          className={`pl-10 pr-10 transition-all duration-300 ${
-                            focusedField === 'password' 
-                              ? 'border-green-500 ring-2 ring-green-200' 
-                              : 'border-gray-300 hover:border-gray-400'
-                          }`}
+                          className={`pl-10 pr-10 transition-all duration-300 ${focusedField === 'password'
+                            ? 'border-green-500 ring-2 ring-green-200'
+                            : 'border-gray-300 hover:border-gray-400'
+                            }`}
                           disabled={loading}
                           required
                         />
@@ -351,8 +336,8 @@ export default function LoginPage() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <Button 
-                        type="submit" 
+                      <Button
+                        type="submit"
                         className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                         disabled={loading}
                       >
@@ -429,7 +414,7 @@ export default function LoginPage() {
               </div>
 
               {/* Stats */}
-              <motion.div 
+              <motion.div
                 className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white"
                 variants={itemVariants}
                 whileHover={{ scale: 1.02 }}
@@ -454,7 +439,7 @@ export default function LoginPage() {
               </motion.div>
 
               {/* Security Badge */}
-              <motion.div 
+              <motion.div
                 className="bg-white/60 backdrop-blur-sm rounded-xl p-6 text-center"
                 variants={itemVariants}
                 whileHover={{ scale: 1.02 }}
