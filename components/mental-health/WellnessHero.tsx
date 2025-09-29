@@ -19,10 +19,10 @@ import {
 const WellnessHero = () => {
   const fadeInUp = {
     hidden: { opacity: 0, y: 60 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" }
+      transition: { duration: 0.8 }
     }
   };
 
@@ -41,8 +41,7 @@ const WellnessHero = () => {
     y: [-10, 10, -10],
     transition: {
       duration: 4,
-      repeat: Infinity,
-      ease: "easeInOut"
+      repeat: Infinity
     }
   };
 
