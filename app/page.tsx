@@ -215,7 +215,7 @@ export default function HomePage() {
               {/* Quote Section */}
               <div className="border-l-4 border-gray-300 pl-6 mb-8">
                 <p className="text-gray-700 italic text-lg">
-                  "Emotional support, guidance, and wellness aid"
+                  &quot;Emotional support, guidance, and wellness aid&quot;
                 </p>
               </div>
 
