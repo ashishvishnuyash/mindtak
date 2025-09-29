@@ -30,14 +30,11 @@ import {
   Pause,
   Search,
   Menu,
-<<<<<<< HEAD
   Brain,
-=======
   Paperclip,
   Image,
   X,
   Upload,
->>>>>>> 2485ce3d32bab74b0e0f93547c719bffecddc1ee
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
@@ -846,11 +843,12 @@ How have you been feeling lately?`;
             Your confidential space to reflect on your well-being.
           </p>
         </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
             <Card className="flex flex-col item-center justify-center bg-white/80 backdrop-blur-sm border-0 shadow-2xl w-auto rounded-3xl overflow-hidden">
               <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <CardTitle className="flex items-center justify-between">
@@ -1476,10 +1474,6 @@ How have you been feeling lately?`;
               </div>
             )}
 
-<<<<<<< HEAD
-            <div className="border-t border-gray-200 p-4 bg-gradient-to-r from-white to-gray-50">
-              <div className="flex space-x-3">
-=======
             <div className="border-t p-4 bg-white">
               {/* File attachments preview */}
               {attachedFiles.length > 0 && (
@@ -1541,7 +1535,6 @@ How have you been feeling lately?`;
                   className="hidden"
                 />
 
->>>>>>> 2485ce3d32bab74b0e0f93547c719bffecddc1ee
                 <Input
                   placeholder={
                     sessionEnded
@@ -1580,7 +1573,7 @@ How have you been feeling lately?`;
               )}
             </div>
           </Card>
-          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
