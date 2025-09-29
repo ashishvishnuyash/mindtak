@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,17 +20,26 @@ import {
   Minus,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
+  RefreshCw,
+  Loader2,
+  Sparkles,
+  Brain,
+  Heart,
+  Battery,
+  Smile,
+  ArrowRight
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase'; // Import db
+import { auth, db } from '@/lib/firebase';
 import type { MentalHealthReport } from '@/types';
 
 export default function EmployeeReportsPage() {
   const { user, loading: userLoading } = useUser();
   const [reports, setReports] = useState<MentalHealthReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRisk, setFilterRisk] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
@@ -42,7 +52,6 @@ export default function EmployeeReportsPage() {
     }
 
     if (user?.role !== 'employee') {
-      // router.push('/employer/dashboard');
       return;
     }
 
@@ -55,6 +64,7 @@ export default function EmployeeReportsPage() {
     if (!user) return;
 
     try {
+      setRefreshing(true);
       const reportsCollection = collection(db, 'mental_health_reports');
       const q = query(
         reportsCollection,
@@ -77,6 +87,7 @@ export default function EmployeeReportsPage() {
       console.error('Error fetching reports:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -132,12 +143,52 @@ export default function EmployeeReportsPage() {
     }
   });
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" }
+    }
+  };
+
+  const floatingAnimation = {
+    y: [-10, 10, -10],
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  };
+
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Brain className="h-16 w-16 text-green-600 mx-auto mb-4" />
+          </motion.div>
+          <p className="text-lg text-gray-600">Loading your wellness reports...</p>
+        </motion.div>
       </div>
     );
   }
@@ -147,217 +198,317 @@ export default function EmployeeReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
+          animate={floatingAnimation}
+        />
+        <motion.div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
+          animate={{
+            ...floatingAnimation,
+            transition: { ...floatingAnimation.transition, delay: 2 }
+          }}
+        />
+      </div>
+
       <Navbar user={user || undefined} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Wellness Reports</h1>
-            <p className="text-gray-600 mt-2">
-              Track your mental health journey and view your progress over time.
-            </p>
-          </div>
-          <Link href="/employee/reports/new">
-            <Button className="mt-4 sm:mt-0">
-              <Plus className="h-4 w-4 mr-2" />
-              New Report
-            </Button>
-          </Link>
-        </div>
-
-        {/* Filters and Search */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search reports..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              <Select value={filterRisk} onValueChange={setFilterRisk}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by risk" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Risk Levels</SelectItem>
-                  <SelectItem value="low">Low Risk</SelectItem>
-                  <SelectItem value="medium">Medium Risk</SelectItem>
-                  <SelectItem value="high">High Risk</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="wellness-high">Highest Wellness</SelectItem>
-                  <SelectItem value="wellness-low">Lowest Wellness</SelectItem>
-                  <SelectItem value="stress-high">Highest Stress</SelectItem>
-                  <SelectItem value="stress-low">Lowest Stress</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="text-sm text-gray-600 flex items-center">
-                <span>{filteredReports.length} of {reports.length} reports</span>
+        <motion.div 
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center space-x-3 mb-4">
+              <motion.div
+                animate={floatingAnimation}
+                className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
+              >
+                <Calendar className="h-6 w-6 text-white" />
+              </motion.div>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">My Wellness Reports</h1>
+                <p className="text-lg text-gray-600 mt-1">
+                  Track your mental health journey and view your progress over time.
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </motion.div>
+          <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+            <Button
+              onClick={fetchReports}
+              variant="outline"
+              size="sm"
+              className="bg-white/60 backdrop-blur-sm hover:bg-green-50 border-green-200"
+              disabled={refreshing}
+            >
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </Button>
+            <Link href="/employee/reports/new">
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg">
+                <Plus className="h-4 w-4 mr-2" />
+                New Report
+              </Button>
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        {/* Filters and Search */}
+        <motion.div variants={itemVariants}>
+          <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search reports..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  />
+                </div>
+                
+                <Select value={filterRisk} onValueChange={setFilterRisk}>
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filter by risk" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Risk Levels</SelectItem>
+                    <SelectItem value="low">Low Risk</SelectItem>
+                    <SelectItem value="medium">Medium Risk</SelectItem>
+                    <SelectItem value="high">High Risk</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="wellness-high">Highest Wellness</SelectItem>
+                    <SelectItem value="wellness-low">Lowest Wellness</SelectItem>
+                    <SelectItem value="stress-high">Highest Stress</SelectItem>
+                    <SelectItem value="stress-low">Lowest Stress</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="text-sm text-gray-600 flex items-center">
+                  <span>{filteredReports.length} of {reports.length} reports</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Reports List */}
         {sortedReports.length > 0 ? (
-          <div className="space-y-6">
+          <motion.div 
+            className="space-y-6"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+          >
             {sortedReports.map((report, index) => {
               const previousReport = sortedReports[index + 1];
               return (
-                <Card key={report.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4">
-                      <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {new Date(report.created_at).toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {new Date(report.created_at).toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4">
-                        {getRiskLevelBadge(report.risk_level)}
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-gray-900">
-                            {report.overall_wellness}/10
+                <motion.div key={report.id} variants={itemVariants}>
+                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+                        <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-2xl shadow-lg"
+                          >
+                            <Calendar className="h-6 w-6 text-white" />
+                          </motion.div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {new Date(report.created_at).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {new Date(report.created_at).toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
                           </div>
-                          <div className="text-sm text-gray-600">Overall Wellness</div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-4">
+                          {getRiskLevelBadge(report.risk_level)}
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-gray-900">
+                              {report.overall_wellness}/10
+                            </div>
+                            <div className="text-sm text-gray-600">Overall Wellness</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Metrics Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center justify-center space-x-1 mb-1">
-                          <span className="text-lg font-semibold text-blue-700">
-                            {report.mood_rating}/10
-                          </span>
-                          {previousReport && getTrendIcon(report.mood_rating, previousReport.mood_rating)}
+                      {/* Main Metrics Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <motion.div 
+                          className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300"
+                          whileHover={{ scale: 1.02, y: -2 }}
+                        >
+                          <div className="flex items-center justify-center space-x-1 mb-2">
+                            <Smile className="h-5 w-5 text-blue-600" />
+                            <span className="text-xl font-semibold text-blue-700">
+                              {report.mood_rating}/10
+                            </span>
+                            {previousReport && getTrendIcon(report.mood_rating, previousReport.mood_rating)}
+                          </div>
+                          <div className="text-sm text-blue-600 font-medium">Mood</div>
+                        </motion.div>
+
+                        <motion.div 
+                          className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-md transition-all duration-300"
+                          whileHover={{ scale: 1.02, y: -2 }}
+                        >
+                          <div className="flex items-center justify-center space-x-1 mb-2">
+                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                            <span className="text-xl font-semibold text-red-700">
+                              {report.stress_level}/10
+                            </span>
+                            {previousReport && getTrendIcon(previousReport.stress_level, report.stress_level)}
+                          </div>
+                          <div className="text-sm text-red-600 font-medium">Stress</div>
+                        </motion.div>
+
+                        <motion.div 
+                          className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all duration-300"
+                          whileHover={{ scale: 1.02, y: -2 }}
+                        >
+                          <div className="flex items-center justify-center space-x-1 mb-2">
+                            <Battery className="h-5 w-5 text-green-600" />
+                            <span className="text-xl font-semibold text-green-700">
+                              {report.energy_level}/10
+                            </span>
+                            {previousReport && getTrendIcon(report.energy_level, previousReport.energy_level)}
+                          </div>
+                          <div className="text-sm text-green-600 font-medium">Energy</div>
+                        </motion.div>
+
+                        <motion.div 
+                          className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-300"
+                          whileHover={{ scale: 1.02, y: -2 }}
+                        >
+                          <div className="flex items-center justify-center space-x-1 mb-2">
+                            <Heart className="h-5 w-5 text-purple-600" />
+                            <span className="text-xl font-semibold text-purple-700">
+                              {report.work_satisfaction}/10
+                            </span>
+                            {previousReport && getTrendIcon(report.work_satisfaction, previousReport.work_satisfaction)}
+                          </div>
+                          <div className="text-sm text-purple-600 font-medium">Work Satisfaction</div>
+                        </motion.div>
+                      </div>
+
+                      {/* Additional Metrics */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                          <div className="text-lg font-semibold text-gray-700">{report.work_life_balance}/10</div>
+                          <div className="text-xs text-gray-600">Work-Life Balance</div>
                         </div>
-                        <div className="text-xs text-blue-600">Mood</div>
-                      </div>
-
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="flex items-center justify-center space-x-1 mb-1">
-                          <span className="text-lg font-semibold text-red-700">
-                            {report.stress_level}/10
-                          </span>
-                          {previousReport && getTrendIcon(previousReport.stress_level, report.stress_level)}
+                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                          <div className="text-lg font-semibold text-gray-700">{report.anxiety_level}/10</div>
+                          <div className="text-xs text-gray-600">Anxiety</div>
                         </div>
-                        <div className="text-xs text-red-600">Stress</div>
-                      </div>
-
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center justify-center space-x-1 mb-1">
-                          <span className="text-lg font-semibold text-green-700">
-                            {report.energy_level}/10
-                          </span>
-                          {previousReport && getTrendIcon(report.energy_level, previousReport.energy_level)}
+                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                          <div className="text-lg font-semibold text-gray-700">{report.confidence_level}/10</div>
+                          <div className="text-xs text-gray-600">Confidence</div>
                         </div>
-                        <div className="text-xs text-green-600">Energy</div>
-                      </div>
-
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="flex items-center justify-center space-x-1 mb-1">
-                          <span className="text-lg font-semibold text-purple-700">
-                            {report.work_satisfaction}/10
-                          </span>
-                          {previousReport && getTrendIcon(report.work_satisfaction, previousReport.work_satisfaction)}
+                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                          <div className="text-lg font-semibold text-gray-700">{report.sleep_quality}/10</div>
+                          <div className="text-xs text-gray-600">Sleep Quality</div>
                         </div>
-                        <div className="text-xs text-purple-600">Work Satisfaction</div>
                       </div>
-                    </div>
 
-                    {/* Additional Metrics */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="text-center p-2 bg-gray-50 rounded">
-                        <div className="text-sm font-medium text-gray-700">{report.work_life_balance}/10</div>
-                        <div className="text-xs text-gray-600">Work-Life Balance</div>
-                      </div>
-                      <div className="text-center p-2 bg-gray-50 rounded">
-                        <div className="text-sm font-medium text-gray-700">{report.anxiety_level}/10</div>
-                        <div className="text-xs text-gray-600">Anxiety</div>
-                      </div>
-                      <div className="text-center p-2 bg-gray-50 rounded">
-                        <div className="text-sm font-medium text-gray-700">{report.confidence_level}/10</div>
-                        <div className="text-xs text-gray-600">Confidence</div>
-                      </div>
-                      <div className="text-center p-2 bg-gray-50 rounded">
-                        <div className="text-sm font-medium text-gray-700">{report.sleep_quality}/10</div>
-                        <div className="text-xs text-gray-600">Sleep Quality</div>
-                      </div>
-                    </div>
+                      {/* Comments */}
+                      {report.comments && (
+                        <motion.div 
+                          className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <h4 className="text-sm font-semibold text-blue-700 mb-2 flex items-center">
+                            <Brain className="h-4 w-4 mr-2" />
+                            Personal Notes:
+                          </h4>
+                          <p className="text-sm text-blue-600">{report.comments}</p>
+                        </motion.div>
+                      )}
 
-                    {/* Comments */}
-                    {report.comments && (
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Personal Notes:</h4>
-                        <p className="text-sm text-gray-600">{report.comments}</p>
-                      </div>
-                    )}
-
-                    {/* AI Analysis */}
-                    {report.ai_analysis && (
-                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                        <h4 className="text-sm font-medium text-blue-700 mb-2">AI Insights:</h4>
-                        <p className="text-sm text-blue-600">{report.ai_analysis}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      {/* AI Analysis */}
+                      {report.ai_analysis && (
+                        <motion.div 
+                          className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <h4 className="text-sm font-semibold text-green-700 mb-2 flex items-center">
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            AI Insights:
+                          </h4>
+                          <p className="text-sm text-green-600">{report.ai_analysis}</p>
+                        </motion.div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         ) : (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reports Found</h3>
-              <p className="text-gray-600 mb-6">
-                {searchTerm || filterRisk !== 'all' 
-                  ? 'No reports match your current filters. Try adjusting your search criteria.'
-                  : 'You haven\'t created any wellness reports yet. Start tracking your mental health today!'
-                }
-              </p>
-              {!searchTerm && filterRisk === 'all' && (
-                <Link href="/employee/reports/new">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Report
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div variants={itemVariants}>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-12 text-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                </motion.div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Reports Found</h3>
+                <p className="text-gray-600 mb-6 text-lg">
+                  {searchTerm || filterRisk !== 'all' 
+                    ? 'No reports match your current filters. Try adjusting your search criteria.'
+                    : 'You haven\'t created any wellness reports yet. Start tracking your mental health today!'
+                  }
+                </p>
+                {!searchTerm && filterRisk === 'all' && (
+                  <Link href="/employee/reports/new">
+                    <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg px-8 py-3 text-lg">
+                      <Sparkles className="h-5 w-5 mr-2" />
+                      Create Your First Report
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
       </div>
     </div>

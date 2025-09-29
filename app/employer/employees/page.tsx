@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,14 +24,19 @@ import {
   MoreVertical,
   Eye,
   Edit,
-
   Building,
   ChevronRight,
   ChevronDown,
   User,
   Crown,
   Shield,
-  Loader2
+  Loader2,
+  Sparkles,
+  Heart,
+  Zap,
+  Star,
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -63,6 +69,7 @@ export default function EmployeesPage() {
   const [filterRisk, setFilterRisk] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'hierarchy'>('hierarchy');
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -163,6 +170,13 @@ export default function EmployeesPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchEmployees();
+    setRefreshing(false);
+    toast.success('Team data refreshed!');
+  };
+
   const buildHierarchy = (employees: EmployeeWithStats[]) => {
     const employeeMap = new Map<string, EmployeeWithStats>();
     employees.forEach(emp => employeeMap.set(emp.id, emp));
@@ -239,46 +253,71 @@ export default function EmployeesPage() {
     const hasChildren = children.length > 0;
 
     return (
-      <div key={employee.id} className="mb-2">
-        <div 
-          className={`flex items-center p-4 bg-white rounded-lg border hover:shadow-md transition-shadow ${
+      <motion.div 
+        key={employee.id} 
+        className="mb-3"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.div 
+          className={`flex items-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-0 shadow-lg hover:shadow-2xl transition-all duration-300 ${
             level > 0 ? 'ml-' + (level * 6) : ''
           }`}
           style={{ marginLeft: level * 24 }}
+          whileHover={{ scale: 1.02, y: -2 }}
         >
           {hasChildren && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleNode(employee.id)}
-              className="mr-2 p-1 h-6 w-6"
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleNode(employee.id)}
+                className="mr-3 p-1 h-6 w-6 bg-white/60 hover:bg-green-50"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+            </motion.div>
           )}
           
-          <Avatar className="h-10 w-10 mr-3">
-            <AvatarFallback>
-              {getInitials(employee.first_name, employee.last_name)}
-            </AvatarFallback>
-          </Avatar>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Avatar className="h-12 w-12 mr-4 shadow-lg">
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
+                {getInitials(employee.first_name, employee.last_name)}
+              </AvatarFallback>
+            </Avatar>
+          </motion.div>
 
           <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <h3 className="font-semibold text-gray-900">
+            <div className="flex items-center space-x-2 mb-1">
+              <h3 className="font-semibold text-gray-900 text-lg">
                 {employee.first_name} {employee.last_name}
               </h3>
-              {getRoleIcon(employee.role)}
-              <Badge variant="outline" className="text-xs">
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
+                {getRoleIcon(employee.role)}
+              </motion.div>
+              <Badge variant="outline" className="text-xs bg-white/60">
                 {employee.role}
               </Badge>
             </div>
             <div className="flex items-center space-x-4 text-sm text-gray-600">
-              <span>{employee.email}</span>
+              <span className="flex items-center">
+                <Mail className="h-3 w-3 mr-1" />
+                {employee.email}
+              </span>
               {employee.department && (
                 <>
                   <span>•</span>
@@ -295,7 +334,7 @@ export default function EmployeesPage() {
               </Badge>
             )}
             <div className="text-right">
-              <div className="text-sm font-medium">
+              <div className="text-lg font-semibold text-gray-900">
                 {employee.average_wellness || 'N/A'}
                 {employee.average_wellness && '/10'}
               </div>
@@ -303,13 +342,18 @@ export default function EmployeesPage() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Button variant="ghost" size="sm" className="bg-white/60 hover:bg-green-50">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </motion.div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-white/90 backdrop-blur-sm">
                 <DropdownMenuItem asChild>
-                  <Link href={`/employer/employees/${employee.id}`}>
+                  <Link href={`/employer/employees/${employee.id}`} className="flex items-center">
                     <Eye className="h-4 w-4 mr-2" />
                     View Details
                   </Link>
@@ -321,14 +365,22 @@ export default function EmployeesPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
+        </motion.div>
 
-        {hasChildren && isExpanded && (
-          <div className="mt-2">
-            {children.map(child => renderHierarchyNode(child))}
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {hasChildren && isExpanded && (
+            <motion.div 
+              className="mt-3"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children.map(child => renderHierarchyNode(child))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     );
   };
 
@@ -346,13 +398,52 @@ export default function EmployeesPage() {
     return matchesSearch && matchesDepartment && matchesRisk;
   });
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" }
+    }
+  };
+
+  const floatingAnimation = {
+    y: [-10, 10, -10],
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  };
+
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar user={user || undefined} />
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-16 w-16 animate-spin text-blue-600" />
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Loader2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
+          </motion.div>
+          <p className="text-lg text-gray-600">Loading your team...</p>
+        </motion.div>
       </div>
     );
   }
@@ -362,322 +453,503 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
+          animate={floatingAnimation}
+        />
+        <motion.div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
+          animate={{
+            ...floatingAnimation,
+            transition: { ...floatingAnimation.transition, delay: 2 }
+          }}
+        />
+      </div>
+
       <Navbar user={user || undefined} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Team Management</h1>
-            <p className="text-gray-600 mt-2">
-              Manage your team members and monitor their wellness status with organizational hierarchy.
-            </p>
-          </div>
-          <div className="flex items-center space-x-3 mt-4 sm:mt-0">
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <Button
-                variant={viewMode === 'hierarchy' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('hierarchy')}
+        <motion.div 
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center space-x-3 mb-4">
+              <motion.div
+                animate={floatingAnimation}
+                className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
               >
-                <Building className="h-4 w-4 mr-2" />
-                Hierarchy
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                List
-              </Button>
+                <Users className="h-6 w-6 text-white" />
+              </motion.div>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">Team Management</h1>
+                <p className="text-lg text-gray-600 mt-1">
+                  Manage your team members and monitor their wellness status with organizational hierarchy.
+                </p>
+              </div>
             </div>
-            <Link href="/employer/employees/new">
-              <Button>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Employee
+          </motion.div>
+          <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div className="flex bg-white/60 backdrop-blur-sm rounded-xl p-1 shadow-lg">
+                <Button
+                  variant={viewMode === 'hierarchy' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('hierarchy')}
+                  className={viewMode === 'hierarchy' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
+                >
+                  <Building className="h-4 w-4 mr-2" />
+                  Hierarchy
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  List
+                </Button>
+              </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button 
+                onClick={handleRefresh} 
+                variant="outline" 
+                size="sm"
+                disabled={refreshing}
+                className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
+              >
+                {refreshing ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  </motion.div>
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Refresh
               </Button>
-            </Link>
-          </div>
-        </div>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link href="/employer/employees/new">
+                <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Employee
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Users className="h-8 w-8 text-blue-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{employees.length}</div>
-                  <p className="text-sm text-gray-600">Total Team Members</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {employees.filter(emp => emp.latest_report?.risk_level === 'low').length}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Users className="h-8 w-8 text-blue-600" />
+                  </motion.div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">{employees.length}</div>
+                    <p className="text-sm text-gray-600">Total Team Members</p>
                   </div>
-                  <p className="text-sm text-gray-600">Low Risk</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-8 w-8 text-yellow-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {employees.filter(emp => emp.latest_report?.risk_level === 'medium').length}
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </motion.div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {employees.filter(emp => emp.latest_report?.risk_level === 'low').length}
+                    </div>
+                    <p className="text-sm text-gray-600">Low Risk</p>
                   </div>
-                  <p className="text-sm text-gray-600">Medium Risk</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {employees.filter(emp => emp.latest_report?.risk_level === 'high').length}
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <Clock className="h-8 w-8 text-yellow-600" />
+                  </motion.div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {employees.filter(emp => emp.latest_report?.risk_level === 'medium').length}
+                    </div>
+                    <p className="text-sm text-gray-600">Medium Risk</p>
                   </div>
-                  <p className="text-sm text-gray-600">High Risk</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                  </motion.div>
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {employees.filter(emp => emp.latest_report?.risk_level === 'high').length}
+                    </div>
+                    <p className="text-sm text-gray-600">High Risk</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
 
         {/* Filters */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search team members..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search team members..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-white/60 backdrop-blur-sm border-white/20 focus:border-green-400 focus:ring-green-400"
+                    />
+                  </div>
 
-              <Select value={filterDepartment} onValueChange={setFilterDepartment}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {departments.map(dept => (
-                    <SelectItem key={dept} value={dept!}>{dept}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Select value={filterDepartment} onValueChange={setFilterDepartment}>
+                    <SelectTrigger className="bg-white/60 backdrop-blur-sm border-white/20">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Filter by department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      {departments.map(dept => (
+                        <SelectItem key={dept} value={dept!}>{dept}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-              <Select value={filterRisk} onValueChange={setFilterRisk}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by risk" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Risk Levels</SelectItem>
-                  <SelectItem value="low">Low Risk</SelectItem>
-                  <SelectItem value="medium">Medium Risk</SelectItem>
-                  <SelectItem value="high">High Risk</SelectItem>
-                </SelectContent>
-              </Select>
+                  <Select value={filterRisk} onValueChange={setFilterRisk}>
+                    <SelectTrigger className="bg-white/60 backdrop-blur-sm border-white/20">
+                      <SelectValue placeholder="Filter by risk" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Risk Levels</SelectItem>
+                      <SelectItem value="low">Low Risk</SelectItem>
+                      <SelectItem value="medium">Medium Risk</SelectItem>
+                      <SelectItem value="high">High Risk</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-              <div className="text-sm text-gray-600 flex items-center">
-                <span>{filteredEmployees.length} of {employees.length} members</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <div className="text-sm text-gray-600 flex items-center">
+                    <span>{filteredEmployees.length} of {employees.length} members</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
 
         {/* Content */}
-        {viewMode === 'hierarchy' ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Building className="h-5 w-5 mr-2" />
-                Organizational Hierarchy
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {hierarchyTree.length > 0 ? (
-                <div className="space-y-2">
-                  {hierarchyTree.map(node => renderHierarchyNode(node))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Building className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Hierarchy Data</h3>
-                  <p className="text-gray-600">Add employees and set up manager relationships to see the organizational structure.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          /* List View */
-          filteredEmployees.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredEmployees.map((employee) => (
-                <Card key={employee.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback>
-                            {getInitials(employee.first_name, employee.last_name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={containerVariants}
+        >
+          {viewMode === 'hierarchy' ? (
+            <motion.div variants={itemVariants}>
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-xl font-bold text-gray-900">
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <Building className="h-6 w-6 mr-3 text-green-600" />
+                    </motion.div>
+                    Organizational Hierarchy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {hierarchyTree.length > 0 ? (
+                    <div className="space-y-2">
+                      {hierarchyTree.map(node => renderHierarchyNode(node))}
+                    </div>
+                  ) : (
+                    <motion.div 
+                      className="text-center py-12"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <motion.div
+                        animate={floatingAnimation}
+                        className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                      >
+                        <Building className="h-8 w-8 text-white" />
+                      </motion.div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Hierarchy Data</h3>
+                      <p className="text-gray-600">Add employees and set up manager relationships to see the organizational structure.</p>
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            /* List View */
+            filteredEmployees.length > 0 ? (
+              <motion.div 
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                variants={containerVariants}
+              >
+                {filteredEmployees.map((employee, index) => (
+                  <motion.div
+                    key={employee.id}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center space-x-4">
+                            <motion.div
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <Avatar className="h-14 w-14 shadow-lg">
+                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold text-lg">
+                                  {getInitials(employee.first_name, employee.last_name)}
+                                </AvatarFallback>
+                              </Avatar>
+                            </motion.div>
+                            <div>
+                              <div className="flex items-center space-x-2 mb-1">
+                                <h3 className="text-xl font-semibold text-gray-900">
+                                  {employee.first_name} {employee.last_name}
+                                </h3>
+                                <motion.div
+                                  whileHover={{ rotate: 360 }}
+                                  transition={{ duration: 0.6 }}
+                                >
+                                  {getRoleIcon(employee.role)}
+                                </motion.div>
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
+                                <Mail className="h-4 w-4" />
+                                <span>{employee.email}</span>
+                              </div>
+                              {employee.department && (
+                                <p className="text-sm text-gray-600">{employee.department}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <motion.div
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                              >
+                                <Button variant="ghost" size="sm" className="bg-white/60 hover:bg-green-50">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </motion.div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-white/90 backdrop-blur-sm">
+                              <DropdownMenuItem asChild>
+                                <Link href={`/employer/employees/${employee.id}`} className="flex items-center">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Profile
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+
+                        {/* Wellness Stats */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <motion.div 
+                            className="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl"
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            <div className="text-xl font-bold text-blue-700">
+                              {employee.average_wellness || 'N/A'}
+                              {employee.average_wellness && '/10'}
+                            </div>
+                            <div className="text-xs text-blue-600">Avg Wellness</div>
+                          </motion.div>
+                          <motion.div 
+                            className="text-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl"
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            <div className="text-xl font-bold text-purple-700">
+                              {employee.reports_count}
+                            </div>
+                            <div className="text-xs text-purple-600">Total Reports</div>
+                          </motion.div>
+                        </div>
+
+                        {/* Risk Level and Last Report */}
+                        <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center space-x-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {employee.first_name} {employee.last_name}
-                            </h3>
-                            {getRoleIcon(employee.role)}
+                            <span className="text-sm text-gray-600">Risk Level:</span>
+                            {employee.latest_report ? (
+                              <Badge className={getRiskBadgeColor(employee.latest_report.risk_level)}>
+                                {employee.latest_report.risk_level} risk
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-gray-100 text-gray-700">No Data</Badge>
+                            )}
                           </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600">
-                            <Mail className="h-4 w-4" />
-                            <span>{employee.email}</span>
-                          </div>
-                          {employee.department && (
-                            <p className="text-sm text-gray-600">{employee.department}</p>
+
+                          {employee.last_report_date && (
+                            <div className="flex items-center space-x-1 text-sm text-gray-600">
+                              <Calendar className="h-4 w-4" />
+                              <span>
+                                {new Date(employee.last_report_date).toLocaleDateString()}
+                              </span>
+                            </div>
                           )}
                         </div>
-                      </div>
 
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/employer/employees/${employee.id}`}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Profile
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    {/* Wellness Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-lg font-semibold text-blue-700">
-                          {employee.average_wellness || 'N/A'}
-                          {employee.average_wellness && '/10'}
-                        </div>
-                        <div className="text-xs text-blue-600">Avg Wellness</div>
-                      </div>
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-lg font-semibold text-purple-700">
-                          {employee.reports_count}
-                        </div>
-                        <div className="text-xs text-purple-600">Total Reports</div>
-                      </div>
-                    </div>
-
-                    {/* Risk Level and Last Report */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600">Risk Level:</span>
-                        {employee.latest_report ? (
-                          <Badge className={getRiskBadgeColor(employee.latest_report.risk_level)}>
-                            {employee.latest_report.risk_level} risk
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-gray-100 text-gray-700">No Data</Badge>
+                        {/* Latest Metrics */}
+                        {employee.latest_report && (
+                          <motion.div 
+                            className="pt-4 border-t border-gray-200"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <div className="grid grid-cols-4 gap-2 text-xs">
+                              <div className="text-center p-2 bg-green-50 rounded-lg">
+                                <div className="font-semibold text-green-700">
+                                  {employee.latest_report.mood_rating}/10
+                                </div>
+                                <div className="text-green-600">Mood</div>
+                              </div>
+                              <div className="text-center p-2 bg-red-50 rounded-lg">
+                                <div className="font-semibold text-red-700">
+                                  {employee.latest_report.stress_level}/10
+                                </div>
+                                <div className="text-red-600">Stress</div>
+                              </div>
+                              <div className="text-center p-2 bg-yellow-50 rounded-lg">
+                                <div className="font-semibold text-yellow-700">
+                                  {employee.latest_report.energy_level}/10
+                                </div>
+                                <div className="text-yellow-600">Energy</div>
+                              </div>
+                              <div className="text-center p-2 bg-purple-50 rounded-lg">
+                                <div className="font-semibold text-purple-700">
+                                  {employee.latest_report.work_satisfaction}/10
+                                </div>
+                                <div className="text-purple-600">Work Sat.</div>
+                              </div>
+                            </div>
+                          </motion.div>
                         )}
-                      </div>
-
-                      {employee.last_report_date && (
-                        <div className="flex items-center space-x-1 text-sm text-gray-600">
-                          <Calendar className="h-4 w-4" />
-                          <span>
-                            {new Date(employee.last_report_date).toLocaleDateString()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Latest Metrics */}
-                    {employee.latest_report && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <div className="grid grid-cols-4 gap-2 text-xs">
-                          <div className="text-center">
-                            <div className="font-medium text-gray-900">
-                              {employee.latest_report.mood_rating}/10
-                            </div>
-                            <div className="text-gray-600">Mood</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium text-gray-900">
-                              {employee.latest_report.stress_level}/10
-                            </div>
-                            <div className="text-gray-600">Stress</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium text-gray-900">
-                              {employee.latest_report.energy_level}/10
-                            </div>
-                            <div className="text-gray-600">Energy</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium text-gray-900">
-                              {employee.latest_report.work_satisfaction}/10
-                            </div>
-                            <div className="text-gray-600">Work Sat.</div>
-                          </div>
-                        </div>
-                      </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div variants={itemVariants}>
+                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-12 text-center">
+                    <motion.div
+                      animate={floatingAnimation}
+                      className="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    >
+                      <Users className="h-8 w-8 text-white" />
+                    </motion.div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Team Members Found</h3>
+                    <p className="text-gray-600 mb-6">
+                      {searchTerm || filterDepartment !== 'all' || filterRisk !== 'all'
+                        ? 'No team members match your current filters. Try adjusting your search criteria.'
+                        : 'You haven\'t added any team members yet. Start building your team!'
+                      }
+                    </p>
+                    {!searchTerm && filterDepartment === 'all' && filterRisk === 'all' && (
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Link href="/employer/employees/new">
+                          <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Add Your First Team Member
+                          </Button>
+                        </Link>
+                      </motion.div>
                     )}
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Team Members Found</h3>
-                <p className="text-gray-600 mb-6">
-                  {searchTerm || filterDepartment !== 'all' || filterRisk !== 'all'
-                    ? 'No team members match your current filters. Try adjusting your search criteria.'
-                    : 'You haven\'t added any team members yet. Start building your team!'
-                  }
-                </p>
-                {!searchTerm && filterDepartment === 'all' && filterRisk === 'all' && (
-                  <Link href="/employer/employees/new">
-                    <Button>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Add Your First Team Member
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
-          )
-        )}
+              </motion.div>
+            )
+          )}
+        </motion.div>
       </div>
     </div>
   );

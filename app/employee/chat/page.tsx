@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Navbar } from "@/components/shared/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
   Pause,
   Search,
   Menu,
+  Brain,
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
@@ -666,24 +668,74 @@ How have you been feeling lately?`;
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 ">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
+          animate={{
+            y: [-10, 10, -10],
+            transition: {
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
+          }}
+        />
+        <motion.div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
+          animate={{
+            y: [10, -10, 10],
+            transition: {
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2
+            }
+          }}
+        />
+      </div>
+
       <Navbar user={user || undefined} />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <motion.div 
+          className="mb-8 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+          >
+            <Brain className="h-8 w-8 text-white" />
+          </motion.div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
             AI Wellness Assistant
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-lg text-gray-600">
             Your confidential space to reflect on your well-being.
           </p>
-        </div>
-          <Card className="flex flex-col item-center justify-center shadow-lg w-auto">
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Sparkles className="h-6 w-6 text-blue-600" />
-                  <span>Wellness Chat</span>
+        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Card className="flex flex-col item-center justify-center bg-white/80 backdrop-blur-sm border-0 shadow-2xl w-auto rounded-3xl overflow-hidden">
+              <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                      className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-lg"
+                    >
+                      <Sparkles className="h-5 w-5 text-white" />
+                    </motion.div>
+                    <span className="text-gray-900 font-semibold">Wellness Chat</span>
                   <Badge
                     variant={
                       sessionEnded
@@ -907,17 +959,28 @@ How have you been feeling lately?`;
             )}
 
             {/* Chat Messages */}
-            <CardContent className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 bg-gray-50/50 min-h-[400px] max-h-[600px]">
+            <CardContent className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 min-h-[400px] max-h-[600px]">
               {messages.length === 0 && !loading && (
                 <div className="flex items-center justify-center h-full min-h-[300px]">
-                  <div className="text-center">
-                    <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Welcome to Wellness Chat</h3>
-                    <p className="text-gray-600 text-sm max-w-md">
+                  <motion.div 
+                    className="text-center"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                    >
+                      <Bot className="h-8 w-8 text-white" />
+                    </motion.div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">Welcome to Wellness Chat</h3>
+                    <p className="text-gray-600 text-sm max-w-md leading-relaxed">
                       Start a conversation with your AI wellness assistant. Share how you&apos;re feeling, 
                       discuss your day, or ask for support. Your conversation is confidential.
                     </p>
-                  </div>
+                  </motion.div>
                 </div>
               )}
               
@@ -951,11 +1014,14 @@ How have you been feeling lately?`;
                     </Avatar>
 
                     {/* Message Bubble */}
-                    <div
-                      className={`rounded-xl shadow-sm px-3 py-2 sm:px-4 sm:py-2 text-sm leading-relaxed max-w-[85%] sm:max-w-[75%] ${
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`rounded-2xl shadow-lg px-4 py-3 text-sm leading-relaxed max-w-[85%] sm:max-w-[75%] ${
                         message.sender === "user"
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-gray-800 border"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          : "bg-white text-gray-800 border border-gray-200"
                       }`}
                     >
                       {message.sender === "ai" ? (
@@ -975,7 +1041,7 @@ How have you been feeling lately?`;
                       ) : (
                         <p>{message.content}</p>
                       )}
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               ))}
@@ -1285,8 +1351,8 @@ How have you been feeling lately?`;
               </div>
             )}
 
-            <div className="border-t p-4 bg-white">
-              <div className="flex space-x-2">
+            <div className="border-t border-gray-200 p-4 bg-gradient-to-r from-white to-gray-50">
+              <div className="flex space-x-3">
                 <Input
                   placeholder={
                     sessionEnded
@@ -1301,7 +1367,7 @@ How have you been feeling lately?`;
                   disabled={
                     loading || sessionEnded || processingAudio || isVoiceMode
                   }
-                  className="flex-1"
+                  className="flex-1 bg-white border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-xl"
                 />
                 <Button
                   onClick={() => handleSendMessage()}
@@ -1312,6 +1378,7 @@ How have you been feeling lately?`;
                     processingAudio ||
                     isVoiceMode
                   }
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl px-6"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -1325,6 +1392,7 @@ How have you been feeling lately?`;
               )}
             </div>
           </Card>
+          </motion.div>
       </div>
     </div>
   );
