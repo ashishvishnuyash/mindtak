@@ -30,7 +30,14 @@ import {
   Pause,
   Search,
   Menu,
+<<<<<<< HEAD
   Brain,
+=======
+  Paperclip,
+  Image,
+  X,
+  Upload,
+>>>>>>> 2485ce3d32bab74b0e0f93547c719bffecddc1ee
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
@@ -184,6 +191,11 @@ export default function EmployeeChatPage() {
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
+
+  // File upload state
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Deep Conversation state
   const [deepConversation, setDeepConversation] = useState(true);
@@ -424,17 +436,101 @@ How have you been feeling lately?`;
     }
   };
 
+  // File handling functions
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      const supportedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'text/plain', 'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (file.size > maxSize) {
+        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
+        return false;
+      }
+      
+      if (!supportedTypes.includes(file.type)) {
+        toast.error(`File type ${file.type} is not supported.`);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    setAttachedFiles(prev => [...prev, ...validFiles]);
+    
+    // Clear the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Function to render message content with file attachments
+  const renderMessageContent = (content: string) => {
+    // Check if message contains file attachment indicators
+    const fileAttachmentRegex = /📎\s+([^\n,]+)/g;
+    const hasAttachments = fileAttachmentRegex.test(content);
+    
+    if (hasAttachments) {
+      const parts = content.split('\n\nAttached files:');
+      const messageText = parts[0];
+      const fileList = parts[1];
+      
+      return (
+        <div>
+          {messageText && (
+            <div className="prose prose-sm max-w-none mb-2">
+              <ReactMarkdown>{messageText}</ReactMarkdown>
+            </div>
+          )}
+          {fileList && (
+            <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+              <div className="flex items-center space-x-1 text-gray-600">
+                <Paperclip className="h-3 w-3" />
+                <span className="font-medium">Attachments:</span>
+              </div>
+              <div className="mt-1 text-gray-700">{fileList}</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="prose prose-sm max-w-none">
+        <ReactMarkdown>{content}</ReactMarkdown>
+      </div>
+    );
+  };
+
   const handleSendMessage = async (messageText?: string) => {
     const messageContent = messageText || currentMessage;
-    if (!messageContent.trim() || !sessionId || loading || sessionEnded) return;
+    if ((!messageContent.trim() && attachedFiles.length === 0) || !sessionId || loading || sessionEnded) return;
 
     setCurrentMessage("");
-
     setLoading(true);
 
-    // Add user message to DB immediately for optimistic UI update
+    // Create message content with file info
+    let fullMessageContent = messageContent;
+    if (attachedFiles.length > 0) {
+      const fileList = attachedFiles.map(f => `📎 ${f.name}`).join(', ');
+      fullMessageContent = messageContent ? `${messageContent}\n\nAttached files: ${fileList}` : `Attached files: ${fileList}`;
+    }
 
-    await addMessageToDb(messageContent, "user", sessionId);
+    // Add user message to DB immediately for optimistic UI update
+    await addMessageToDb(fullMessageContent, "user", sessionId);
 
     try {
       // Note: we fetch the latest messages from state to ensure the API gets the full context
@@ -449,18 +545,49 @@ How have you been feeling lately?`;
         },
       ];
 
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      let response;
+
+      if (attachedFiles.length > 0) {
+        // Handle file upload
+        const formData = new FormData();
+        
+        // Add JSON data
+        formData.append('data', JSON.stringify({
           messages: messageHistoryForApi,
           sessionType: isVoiceMode ? "voice" : "text",
           userId: user?.id,
           companyId: user?.company_id,
           deepSearch: deepConversation,
           aiProvider: deepConversation ? "perplexity" : "openai",
-        }),
-      });
+        }));
+
+        // Add files
+        attachedFiles.forEach(file => {
+          formData.append('files', file);
+        });
+
+        response = await fetch("/api/chat", {
+          method: "POST",
+          body: formData,
+        });
+
+        // Clear attached files after sending
+        setAttachedFiles([]);
+      } else {
+        // Regular text message
+        response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: messageHistoryForApi,
+            sessionType: isVoiceMode ? "voice" : "text",
+            userId: user?.id,
+            companyId: user?.company_id,
+            deepSearch: deepConversation,
+            aiProvider: deepConversation ? "perplexity" : "openai",
+          }),
+        });
+      }
 
       if (!response.ok) {
         throw new Error("Failed to get response from AI.");
@@ -1026,9 +1153,7 @@ How have you been feeling lately?`;
                     >
                       {message.sender === "ai" ? (
                         <div>
-                          <div className="prose prose-sm max-w-none">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
+                          {renderMessageContent(message.content)}
                           {deepConversation && false && (
                             <div className="flex items-center justify-end mt-2 pt-2 border-t border-gray-100">
                               <div className="flex items-center space-x-1 text-xs text-blue-600">
@@ -1039,7 +1164,7 @@ How have you been feeling lately?`;
                           )}
                         </div>
                       ) : (
-                        <p>{message.content}</p>
+                        renderMessageContent(message.content)
                       )}
                     </motion.div>
                   </div>
@@ -1351,15 +1476,79 @@ How have you been feeling lately?`;
               </div>
             )}
 
+<<<<<<< HEAD
             <div className="border-t border-gray-200 p-4 bg-gradient-to-r from-white to-gray-50">
               <div className="flex space-x-3">
+=======
+            <div className="border-t p-4 bg-white">
+              {/* File attachments preview */}
+              {attachedFiles.length > 0 && (
+                <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      Attached Files ({attachedFiles.length})
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {attachedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                        <div className="flex items-center space-x-2">
+                          {file.type.startsWith('image/') ? (
+                            <Image className="h-4 w-4 text-blue-500" />
+                          ) : (
+                            <FileText className="h-4 w-4 text-gray-500" />
+                          )}
+                          <span className="text-sm text-gray-700 truncate max-w-[200px]">
+                            {file.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            ({(file.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex space-x-2">
+                {/* File attachment button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={openFileDialog}
+                  disabled={loading || sessionEnded || isVoiceMode}
+                  className="px-3"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,.txt,.pdf,.doc,.docx"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+>>>>>>> 2485ce3d32bab74b0e0f93547c719bffecddc1ee
                 <Input
                   placeholder={
                     sessionEnded
                       ? "This session has ended."
                       : isVoiceMode
                       ? "Voice mode active - switch to text if needed..."
-                      : "Type your message..."
+                      : "Type your message or attach files..."
                   }
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
@@ -1374,7 +1563,7 @@ How have you been feeling lately?`;
                   disabled={
                     loading ||
                     sessionEnded ||
-                    !currentMessage.trim() ||
+                    (!currentMessage.trim() && attachedFiles.length === 0) ||
                     processingAudio ||
                     isVoiceMode
                   }
@@ -1386,8 +1575,7 @@ How have you been feeling lately?`;
 
               {!sessionEnded && !isVoiceMode && (
                 <p className="text-xs text-gray-500 mt-2">
-                  Press Enter to send. When you&apos;re ready, end the session to get
-                  your report.
+                  Press Enter to send. Attach images or documents for analysis. When you&apos;re ready, end the session to get your report.
                 </p>
               )}
             </div>
