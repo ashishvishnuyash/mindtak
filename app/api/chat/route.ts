@@ -5,6 +5,86 @@ import OpenAI from 'openai';
 import type { ChatMessage } from '@/types/index';
 import { getRecentReports, generateReportsAnalytics, formatReportsForAI, getPersonalHistory, formatPersonalHistoryForAI } from '@/lib/reports-service';
 
+// File processing utilities
+interface FileAttachment {
+  type: 'image' | 'document';
+  name: string;
+  content: string; // base64 for images, text content for documents
+  mimeType: string;
+  size: number;
+}
+
+// Supported file types
+const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const SUPPORTED_DOCUMENT_TYPES = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+// File processing functions
+async function processImageFile(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString('base64');
+  return `data:${file.type};base64,${base64}`;
+}
+
+async function processDocumentFile(file: File): Promise<string> {
+  if (file.type === 'text/plain') {
+    return await file.text();
+  }
+
+  if (file.type === 'application/pdf') {
+    // For PDF processing, we'll need a PDF parser
+    // For now, return a placeholder - in production, use pdf-parse or similar
+    return `[PDF Document: ${file.name}] - PDF text extraction not implemented yet. Please describe the content or convert to text format.`;
+  }
+
+  if (file.type.includes('word')) {
+    // For Word documents, we'll need a Word parser
+    // For now, return a placeholder - in production, use mammoth or similar
+    return `[Word Document: ${file.name}] - Word document text extraction not implemented yet. Please describe the content or convert to text format.`;
+  }
+
+  return `[Document: ${file.name}] - Unsupported document type for text extraction.`;
+}
+
+async function validateAndProcessFile(file: File): Promise<FileAttachment | null> {
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`);
+  }
+
+  // Validate file type
+  const isImage = SUPPORTED_IMAGE_TYPES.includes(file.type);
+  const isDocument = SUPPORTED_DOCUMENT_TYPES.includes(file.type);
+
+  if (!isImage && !isDocument) {
+    throw new Error(`Unsupported file type: ${file.type}`);
+  }
+
+  try {
+    let content: string;
+    let type: 'image' | 'document';
+
+    if (isImage) {
+      content = await processImageFile(file);
+      type = 'image';
+    } else {
+      content = await processDocumentFile(file);
+      type = 'document';
+    }
+
+    return {
+      type,
+      name: file.name,
+      content,
+      mimeType: file.type,
+      size: file.size
+    };
+  } catch (error) {
+    console.error('Error processing file:', error);
+    throw new Error(`Failed to process file: ${file.name}`);
+  }
+}
+
 // Psychological Assessment Data
 const ASSESSMENT_DATA = {
   personality_profiler: {
@@ -221,6 +301,44 @@ function interpretSelfEfficacyScale(scores: number[]): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if this is a multipart form data request (file upload)
+    const contentType = request.headers.get('content-type') || '';
+    let requestData: any;
+    let files: FileAttachment[] = [];
+
+    if (contentType.includes('multipart/form-data')) {
+      // Handle file upload
+      const formData = await request.formData();
+
+      // Extract JSON data
+      const jsonData = formData.get('data') as string;
+      if (jsonData) {
+        requestData = JSON.parse(jsonData);
+      } else {
+        throw new Error('Missing data in form submission');
+      }
+
+      // Process uploaded files
+      const uploadedFiles = formData.getAll('files') as File[];
+      for (const file of uploadedFiles) {
+        try {
+          const processedFile = await validateAndProcessFile(file);
+          if (processedFile) {
+            files.push(processedFile);
+          }
+        } catch (error: any) {
+          console.error('File processing error:', error);
+          return NextResponse.json(
+            { error: `File processing failed: ${error.message}` },
+            { status: 400 }
+          );
+        }
+      }
+    } else {
+      // Handle regular JSON request
+      requestData = await request.json();
+    }
+
     const {
       messages,
       endSession,
@@ -232,7 +350,7 @@ export async function POST(request: NextRequest) {
       aiProvider = 'openai', // 'openai' or 'perplexity'
       assessmentType,
       assessmentAnswers
-    } = await request.json();
+    } = requestData;
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -281,7 +399,7 @@ export async function POST(request: NextRequest) {
     if (endSession) {
       return await generateWellnessReport(messages, sessionType, sessionDuration);
     } else {
-      return await generateChatResponse(messages, sessionType, userId, companyId, deepSearch, aiProvider);
+      return await generateChatResponse(messages, sessionType, userId, companyId, deepSearch, aiProvider, files);
     }
 
   } catch (error: any) {
@@ -479,7 +597,7 @@ async function callPerplexityAPI(messages: any[], systemPrompt: string, maxToken
   return result;
 }
 
-async function generateChatResponse(messages: ChatMessage[], sessionType: string, userId?: string, companyId?: string, deepSearch: boolean = false, aiProvider: string = 'openai') {
+async function generateChatResponse(messages: ChatMessage[], sessionType: string, userId?: string, companyId?: string, deepSearch: boolean = false, aiProvider: string = 'openai', files: FileAttachment[] = []) {
   try {
     // Get company-wide reports context
     let reportsContext = '';
@@ -506,11 +624,54 @@ async function generateChatResponse(messages: ChatMessage[], sessionType: string
       }
     }
 
+    // Process file attachments
+    let fileContext = '';
+    let hasImages = false;
+    const imageAttachments: any[] = [];
+
+    if (files.length > 0) {
+      fileContext = '\n\nFILE ATTACHMENTS:\n';
+
+      for (const file of files) {
+        if (file.type === 'image') {
+          hasImages = true;
+          fileContext += `- Image: ${file.name} (${file.mimeType})\n`;
+          imageAttachments.push({
+            type: 'image_url',
+            image_url: {
+              url: file.content,
+              detail: 'high'
+            }
+          });
+        } else if (file.type === 'document') {
+          fileContext += `- Document: ${file.name} (${file.mimeType})\n`;
+          fileContext += `Content: ${file.content.substring(0, 2000)}${file.content.length > 2000 ? '...' : ''}\n\n`;
+        }
+      }
+
+      fileContext += 'Please analyze the attached files and incorporate them into your wellness assessment and conversation.\n';
+    }
+
     // Prepare conversation context
-    const conversationHistory = messages.map(msg => ({
-      role: msg.sender === 'user' ? 'user' as const : 'assistant' as const,
-      content: msg.content
-    }));
+    const conversationHistory = messages.map((msg, index) => {
+      const baseMessage = {
+        role: msg.sender === 'user' ? 'user' as const : 'assistant' as const,
+        content: msg.content
+      };
+
+      // Add image attachments to the last user message if we have images
+      if (hasImages && msg.sender === 'user' && index === messages.length - 1) {
+        return {
+          ...baseMessage,
+          content: [
+            { type: 'text', text: msg.content + fileContext },
+            ...imageAttachments
+          ]
+        };
+      }
+
+      return baseMessage;
+    });
 
 
 
@@ -532,6 +693,10 @@ async function generateChatResponse(messages: ChatMessage[], sessionType: string
 8. **PSYCHOLOGICAL ASSESSMENTS**: You can offer and facilitate psychological assessments including:
    - Personality Profiler (48 yes/no questions assessing sociability, emotional stability, conformity, and social desirability)
    - Self-Efficacy Scale (10 questions rated 1-4 assessing confidence in handling challenges)
+9. **FILE ANALYSIS**: You can analyze uploaded images and documents:
+   - Images: Analyze mood, body language, environment, or wellness-related content
+   - Documents: Review wellness journals, medical reports, or other text-based materials
+   - Provide insights based on visual or textual content that relates to mental health and wellness
 
 ASSESSMENT GUIDELINES:
 - When users express interest in taking a test or assessment, offer available options
