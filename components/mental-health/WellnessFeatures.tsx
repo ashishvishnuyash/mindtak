@@ -59,10 +59,10 @@ const WellnessFeatures = () => {
     {
       icon: Shield,
       title: "Privacy & Security",
-      description: "DPDP Act certified platform with end-to-end encryption for complete confidentiality",
+      description: "Platform with end-to-end encryption for complete confidentiality",
       color: "from-purple-500 to-pink-500",
       bgColor: "from-purple-50 to-pink-50",
-      features: ["DPDP Act Certified", "Secure Storage", "Anonymous Support"]
+      features: ["Secure Storage", "Anonymous Support", "End-to-end Encryption"]
     },
     {
       icon: Activity,

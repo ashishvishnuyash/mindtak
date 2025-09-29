@@ -80,7 +80,7 @@ export default function HomePage() {
     },
     {
       question: "Is Diltak.ai compliant with data privacy standards?",
-      answer: "Absolutely. Diltak.ai is DPDP Act certified and follows industry-leading security measures with end-to-end encryption to protect all sensitive data."
+      answer: "Absolutely. Diltak.ai follows industry-leading security measures with end-to-end encryption to protect all sensitive data."
     },
     {
       question: "How is Diltak.ai different from traditional wellness apps?",
@@ -198,14 +198,7 @@ export default function HomePage() {
                   variants={wordVariants}
                   className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700"
                 >
-                  Enterprise
-                </motion.span>
-                <br />
-                <motion.span
-                  variants={wordVariants}
-                  className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700"
-                >
-                  Mental Health
+                  Organizational Well-Being Reimagined
                 </motion.span>
               </motion.h1>
               <p className="mt-6 text-lg leading-8 text-gray-600 max-w-lg mb-8">
@@ -229,10 +222,7 @@ export default function HomePage() {
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-gray-700 font-medium">10+ Countries</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700 font-medium">Enterprise Ready</span>
-                </div>
+
               </div>
 
               <div className="flex flex-col sm:flex-row items-start gap-4 mb-6">

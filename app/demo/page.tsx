@@ -79,7 +79,7 @@ export default function DemoPage() {
       features: ['Org Chart Visualization', 'Permission Testing', 'Team Statistics', 'Access Control'],
       route: '/test-hierarchy',
       demoData: 'Multi-level organization structure',
-      stats: 'DPDP Act Certified'
+      stats: 'Secure & Compliant'
     }
   ];
 
@@ -142,7 +142,7 @@ export default function DemoPage() {
     {
       icon: Shield,
       title: 'Privacy First',
-      description: 'DPDP Act certified security',
+      description: 'Advanced security and privacy protection',
       color: 'text-blue-600'
     },
     {
@@ -479,7 +479,6 @@ export default function DemoPage() {
                     'Org Chart',
                     'Role-Based Access',
                     'Real-time Data',
-                    'DPDP Certified',
                     '24/7 Support'
                   ].map((badge, index) => (
                     <motion.div

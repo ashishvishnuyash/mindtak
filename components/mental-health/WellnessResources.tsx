@@ -271,20 +271,17 @@ const WellnessResources = () => {
                 {
                   title: "30-Day Mindfulness Challenge",
                   description: "Build a daily meditation practice",
-                  duration: "30 days",
-                  participants: "10K+ joined"
+                  duration: "30 days"
                 },
                 {
                   title: "Stress Management Masterclass",
                   description: "Learn proven techniques to manage stress",
-                  duration: "2 weeks",
-                  participants: "5K+ completed"
+                  duration: "2 weeks"
                 },
                 {
                   title: "Sleep Better Program",
                   description: "Improve your sleep quality naturally",
-                  duration: "21 days",
-                  participants: "8K+ improved"
+                  duration: "21 days"
                 }
               ].map((program, index) => (
                 <motion.div
@@ -296,7 +293,6 @@ const WellnessResources = () => {
                   <p className="text-green-100 mb-4">{program.description}</p>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-green-200">{program.duration}</span>
-                    <span className="text-green-200">{program.participants}</span>
                   </div>
                 </motion.div>
               ))}

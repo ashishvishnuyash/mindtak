@@ -1,24 +1,23 @@
-# Task: Fix TypeScript errors in build - COMPLETED
+# TODO: Remove Specified Texts from Website
 
-## Steps Completed:
+## Steps to Complete:
 
-1. ✅ **Update Progress component** in `components/ui/progress.tsx`:
-   - Added optional `indicatorClassName` prop to the interface.
-   - Applied the class to the inner progress bar div, defaulting to `bg-blue-600`.
+- [x] Edit app/page.tsx: Remove "Enterprise" from hero title, "Enterprise Ready" from trust indicators, and update FAQ privacy answer to remove DPDP reference.
 
-2. ✅ **Fix Framer Motion variants** in `components/mental-health/WellnessFeatures.tsx`:
-   - Removed the `ease` property from transition to resolve TypeScript error.
+- [x] Edit components/mental-health/WellnessStats.tsx: Remove "< 2 min" / "Response Time" stat, "DPDP" / "Act Certified" stat, and "DPDP Act Certified" achievement.
 
-3. ✅ **Fix Framer Motion variants** in `components/mental-health/WellnessHero.tsx`:
-   - Removed the `ease` property from `fadeInUp` and `floatingAnimation` variants.
+- [x] Edit components/Footer.tsx: Remove "Platform" column (Diltak AI, White Label) and "Privacy & Compliance" column (DPDP Act, GDPR).
 
-4. ✅ **Fix Framer Motion variants** in `components/mental-health/WellnessStats.tsx`:
-   - Removed the `ease` property from `itemVariants` and `numberVariants`.
+- [x] Edit app/demo/page.tsx: Remove 'DPDP Certified' from hierarchy stats, "DPDP Act certified security" from features, and 'DPDP Certified' from badges.
 
-5. ✅ **Verify the fixes**:
-   - Ran `npm run build` - build now compiles successfully with no TypeScript errors.
+- [x] Edit components/mental-health/WellnessHero.tsx: Remove "DPDP Act certified" from privacy text and "DPDP Act Certified" from feature card.
 
-6. **Testing Notes**:
-   - Dynamic coloring now works in `manager-dashboard.tsx` for wellness score progress bars.
-   - Animations work in all mental health components with smooth transitions.
-   - No functionality was changed, only type compatibility was fixed.
+- [x] Edit components/mental-health/WellnessFeatures.tsx: Remove "DPDP Act certified" from privacy description and "DPDP Act Certified" from features list.
+
+- [x] Edit components/mental-health/WellnessTestimonials.tsx: Remove "DPDP Act compliance" from healthcare testimonial.
+
+- [x] Edit app/auth/login/page.tsx: Remove "DPDP Act Certified" from features section.
+
+- [ ] Verify changes: Run `npm run dev` and manually check landing page, footer, trusted section, demo page, and auth pages for correct removals and layout integrity.
+
+- [ ] Update TODO.md with completion and finalize task.
