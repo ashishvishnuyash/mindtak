@@ -20,10 +20,10 @@ const WellnessTestimonials = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6 }
     }
   };
 
@@ -88,7 +88,7 @@ const WellnessTestimonials = () => {
       role: "Healthcare Worker",
       age: 29,
       avatar: "/api/placeholder/40/40",
-      content: "As someone in healthcare, I appreciate the DPDP Act compliance and professional standards. The quality of care is exceptional.",
+      content: "As someone in healthcare, I appreciate the professional standards. The quality of care is exceptional.",
       rating: 5,
       highlight: "Professional Quality",
       icon: Shield,
@@ -151,7 +151,7 @@ const WellnessTestimonials = () => {
 
                   {/* Content */}
                   <p className="text-gray-700 leading-relaxed mb-6 italic">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </p>
 
                   {/* Rating */}
@@ -193,7 +193,7 @@ const WellnessTestimonials = () => {
             { number: "7K+", label: "People Helped", icon: Heart },
             { number: "98%", label: "Satisfaction Rate", icon: Star },
             { number: "24/7", label: "AI Support", icon: Brain },
-            { number: "DPDP", label: "Act Certified", icon: Shield }
+            { number: "100%", label: "Secure & Private", icon: Shield }
           ].map((stat, index) => (
             <motion.div
               key={index}

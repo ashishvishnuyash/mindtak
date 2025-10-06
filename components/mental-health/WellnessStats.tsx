@@ -30,19 +30,19 @@ const WellnessStats = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" }
+      transition: { duration: 0.6 }
     }
   };
 
   const numberVariants = {
     hidden: { opacity: 0, scale: 0.5 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       scale: 1,
-      transition: { duration: 0.8, ease: "easeOut" }
+      transition: { duration: 0.8 }
     }
   };
 
@@ -71,14 +71,7 @@ const WellnessStats = () => {
       color: "from-green-500 to-emerald-500",
       bgColor: "from-green-50 to-emerald-50"
     },
-    {
-      icon: Shield,
-      number: "DPDP",
-      label: "Act Certified",
-      description: "Secure and confidential platform",
-      color: "from-green-500 to-emerald-500",
-      bgColor: "from-green-50 to-emerald-50"
-    },
+
     {
       icon: TrendingUp,
       number: "85%",
@@ -87,14 +80,7 @@ const WellnessStats = () => {
       color: "from-green-500 to-emerald-500",
       bgColor: "from-green-50 to-emerald-50"
     },
-    {
-      icon: Clock,
-      number: "< 2 min",
-      label: "Response Time",
-      description: "Average AI response time",
-      color: "from-green-500 to-emerald-500",
-      bgColor: "from-green-50 to-emerald-50"
-    },
+
     {
       icon: Target,
       number: "10+",
@@ -146,7 +132,7 @@ const WellnessStats = () => {
             Trusted by Thousands Worldwide
           </h2>
           <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed">
-            Our platform has helped hundreds of thousands of people improve their mental health 
+            Our platform has helped thousands of people improve their mental health 
             with proven results and industry-leading security.
           </p>
         </motion.div>
@@ -187,35 +173,6 @@ const WellnessStats = () => {
           ))}
         </div>
 
-        {/* Certifications & Achievements */}
-        <motion.div 
-          className="bg-white/5 backdrop-blur-sm rounded-3xl p-8"
-          variants={itemVariants}
-        >
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold mb-4">Certified & Compliant</h3>
-            <p className="text-green-100">
-              We maintain the highest standards of security and privacy protection
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {achievements.map((achievement, index) => (
-              <motion.div
-                key={index}
-                className="text-center"
-                variants={itemVariants}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <achievement.icon className="h-6 w-6 text-white" />
-                </div>
-                <h4 className="font-semibold mb-2">{achievement.title}</h4>
-                <p className="text-sm text-blue-200">{achievement.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
 
 
         {/* Bottom CTA */}

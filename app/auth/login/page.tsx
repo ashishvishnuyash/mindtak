@@ -155,7 +155,7 @@ export default function LoginPage() {
     {
       icon: Shield,
       title: 'Privacy First',
-      description: 'DPDP Act certified security',
+      description: 'Advanced security and privacy protection',
       color: 'text-blue-600'
     },
     {
@@ -445,7 +445,7 @@ export default function LoginPage() {
                 whileHover={{ scale: 1.02 }}
               >
                 <Shield className="h-12 w-12 mx-auto mb-4 text-green-600" />
-                <h3 className="font-semibold text-gray-900 mb-2">DPDP Act Certified</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Secure & Private</h3>
                 <p className="text-sm text-gray-600">
                   Your data is protected with industry-leading security measures
                 </p>

@@ -19,10 +19,10 @@ import {
 const WellnessHero = () => {
   const fadeInUp = {
     hidden: { opacity: 0, y: 60 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" }
+      transition: { duration: 0.8 }
     }
   };
 
@@ -41,8 +41,7 @@ const WellnessHero = () => {
     y: [-10, 10, -10],
     transition: {
       duration: 4,
-      repeat: Infinity,
-      ease: "easeInOut"
+      repeat: Infinity
     }
   };
 
@@ -81,7 +80,7 @@ const WellnessHero = () => {
                 transition={{ delay: 0.5 }}
               >
                 <Sparkles className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">Trusted by 7k+ People</span>
+                <span className="text-sm font-medium text-blue-700">Trusted by 3k+ People</span>
               </motion.div>
 
               <motion.h1 
@@ -98,8 +97,8 @@ const WellnessHero = () => {
                 className="text-xl text-gray-600 leading-relaxed"
                 variants={fadeInUp}
               >
-                Consult top doctors, psychologists, dietitians, and wellness experts. 
-                Get personalized care with 100% secure, DPDP Act certified consultations.
+                Consult top doctors, psychologists, dietitians, and wellness experts.
+                Get personalized care with 100% secure consultations.
               </motion.p>
             </div>
 
@@ -111,8 +110,8 @@ const WellnessHero = () => {
               <div className="flex items-center space-x-3 bg-white/60 backdrop-blur-sm p-4 rounded-lg">
                 <Shield className="h-6 w-6 text-green-600" />
                 <div>
-                  <p className="font-semibold text-gray-900">DPDP Act Certified</p>
-                  <p className="text-sm text-gray-600">Secure & Private</p>
+                  <p className="font-semibold text-gray-900">Secure & Private</p>
+                  <p className="text-sm text-gray-600">End-to-end encryption</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3 bg-white/60 backdrop-blur-sm p-4 rounded-lg">
