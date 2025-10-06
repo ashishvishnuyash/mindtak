@@ -181,7 +181,18 @@ export default function ManagerTeamReportsPage() {
               <BarChart3 className="h-4 w-4 mr-2" />
               Generate Summary
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                const params = new URLSearchParams({
+                  type: 'team',
+                  range: '30d',
+                  risk: filterRisk,
+                  employee: filterEmployee
+                });
+                router.push(`/export/report?${params.toString()}`);
+              }}
+            >
               <Download className="h-4 w-4 mr-2" />
               Export Data
             </Button>

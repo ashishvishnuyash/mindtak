@@ -28,7 +28,8 @@ import {
   Heart,
   Battery,
   Smile,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
@@ -108,6 +109,22 @@ export default function EmployeeReportsPage() {
         <span>{riskLevel.toUpperCase()}</span>
       </Badge>
     );
+  };
+
+  const exportMyReports = async () => {
+    try {
+      // Build query parameters for the export page
+      const params = new URLSearchParams({
+        type: 'employee',
+        range: '30d',
+        risk: filterRisk
+      });
+      
+      // Redirect to the export page
+      router.push(`/export/report?${params.toString()}`);
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   const getTrendIcon = (current: number, previous: number) => {
@@ -254,6 +271,15 @@ export default function EmployeeReportsPage() {
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
               Refresh
+            </Button>
+            <Button
+              onClick={exportMyReports}
+              variant="outline"
+              size="sm"
+              className="bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export My Reports
             </Button>
             <Link href="/employee/reports/new">
               <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg">

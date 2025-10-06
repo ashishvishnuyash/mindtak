@@ -105,7 +105,7 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ employee, onView, canVi
                   </Badge>
                 </div>
                 <div className="text-xs text-gray-500 mt-1">Wellness Score</div>
-                <Progress value={wellnessScore * 10} className="w-20 h-2 mt-2 bg-gray-100" indicatorClassName={wellnessStatus.color} />
+                <Progress value={wellnessScore * 10} className="w-20 h-2 mt-2 bg-gray-100" />
               </div>
               
               {canViewReports && (
@@ -175,7 +175,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
     };
 
     fetchManagerData();
-  }, [manager?.id]);
+  }, [manager]);
 
   // Handle case when manager is null
   if (!manager) {
@@ -310,7 +310,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
                       {teamStats.avg_team_wellness}/10
                     </div>
                     <p className="text-sm text-gray-600">Team Wellness</p>
-                    <Progress value={teamStats.avg_team_wellness * 10} className="w-full h-2 mt-2 bg-gray-100" indicatorClassName="bg-green-500" />
+                    <Progress value={teamStats.avg_team_wellness * 10} className="w-full h-2 mt-2 bg-gray-100" />
                   </div>
                 </div>
               </CardContent>

@@ -153,6 +153,11 @@ function EmployeeDashboard() {
     return colors[riskLevel];
   };
 
+  const safeRiskLevel = (value: any): 'low' | 'medium' | 'high' => {
+    if (value === 'medium' || value === 'high') return value;
+    return 'low';
+  };
+
   const chartData = reports.slice(0, 7).reverse().map((report, index) => ({
     date: new Date(report.created_at).toLocaleDateString(),
     mood: report.mood_rating,
@@ -586,8 +591,8 @@ function EmployeeDashboard() {
                             Wellness: {report.overall_wellness}/10
                           </p>
                         </div>
-                        <Badge className={getRiskLevelBadge(report.risk_level || 'low')}>
-                          {(report.risk_level || 'low').toUpperCase()}
+                        <Badge className={getRiskLevelBadge(report.risk_level)}>
+                          {report.risk_level.toUpperCase()}
                         </Badge>
                       </motion.div>
                     ))}

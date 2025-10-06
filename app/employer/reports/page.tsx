@@ -246,12 +246,21 @@ export default function EmployerReportsPage() {
 
   const exportData = async () => {
     try {
-      toast.info('Preparing data export...');
-      // Export logic here
-      toast.success('Data exported successfully!');
+      toast.info('Preparing comprehensive report...');
+      
+      // Build query parameters for the export page
+      const params = new URLSearchParams({
+        type: 'company',
+        range: '30d',
+        department: filterDepartment,
+        risk: filterRisk
+      });
+      
+      // Redirect to the export page
+      router.push(`/export/report?${params.toString()}`);
     } catch (error) {
       console.error('Export error:', error);
-      toast.error('Failed to export data');
+      toast.error('Failed to prepare export');
     }
   };
 

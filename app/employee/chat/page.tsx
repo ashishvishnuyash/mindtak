@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { AvatarController } from "@/components/avatar";
 
 import {
   Send,
@@ -32,9 +33,10 @@ import {
   Menu,
   Brain,
   Paperclip,
-  Image,
+  Image as ImageIcon,
   X,
   Upload,
+  UserCircle, // Replace User3D with UserCircle
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
@@ -181,6 +183,7 @@ export default function EmployeeChatPage() {
 
   // Voice/Call state
   const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isAvatarMode, setIsAvatarMode] = useState(false);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -188,6 +191,9 @@ export default function EmployeeChatPage() {
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
+  
+  // Avatar state
+  const [currentAvatarEmotion, setCurrentAvatarEmotion] = useState<string>("");
 
   // File upload state
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -215,9 +221,12 @@ export default function EmployeeChatPage() {
       }
     }
     if (user) {
-      initializeChat();
+      (async () => {
+        await initializeChat();
+      })();
     }
-  }, [user, userLoading, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, userLoading]);
 
   useEffect(() => {
     scrollToBottom();
@@ -375,12 +384,7 @@ export default function EmployeeChatPage() {
       const welcomeMessageContent = `Hello ${
         user!.first_name || "there"
       }! I'm your confidential AI wellness assistant. Let's chat for a few minutes about how you're doing. 
-
-You can:
-• Type your responses or use voice mode for natural conversation
-• Enable "Deep Conversation" for real-time mental health research and information
-
-How have you been feeling lately?`;
+`;
       await addMessageToDb(welcomeMessageContent, "ai", newSessionDoc.id);
 
       // Set up real-time listener for messages
@@ -594,6 +598,25 @@ How have you been feeling lately?`;
 
       if (result.type === "message") {
         await addMessageToDb(result.data.content, "ai", sessionId);
+        
+        // Set avatar emotion based on message content
+        if (isAvatarMode) {
+          // Simple emotion detection
+          const content = result.data.content.toLowerCase();
+          if (content.includes('happy') || content.includes('great') || content.includes('excellent')) {
+            setCurrentAvatarEmotion('HAPPY');
+          } else if (content.includes('angry') || content.includes('upset') || content.includes('frustrated')) {
+            setCurrentAvatarEmotion('ANGRY');
+          } else if (content.includes('laugh') || content.includes('funny') || content.includes('haha')) {
+            setCurrentAvatarEmotion('LAUGHING');
+          } else if (content.includes('congratulations') || content.includes('well done') || content.includes('bravo')) {
+            setCurrentAvatarEmotion('CLAPPING');
+          } else if (content.includes('success') || content.includes('achievement') || content.includes('accomplish')) {
+            setCurrentAvatarEmotion('VICTORY');
+          } else {
+            setCurrentAvatarEmotion('IDLE');
+          }
+        }
         // Speak the AI response in voice mode
         if (isVoiceMode && audioEnabled) {
           speakText(result.data.content);
@@ -867,6 +890,8 @@ How have you been feeling lately?`;
                         ? "destructive"
                         : isVoiceMode
                         ? "default"
+                        : isAvatarMode
+                        ? "outline"
                         : "secondary"
                     }
                   >
@@ -874,6 +899,8 @@ How have you been feeling lately?`;
                       ? "Session Ended"
                       : isVoiceMode
                       ? `Voice Mode ${formatCallDuration(callDuration)}`
+                      : isAvatarMode
+                      ? "Avatar Mode"
                       : "Text Mode"}
                   </Badge>
                   {isVoiceMode && (
@@ -893,6 +920,17 @@ How have you been feeling lately?`;
 
                 {/* Desktop Buttons */}
                 <div className="hidden sm:flex items-center space-x-2">
+                  {!sessionEnded && !isVoiceMode && (
+                    <Button
+                      onClick={() => setIsAvatarMode(!isAvatarMode)}
+                      disabled={loading}
+                      variant={isAvatarMode ? "secondary" : "outline"}
+                      size="sm"
+                    >
+                      <UserCircle className="h-4 w-4 mr-2" />
+                      {isAvatarMode ? "Disable" : "Enable"} 3D Avatar
+                    </Button>
+                  )}
                   {!sessionEnded && !isVoiceMode && (
                     <Button
                       onClick={startCall}
@@ -994,6 +1032,17 @@ How have you been feeling lately?`;
                       <div className="mt-4 flex flex-col space-y-3">
                         {!sessionEnded && !isVoiceMode && (
                           <Button
+                            onClick={() => setIsAvatarMode(!isAvatarMode)}
+                            disabled={loading}
+                            variant={isAvatarMode ? "secondary" : "outline"}
+                          >
+                            <UserCircle className="h-4 w-4 mr-2" />
+                            {isAvatarMode ? "Disable" : "Enable"} 3D Avatar
+                          </Button>
+                        )}
+                        
+                        {!sessionEnded && !isVoiceMode && (
+                          <Button
                             onClick={startCall}
                             disabled={loading}
                             variant="outline"
@@ -1083,8 +1132,19 @@ How have you been feeling lately?`;
               </div>
             )}
 
+            {/* 3D Avatar */}
+            {isAvatarMode && !isVoiceMode && (
+              <div className="h-[400px] w-full bg-gradient-to-b from-blue-50 to-gray-50 border-b border-gray-200 overflow-hidden">
+                <AvatarController 
+                  emotion={currentAvatarEmotion || 'IDLE'}
+                  speaking={isSpeaking}
+                  scale={1.5}
+                />
+              </div>
+            )}
+            
             {/* Chat Messages */}
-            <CardContent className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 min-h-[400px] max-h-[600px]">
+            <CardContent className={`flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 ${isAvatarMode ? 'min-h-[200px] max-h-[300px]' : 'min-h-[400px] max-h-[600px]'}`}>
               {messages.length === 0 && !loading && (
                 <div className="flex items-center justify-center h-full min-h-[300px]">
                   <motion.div 
@@ -1488,7 +1548,7 @@ How have you been feeling lately?`;
                       <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
                         <div className="flex items-center space-x-2">
                           {file.type.startsWith('image/') ? (
-                            <Image className="h-4 w-4 text-blue-500" />
+                            <ImageIcon className="h-4 w-4 text-blue-500" />
                           ) : (
                             <FileText className="h-4 w-4 text-gray-500" />
                           )}
@@ -1533,6 +1593,7 @@ How have you been feeling lately?`;
                   accept="image/*,.txt,.pdf,.doc,.docx"
                   onChange={handleFileSelect}
                   className="hidden"
+                  aria-label="Attach files"
                 />
 
                 <Input
