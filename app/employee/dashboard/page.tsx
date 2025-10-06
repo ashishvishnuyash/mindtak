@@ -25,12 +25,14 @@ import {
   ArrowRight,
   RefreshCw,
   Loader2
+  
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { MentalHealthReport } from '@/types';
 import { auth, db } from '@/lib/firebase';
 import { withAuth } from '@/components/auth/with-auth';
+import { useCallback } from 'react';
 
 function EmployeeDashboard() {
   const { user, loading: userLoading } = useUser();
@@ -46,20 +48,14 @@ function EmployeeDashboard() {
   });
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      fetchReports();
-    }
-  }, [user]);
 
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       if (!user?.id) {
         console.log('No user ID available');
         setLoading(false);
         return;
       }
-
       // Fetch reports from Firestore where employee_id matches current user's ID
       const reportsRef = collection(db, 'mental_health_reports');
       const q = query(reportsRef, where('employee_id', '==', user.id));
@@ -128,7 +124,13 @@ function EmployeeDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchReports();
+    }
+  }, [user, fetchReports]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -584,8 +586,8 @@ function EmployeeDashboard() {
                             Wellness: {report.overall_wellness}/10
                           </p>
                         </div>
-                        <Badge className={getRiskLevelBadge(report.risk_level)}>
-                          {report.risk_level.toUpperCase()}
+                        <Badge className={getRiskLevelBadge(report.risk_level || 'low')}>
+                          {(report.risk_level || 'low').toUpperCase()}
                         </Badge>
                       </motion.div>
                     ))}
