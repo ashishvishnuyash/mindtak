@@ -128,7 +128,7 @@ const WellnessStats = () => {
           className="text-center mb-16"
           variants={itemVariants}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold mb-6">
             Trusted by Thousands Worldwide
           </h2>
           <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed">
@@ -138,7 +138,7 @@ const WellnessStats = () => {
         </motion.div>
 
         {/* Main Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mb-16">
           {stats.map((stat, index) => (
             <motion.div
               key={index}

@@ -104,7 +104,7 @@ const WellnessFeatures = () => {
           className="text-center mb-16"
           variants={itemVariants}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6">
             Comprehensive Mental Health
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
               & Wellness Solutions
@@ -117,7 +117,7 @@ const WellnessFeatures = () => {
         </motion.div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}

@@ -1,12 +1,23 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
-import { Navbar } from '@/components/shared/navbar';
 import { ManagerDashboard } from '@/components/hierarchy/manager-dashboard';
 import { withAuth } from '@/components/auth/with-auth';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { 
+  Loader2, 
+  Shield, 
+  ArrowRight, 
+  FileText, 
+  BarChart3,
+  Users,
+  Building
+} from 'lucide-react';
+import { db, auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 import type { User } from '@/types/index';
 
 function ManagerDashboardPage() {
@@ -18,16 +29,26 @@ function ManagerDashboardPage() {
     router.push(`/manager/team-member/${employee.id}`);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      router.push('/auth/login');
+    }
+  };
+
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <Loader2 className="h-16 w-16 animate-spin text-blue-400 mx-auto mb-4" />
+          <Loader2 className="h-16 w-16 animate-spin text-green-600 mx-auto mb-4" />
           <p className="text-lg text-gray-600">Loading your dashboard...</p>
         </motion.div>
       </div>
@@ -35,43 +56,85 @@ function ManagerDashboardPage() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <Navbar user={undefined} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <motion.div 
-            className="text-center py-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600">You must be logged in to access this page.</p>
-          </motion.div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={{ y: [-10, 10, -10] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ y: [10, -10, 10] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => router.push('/auth/login')}>
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors">Wellness Hub</h1>
+                <p className="text-sm text-gray-500">Manager Portal</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+                Management
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <FileText className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <BarChart3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-600 border-green-200"
+                onClick={handleLogout}
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Navbar user={user} />
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Welcome Section */}
+        <div className="mb-8 sm:mb-10 lg:mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight">
+              Manager Dashboard
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-light leading-relaxed max-w-full sm:max-w-2xl">
+              Manage your team and track their wellness progress with comprehensive insights and analytics.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-8 border-b border-gray-200">
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+              Dashboard
+            </button>
+            <Link href="/manager/org-chart">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Org Chart
+              </button>
+            </Link>
+            <Link href="/manager/team-reports">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Team Reports
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Manager Dashboard Component */}
         <ManagerDashboard 
           manager={user} 
           onViewTeamMember={handleViewTeamMember}

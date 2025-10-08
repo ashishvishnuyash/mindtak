@@ -36,6 +36,7 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { MentalHealthReport } from '@/types';
 
+
 export default function EmployeeReportsPage() {
   const { user, loading: userLoading } = useUser();
   const [reports, setReports] = useState<MentalHealthReport[]>([]);
@@ -92,7 +93,10 @@ export default function EmployeeReportsPage() {
     }
   };
 
-  const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high') => {
+  const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high' | undefined | null) => {
+    // Provide a safe default if riskLevel is undefined or null
+    const safeRiskLevel = riskLevel || 'low';
+    
     const colors = {
       low: 'bg-green-100 text-green-700 border-green-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -104,9 +108,9 @@ export default function EmployeeReportsPage() {
       high: <AlertTriangle className="h-3 w-3" />,
     };
     return (
-      <Badge className={`${colors[riskLevel]} flex items-center space-x-1`}>
-        {icons[riskLevel]}
-        <span>{riskLevel.toUpperCase()}</span>
+      <Badge className={`${colors[safeRiskLevel]} flex items-center space-x-1`}>
+        {icons[safeRiskLevel]}
+        <span>{safeRiskLevel.toUpperCase()}</span>
       </Badge>
     );
   };
@@ -215,54 +219,82 @@ export default function EmployeeReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={floatingAnimation}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{
-            ...floatingAnimation,
-            transition: { ...floatingAnimation.transition, delay: 2 }
-          }}
-        />
-      </div>
-
-      <Navbar user={user || undefined} />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <div className="flex items-center space-x-3 mb-4">
-              <motion.div
-                animate={floatingAnimation}
-                className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
-              >
-                <Calendar className="h-6 w-6 text-white" />
-              </motion.div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Brain className="h-5 w-5 text-white" />
+              </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">My Wellness Reports</h1>
-                <p className="text-lg text-gray-600 mt-1">
-                  Track your mental health journey and view your progress over time.
-                </p>
+                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
+                <p className="text-sm text-gray-500">Employee Portal</p>
               </div>
             </div>
-          </motion.div>
-          <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+                Engineering
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Calendar className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Heart className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-green-600 border-green-200"
+                onClick={() => {
+                  auth.signOut();
+                  router.push('/auth/login');
+                }}
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-yellow-600 mb-2">My Wellness Reports</h1>
+          <p className="text-gray-600">
+            Track your mental health journey and view your progress over time.
+          </p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-8 border-b border-gray-200">
+            <Link href="/employee/dashboard">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Overview
+              </button>
+            </Link>
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+              Analytics
+            </button>
+            <Link href="/employee/chat">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                AI Friend
+              </button>
+            </Link>
+          </div>
+        </div>
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-3">
             <Button
               onClick={fetchReports}
               variant="outline"
               size="sm"
-              className="bg-white/60 backdrop-blur-sm hover:bg-green-50 border-green-200"
+              className="border-green-200 text-green-600 hover:bg-green-50"
               disabled={refreshing}
             >
               {refreshing ? (
@@ -276,23 +308,23 @@ export default function EmployeeReportsPage() {
               onClick={exportMyReports}
               variant="outline"
               size="sm"
-              className="bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
             >
               <Download className="h-4 w-4 mr-2" />
               Export My Reports
             </Button>
-            <Link href="/employee/reports/new">
-              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg">
-                <Plus className="h-4 w-4 mr-2" />
-                New Report
-              </Button>
-            </Link>
-          </motion.div>
-        </motion.div>
+          </div>
+          <Link href="/employee/reports/new">
+            <Button className="bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              New Report
+            </Button>
+          </Link>
+        </div>
 
         {/* Filters and Search */}
-        <motion.div variants={itemVariants}>
-          <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+        <div>
+          <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative">
@@ -338,7 +370,7 @@ export default function EmployeeReportsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Reports List */}
         {sortedReports.length > 0 ? (
@@ -352,7 +384,7 @@ export default function EmployeeReportsPage() {
               const previousReport = sortedReports[index + 1];
               return (
                 <motion.div key={report.id} variants={itemVariants}>
-                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+                  <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
                         <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -509,7 +541,7 @@ export default function EmployeeReportsPage() {
           </motion.div>
         ) : (
           <motion.div variants={itemVariants}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-12 text-center">
                 <motion.div
                   animate={{ rotate: 360 }}

@@ -5,9 +5,9 @@ import { useModal } from '@/contexts/modal-context';
 export default function Footer() {
   const { openContactModal } = useModal();
   return (
-    <footer className="bg-green-600 text-white py-12">
+    <footer className="bg-green-600 text-white py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-6 sm:gap-8 mb-8">
           {/* Logo */}
           <div className="col-span-1">
             <div className="flex items-center space-x-2 mb-4">
@@ -49,6 +49,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><button onClick={openContactModal} className="hover:underline cursor-pointer">Technical Support</button></li>
               <li><button onClick={openContactModal} className="hover:underline cursor-pointer">Customer Success</button></li>
+              <li><a href="mailto:info@diltak.ai" className="hover:underline">info@diltak.ai</a></li>
             </ul>
           </div>
         </div>

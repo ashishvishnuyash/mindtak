@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/shared/navbar';
@@ -42,7 +43,8 @@ import {
   orderBy,
   limit
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 import { withAuth } from '@/components/auth/with-auth';
 
 function EmployerDashboardPage() {
@@ -428,106 +430,138 @@ function EmployerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={floatingAnimation}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{
-            ...floatingAnimation,
-            transition: { ...floatingAnimation.transition, delay: 2 }
-          }}
-        />
-      </div>
-
-      <Navbar user={user || undefined} />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div
-          className="mb-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants} className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <motion.div
-                  animate={floatingAnimation}
-                  className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
-                >
-                  <Building className="h-6 w-6 text-white" />
-                </motion.div>
-                <div>
-                  <h1 className="text-4xl font-bold text-gray-900">Employer Dashboard</h1>
-                  <p className="text-lg text-gray-600 mt-1">
-                    Monitor your team's wellness and mental health insights
-                  </p>
-                </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Building className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
+                <p className="text-sm text-gray-500">Employer Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+                Management
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Users className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <BarChart3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-600 border-green-200"
+                onClick={async () => {
+                  try {
+                    await signOut(auth);
+                    router.push('/auth/login');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    router.push('/auth/login');
+                  }
+                }}
               >
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
-                  className="px-4 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white/80 backdrop-blur-sm"
-                >
-                  <option value="7d">Last 7 days</option>
-                  <option value="30d">Last 30 days</option>
-                  <option value="90d">Last 90 days</option>
-                </select>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  onClick={handleRefresh}
-                  variant="outline"
-                  size="sm"
-                  disabled={refreshing}
-                  className="bg-white/80 backdrop-blur-sm hover:bg-green-50 hover:text-green-600"
-                >
-                  {refreshing ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    </motion.div>
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  )}
-                  Refresh
-                </Button>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  onClick={exportReports}
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/80 backdrop-blur-sm hover:bg-green-50 hover:text-green-600"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Reports
-                </Button>
-              </motion.div>
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-yellow-600 mb-2">Employer Dashboard</h1>
+          <p className="text-gray-600">
+            Monitor your team's wellness and mental health insights
+          </p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-8 border-b border-gray-200">
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+              Overview
+            </button>
+            <Link href="/employer/employees">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Employees
+              </button>
+            </Link>
+            <Link href="/employer/reports">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Reports
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center justify-between mb-8">
+          <div></div>
+          <div className="flex items-center space-x-3">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
+                className="px-4 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+              >
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+              </select>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                disabled={refreshing}
+                className="border-green-200 text-green-600 hover:bg-green-50"
+              >
+                {refreshing ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  </motion.div>
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Refresh
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                onClick={exportReports}
+                variant="outline"
+                size="sm"
+                className="bg-white/80 backdrop-blur-sm hover:bg-green-50 hover:text-green-600"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Reports
+              </Button>
+            </motion.div>
+          </div>
+        </div>
 
         {/* Stats Cards */}
         <motion.div
@@ -538,7 +572,7 @@ function EmployerDashboardPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Total Team</CardTitle>
                 <motion.div
@@ -558,7 +592,7 @@ function EmployerDashboardPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Participation Rate</CardTitle>
                 <motion.div
@@ -578,7 +612,7 @@ function EmployerDashboardPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Wellness</CardTitle>
                 <motion.div
@@ -601,7 +635,7 @@ function EmployerDashboardPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">High Risk</CardTitle>
                 <motion.div
@@ -630,7 +664,7 @@ function EmployerDashboardPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Mood</CardTitle>
                 <motion.div
@@ -654,7 +688,7 @@ function EmployerDashboardPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Stress</CardTitle>
                 <motion.div
@@ -678,7 +712,7 @@ function EmployerDashboardPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-700">Average Energy</CardTitle>
                 <motion.div
@@ -758,7 +792,7 @@ function EmployerDashboardPage() {
         >
           {/* Recent Reports */}
           <motion.div className="lg:col-span-2" variants={itemVariants}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="text-xl font-bold text-gray-900">Recent Wellness Reports</span>
@@ -843,7 +877,7 @@ function EmployerDashboardPage() {
 
           {/* Quick Actions */}
           <motion.div variants={itemVariants}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 mb-6">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 mb-6">
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-gray-900">Quick Actions</CardTitle>
               </CardHeader>
@@ -876,7 +910,7 @@ function EmployerDashboardPage() {
             </Card>
 
             {/* Team Overview */}
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 mb-6">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center text-xl font-bold text-gray-900">
                   <motion.div
@@ -921,7 +955,7 @@ function EmployerDashboardPage() {
 
             {/* Department Breakdown */}
             {stats?.department_stats && Object.keys(stats.department_stats).length > 0 && (
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+              <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl font-bold text-gray-900">
                     <motion.div

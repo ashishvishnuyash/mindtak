@@ -186,10 +186,10 @@ export default function HomePage() {
         viewport={{ once: true }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-12 items-center">
             <div className="text-left">
               <motion.h1
-                className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl mb-6 leading-tight"
+                className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl xl:text-7xl mb-6 leading-tight"
                 variants={titleVariants}
                 initial="hidden"
                 animate="visible"
@@ -237,12 +237,12 @@ export default function HomePage() {
 
             <div className="flex justify-center items-center">
               {/* Hero Image - Robot */}
-              <motion.div 
-                className="relative w-full max-w-lg h-[500px] rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 shadow-xl"
+              <motion.div
+                className="relative w-full max-w-full sm:max-w-lg xl:max-w-xl h-[300px] sm:h-[500px] xl:h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 shadow-xl"
                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                whileHover={{ 
+                whileHover={{
                   scale: 1.05,
                   rotateY: 5,
                   transition: { duration: 0.3 }
@@ -301,14 +301,14 @@ export default function HomePage() {
                 />
                 <motion.div
                   className="absolute bottom-6 left-6 w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-lg"
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.6, 1],
                     opacity: [0.3, 1, 0.3],
                     x: [-3, 3, -3],
                     rotate: [0, -180, -360]
                   }}
-                  transition={{ 
-                    duration: 3.5, 
+                  transition={{
+                    duration: 3.5,
                     repeat: Infinity,
                     delay: 1
                   }}
@@ -451,7 +451,7 @@ export default function HomePage() {
         viewport={{ once: true }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-12 items-center">
             {/* Left side - AI Brain Image */}
             <div className="relative">
               <div className="relative w-full aspect-square max-w-[500px] mx-auto rounded-full overflow-hidden bg-yellow-50">
@@ -542,7 +542,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-600 mb-8">Still have more questions? Don&apos;t hesitate to contact us!</p>
+            <p className="text-gray-600 mb-8">Still have more questions? Don&apos;t hesitate to contact us at <a href="mailto:info@diltak.ai" className="text-green-600 hover:underline">info@diltak.ai</a>!</p>
             <Button 
               className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 flex items-center space-x-2"
               onClick={openContactModal}

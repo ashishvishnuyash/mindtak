@@ -42,7 +42,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { User as UserType, MentalHealthReport as MentalHealthReportType } from '@/types';
 import { useUser } from '@/hooks/use-user';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 import { toast } from 'sonner';
 
 interface EmployeeWithStats extends Omit<UserType, 'direct_reports'> {
@@ -253,17 +254,16 @@ export default function EmployeesPage() {
     const hasChildren = children.length > 0;
 
     return (
-      <motion.div 
-        key={employee.id} 
+      <motion.div
+        key={employee.id}
         className="mb-3"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <motion.div 
-          className={`flex items-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-0 shadow-lg hover:shadow-2xl transition-all duration-300 ${
-            level > 0 ? 'ml-' + (level * 6) : ''
-          }`}
+        <motion.div
+          className={`flex items-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-0 shadow-lg hover:shadow-2xl transition-all duration-300 ${level > 0 ? 'ml-' + (level * 6) : ''
+            }`}
           style={{ marginLeft: level * 24 }}
           whileHover={{ scale: 1.02, y: -2 }}
         >
@@ -286,7 +286,7 @@ export default function EmployeesPage() {
               </Button>
             </motion.div>
           )}
-          
+
           <motion.div
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
@@ -369,7 +369,7 @@ export default function EmployeesPage() {
 
         <AnimatePresence>
           {hasChildren && isExpanded && (
-            <motion.div 
+            <motion.div
               className="mt-3"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -411,8 +411,8 @@ export default function EmployeesPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.6, ease: "easeOut" as const }
     }
@@ -453,115 +453,144 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={floatingAnimation}
-        />
-        <motion.div 
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{
-            ...floatingAnimation,
-            transition: { ...floatingAnimation.transition, delay: 2 }
-          }}
-        />
-      </div>
-
-      <Navbar user={user || undefined} />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div 
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <div className="flex items-center space-x-3 mb-4">
-              <motion.div
-                animate={floatingAnimation}
-                className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
-              >
-                <Users className="h-6 w-6 text-white" />
-              </motion.div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Building className="h-5 w-5 text-white" />
+              </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">Team Management</h1>
-                <p className="text-lg text-gray-600 mt-1">
-                  Manage your team members and monitor their wellness status with organizational hierarchy.
-                </p>
+                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
+                <p className="text-sm text-gray-500">Employer Portal</p>
               </div>
             </div>
-          </motion.div>
-          <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className="flex bg-white/60 backdrop-blur-sm rounded-xl p-1 shadow-lg">
-                <Button
-                  variant={viewMode === 'hierarchy' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('hierarchy')}
-                  className={viewMode === 'hierarchy' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
-                >
-                  <Building className="h-4 w-4 mr-2" />
-                  Hierarchy
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  List
-                </Button>
-              </div>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                onClick={handleRefresh} 
-                variant="outline" 
-                size="sm"
-                disabled={refreshing}
-                className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
-              >
-                {refreshing ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  </motion.div>
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Refresh
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+                Management
               </Button>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              <Button variant="outline" size="sm" className="p-2">
+                <Users className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <User className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-600 border-green-200"
+                onClick={async () => {
+                  try {
+                    await signOut(auth);
+                    router.push('/auth/login');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    router.push('/auth/login');
+                  }
+                }}
+              >
+                <ChevronRight className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-yellow-600 mb-2">Team Management</h1>
+          <p className="text-gray-600">
+            Manage your team members and monitor their wellness status with organizational hierarchy.
+          </p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-8 border-b border-gray-200">
+            <Link href="/employer/dashboard">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Overview
+              </button>
+            </Link>
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+              Employees
+            </button>
+            <Link href="/employer/reports">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Reports
+              </button>
+            </Link>
+          </div>
+        </div>
+        <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="flex bg-white/60 backdrop-blur-sm rounded-xl p-1 shadow-lg">
+              <Button
+                variant={viewMode === 'hierarchy' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('hierarchy')}
+                className={viewMode === 'hierarchy' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
+              >
+                <Building className="h-4 w-4 mr-2" />
+                Hierarchy
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                List
+              </Button>
+            </div>
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              size="sm"
+              disabled={refreshing}
+              className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
             >
-              <Link href="/employer/employees/new">
-                <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add Employee
-                </Button>
-              </Link>
-            </motion.div>
+              {refreshing ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                </motion.div>
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Refresh
+            </Button>
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/employer/employees/new">
+              <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Employee
+              </Button>
+            </Link>
           </motion.div>
         </motion.div>
 
         {/* Stats Cards */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
           initial="hidden"
           whileInView="visible"
@@ -569,7 +598,7 @@ export default function EmployeesPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
@@ -588,7 +617,7 @@ export default function EmployeesPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
@@ -609,7 +638,7 @@ export default function EmployeesPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
@@ -630,7 +659,7 @@ export default function EmployeesPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
@@ -659,7 +688,7 @@ export default function EmployeesPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="relative">
@@ -715,7 +744,7 @@ export default function EmployeesPage() {
         >
           {viewMode === 'hierarchy' ? (
             <motion.div variants={itemVariants}>
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl font-bold text-gray-900">
                     <motion.div
@@ -733,7 +762,7 @@ export default function EmployeesPage() {
                       {hierarchyTree.map(node => renderHierarchyNode(node))}
                     </div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       className="text-center py-12"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -754,7 +783,7 @@ export default function EmployeesPage() {
           ) : (
             /* List View */
             filteredEmployees.length > 0 ? (
-              <motion.div 
+              <motion.div
                 className="grid grid-cols-1 lg:grid-cols-2 gap-6"
                 variants={containerVariants}
               >
@@ -765,7 +794,7 @@ export default function EmployeesPage() {
                     whileHover={{ scale: 1.02, y: -5 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+                    <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center space-x-4">
@@ -829,7 +858,7 @@ export default function EmployeesPage() {
 
                         {/* Wellness Stats */}
                         <div className="grid grid-cols-2 gap-4 mb-4">
-                          <motion.div 
+                          <motion.div
                             className="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl"
                             whileHover={{ scale: 1.05 }}
                           >
@@ -839,7 +868,7 @@ export default function EmployeesPage() {
                             </div>
                             <div className="text-xs text-blue-600">Avg Wellness</div>
                           </motion.div>
-                          <motion.div 
+                          <motion.div
                             className="text-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl"
                             whileHover={{ scale: 1.05 }}
                           >
@@ -875,7 +904,7 @@ export default function EmployeesPage() {
 
                         {/* Latest Metrics */}
                         {employee.latest_report && (
-                          <motion.div 
+                          <motion.div
                             className="pt-4 border-t border-gray-200"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -916,7 +945,7 @@ export default function EmployeesPage() {
               </motion.div>
             ) : (
               <motion.div variants={itemVariants}>
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                <Card className="bg-white border border-gray-200 shadow-sm">
                   <CardContent className="p-12 text-center">
                     <motion.div
                       animate={floatingAnimation}
@@ -951,6 +980,6 @@ export default function EmployeesPage() {
           )}
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 }

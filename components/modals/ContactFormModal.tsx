@@ -269,8 +269,11 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                     <CheckCircle className="h-8 w-8 text-green-600" />
                   </motion.div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Thank You!</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 mb-2">
                     Your message has been sent successfully. We'll get back to you soon!
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    You can also reach us directly at <a href="mailto:info@diltak.ai" className="text-green-600 hover:underline">info@diltak.ai</a>
                   </p>
                 </motion.div>
               )}
