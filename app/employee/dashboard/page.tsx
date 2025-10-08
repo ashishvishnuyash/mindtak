@@ -38,6 +38,7 @@ import type { MentalHealthReport } from '@/types';
 import { auth, db } from '@/lib/firebase';
 import { withAuth } from '@/components/auth/with-auth';
 import { useCallback } from 'react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 function EmployeeDashboard() {
   const { user, loading: userLoading } = useUser();
@@ -202,9 +203,9 @@ function EmployeeDashboard() {
   const wellnessStatus = latestReport ? getWellnessStatus(latestReport.overall_wellness) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -212,8 +213,8 @@ function EmployeeDashboard() {
                 <Brain className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
-                <p className="text-sm text-gray-500">Employee Portal</p>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Employee Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -226,6 +227,7 @@ function EmployeeDashboard() {
               <Button variant="outline" size="sm" className="p-2">
                 <User className="h-4 w-4" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -254,7 +256,7 @@ function EmployeeDashboard() {
             <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
               Welcome back, {user.first_name || user.email}!
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-light leading-relaxed max-w-full sm:max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
               Monitor your mental wellness and track your progress over time with our advanced analytics.
             </p>
           </motion.div>
@@ -262,24 +264,24 @@ function EmployeeDashboard() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <button
               onClick={() => setActiveTab('Overview')}
               className={`pb-4 px-1 border-b-2 font-medium transition-colors ${
                 activeTab === 'Overview'
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               Overview
             </button>
             <Link href="/employee/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Analytics
               </button>
             </Link>
             <Link href="/employee/chat">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 AI Friend
               </button>
             </Link>
@@ -289,15 +291,15 @@ function EmployeeDashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Link href="/employee/reports/new">
-            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-blue-100 p-3 rounded-2xl">
                     <Heart className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">New Wellness Check</h3>
-                    <p className="text-sm text-gray-600">Record your current state</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">New Wellness Check</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Record your current state</p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors ml-auto" />
                 </div>
@@ -306,15 +308,15 @@ function EmployeeDashboard() {
           </Link>
 
           <Link href="/employee/chat">
-            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-green-100 p-3 rounded-2xl">
                     <MessageSquare className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">AI Assistant</h3>
-                    <p className="text-sm text-gray-600">Chat with our wellness AI</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-green-600 transition-colors">AI Assistant</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Chat with our wellness AI</p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors ml-auto" />
                 </div>
@@ -323,15 +325,15 @@ function EmployeeDashboard() {
           </Link>
 
           <Link href="/employee/reports">
-            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-purple-100 p-3 rounded-2xl">
                     <TrendingUp className="h-6 w-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">View Reports</h3>
-                    <p className="text-sm text-gray-600">Track your progress</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors">View Reports</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Track your progress</p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors ml-auto" />
                 </div>
@@ -342,9 +344,9 @@ function EmployeeDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
                 <Smile className="h-4 w-4 mr-2 text-blue-500" />
                 Current Mood
               </CardTitle>
@@ -354,7 +356,7 @@ function EmployeeDashboard() {
                 <Smile className="h-6 w-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {latestReport ? latestReport.mood_rating : '-'}/10
                 </div>
                 <Progress 
@@ -365,9 +367,9 @@ function EmployeeDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
                 <AlertTriangle className="h-4 w-4 mr-2 text-orange-500" />
                 Stress Level
               </CardTitle>
@@ -377,7 +379,7 @@ function EmployeeDashboard() {
                 <AlertTriangle className="h-6 w-6 text-orange-600" />
               </div>
               <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {latestReport ? latestReport.stress_level : '-'}/10
                 </div>
                 <Progress 
@@ -388,9 +390,9 @@ function EmployeeDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
                 <Battery className="h-4 w-4 mr-2 text-green-500" />
                 Energy Level
               </CardTitle>
@@ -400,7 +402,7 @@ function EmployeeDashboard() {
                 <Battery className="h-6 w-6 text-green-600" />
               </div>
               <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {latestReport ? latestReport.energy_level : '-'}/10
                 </div>
                 <Progress 
@@ -411,9 +413,9 @@ function EmployeeDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
                 <Brain className="h-4 w-4 mr-2 text-purple-500" />
                 Overall Wellness
               </CardTitle>
@@ -423,7 +425,7 @@ function EmployeeDashboard() {
                 <Brain className="h-6 w-6 text-purple-600" />
               </div>
               <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {latestReport ? latestReport.overall_wellness : '-'}/10
                 </div>
                 {wellnessStatus && (
@@ -438,9 +440,9 @@ function EmployeeDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Wellness Trend Chart */}
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
+              <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
                 <TrendingUp className="h-5 w-5 text-blue-500" />
                 <span>Wellness Trends (Last 7 Reports)</span>
               </CardTitle>
@@ -460,10 +462,10 @@ function EmployeeDashboard() {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                   <div className="text-center">
-                    <Brain className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p className="text-lg font-medium mb-2">No reports yet</p>
+                    <Brain className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <p className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">No reports yet</p>
                     <p className="text-sm mb-4">Create your first wellness check to see trends.</p>
                     <Link href="/employee/reports/new">
                       <Button className="bg-green-600 hover:bg-green-700 text-white">
@@ -478,9 +480,9 @@ function EmployeeDashboard() {
           </Card>
 
           {/* Recent Reports */}
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-gray-900">
+              <CardTitle className="flex items-center justify-between text-gray-900 dark:text-gray-100">
                 <div className="flex items-center space-x-2">
                   <Calendar className="h-5 w-5 text-purple-500" />
                   <span>Recent Reports</span>

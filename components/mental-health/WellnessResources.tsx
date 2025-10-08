@@ -153,7 +153,7 @@ const WellnessResources = () => {
 
   return (
     <motion.section 
-      className="py-20 bg-white"
+      className="py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
@@ -165,10 +165,10 @@ const WellnessResources = () => {
           className="text-center mb-16"
           variants={itemVariants as any}
         >
-          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6">
             Comprehensive Wellness Resources
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Access a complete library of mental health tools, guided sessions, and expert resources 
             designed to support your wellness journey.
           </p>
@@ -188,8 +188,8 @@ const WellnessResources = () => {
                   <category.icon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">{category.category}</h3>
-                  <p className="text-gray-600">Expert-curated resources for your wellness</p>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{category.category}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Expert-curated resources for your wellness</p>
                 </div>
               </div>
 
@@ -205,7 +205,7 @@ const WellnessResources = () => {
                     }}
                     className="group"
                   >
-                    <Card className="h-full bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
+                    <Card className="h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
                       <CardHeader className="pb-4">
                         <div className="flex items-center justify-between mb-4">
                           <div className={`w-10 h-10 bg-gradient-to-br ${category.color} rounded-lg flex items-center justify-center`}>
@@ -213,31 +213,31 @@ const WellnessResources = () => {
                           </div>
                           <div className="flex items-center space-x-1">
                             {renderStars(item.rating)}
-                            <span className="text-sm text-gray-600 ml-1">{item.rating}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{item.rating}</span>
                           </div>
                         </div>
-                        <CardTitle className="text-lg font-bold text-gray-900 mb-2">
+                        <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
                           {item.title}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <p className="text-gray-600 leading-relaxed">
+                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                           {item.description}
                         </p>
                         
                         <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center space-x-2 text-gray-500">
+                          <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
                             <Clock className="h-4 w-4" />
                             <span>{item.duration}</span>
                           </div>
-                          <div className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
+                          <div className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300">
                             {item.type}
                           </div>
                         </div>
 
                         <Link href="/demo">
                           <Button 
-                            className="w-full bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 border-0 group-hover:from-green-500 group-hover:to-emerald-500 group-hover:text-white transition-all duration-300"
+                            className="w-full bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-700 dark:text-gray-300 border-0 group-hover:from-green-500 group-hover:to-emerald-500 group-hover:text-white transition-all duration-300"
                             variant="outline"
                           >
                             Start Now

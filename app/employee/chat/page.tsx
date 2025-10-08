@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AvatarController } from "@/components/avatar";
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 import {
   Send,
@@ -817,9 +818,9 @@ export default function EmployeeChatPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -841,6 +842,7 @@ export default function EmployeeChatPage() {
               <Button variant="outline" size="sm" className="p-2">
                 <UserCircle className="h-4 w-4" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -866,7 +868,7 @@ export default function EmployeeChatPage() {
       <div className="max-w-4xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-yellow-600 mb-2">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">
             AI Wellness Assistant
           </h1>
           <p className="text-gray-600">

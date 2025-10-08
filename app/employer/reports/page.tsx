@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   FileText,
   Download,
@@ -349,9 +350,9 @@ export default function EmployerReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 cursor-pointer group" onClick={() => router.push('/auth/login')}>
@@ -359,10 +360,10 @@ export default function EmployerReportsPage() {
                 <Shield className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:to-green-700 transition-all duration-300">
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:to-green-700 transition-all duration-300">
                   Wellness Hub
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-500 font-medium">Employer Portal</p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Employer Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
@@ -375,6 +376,7 @@ export default function EmployerReportsPage() {
               <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
                 <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
@@ -397,10 +399,10 @@ export default function EmployerReportsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
               Wellness Reports
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-light leading-relaxed max-w-full sm:max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
               View comprehensive wellness reports from your team members and track their mental health progress with advanced analytics.
             </p>
           </motion.div>
@@ -408,18 +410,18 @@ export default function EmployerReportsPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8 sm:mb-10 lg:mb-12">
-          <div className="flex space-x-4 sm:space-x-8 lg:space-x-12 border-b border-gray-200/60 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-8 lg:space-x-12 border-b border-gray-200/60 dark:border-gray-700/60 overflow-x-auto">
             <Link href="/employer/dashboard">
-              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 hover:text-gray-700 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 whitespace-nowrap">
+              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
                 Overview
               </button>
             </Link>
             <Link href="/employer/employees">
-              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 hover:text-gray-700 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 whitespace-nowrap">
+              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
                 Employees
               </button>
             </Link>
-            <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-blue-500 text-blue-600 font-semibold sm:font-bold text-sm sm:text-base lg:text-lg relative whitespace-nowrap">
+            <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold sm:font-bold text-sm sm:text-base lg:text-lg relative whitespace-nowrap">
               Reports
               <div className="absolute -bottom-0.5 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
             </button>
@@ -503,7 +505,7 @@ export default function EmployerReportsPage() {
                     <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">{reports.length}</div>
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">{reports.length}</div>
                     <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Reports</p>
                   </div>
                 </div>
@@ -523,7 +525,7 @@ export default function EmployerReportsPage() {
                     <TrendingUp className="h-8 w-8 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
                       {reports.length > 0
                         ? Math.round(reports.reduce((sum, report) => sum + report.overall_wellness, 0) / reports.length)
                         : 0

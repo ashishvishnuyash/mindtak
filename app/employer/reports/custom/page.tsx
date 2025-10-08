@@ -410,7 +410,7 @@ export default function CustomReportPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Custom Report Builder</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Custom Report Builder</h1>
               <p className="text-gray-600 mt-1">
                 Create customized wellness reports with specific metrics and filters
               </p>

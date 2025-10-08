@@ -325,7 +325,7 @@ export default function AnalyticsPage() {
                 <BarChart3 className="h-6 w-6 text-white" />
               </motion.div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">Analytics Dashboard</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">Analytics Dashboard</h1>
                 <p className="text-lg text-gray-600 mt-1">
                   Deep insights into your team&apos;s mental health and wellness trends
                 </p>

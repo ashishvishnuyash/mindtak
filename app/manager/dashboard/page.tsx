@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 import { ManagerDashboard } from '@/components/hierarchy/manager-dashboard';
 import { withAuth } from '@/components/auth/with-auth';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
@@ -60,9 +61,9 @@ function ManagerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={() => router.push('/auth/login')}>
@@ -70,8 +71,8 @@ function ManagerDashboardPage() {
                 <Shield className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors">Wellness Hub</h1>
-                <p className="text-sm text-gray-500">Manager Portal</p>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-green-600 transition-colors">Wellness Hub</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Manager Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -84,6 +85,7 @@ function ManagerDashboardPage() {
               <Button variant="outline" size="sm" className="p-2">
                 <BarChart3 className="h-4 w-4" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
@@ -106,10 +108,10 @@ function ManagerDashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
               Manager Dashboard
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 font-light leading-relaxed max-w-full sm:max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
               Manage your team and track their wellness progress with comprehensive insights and analytics.
             </p>
           </motion.div>
@@ -117,17 +119,17 @@ function ManagerDashboardPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
               Dashboard
             </button>
             <Link href="/manager/org-chart">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Org Chart
               </button>
             </Link>
             <Link href="/manager/team-reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Team Reports
               </button>
             </Link>

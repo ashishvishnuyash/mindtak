@@ -3,5 +3,6 @@
     "cSpell.words": [
         "doesn",
         "firestore"
-    ]
+    ],
+    "typescript.autoClosingTags": false
 }

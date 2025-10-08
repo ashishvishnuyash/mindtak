@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   Users,
   UserPlus,
@@ -453,9 +454,9 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -463,8 +464,8 @@ export default function EmployeesPage() {
                 <Building className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
-                <p className="text-sm text-gray-500">Employer Portal</p>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Employer Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -477,6 +478,7 @@ export default function EmployeesPage() {
               <Button variant="outline" size="sm" className="p-2">
                 <User className="h-4 w-4" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
@@ -502,25 +504,25 @@ export default function EmployeesPage() {
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-yellow-600 mb-2">Team Management</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-3 sm:mb-4 leading-tight">Team Management</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Manage your team members and monitor their wellness status with organizational hierarchy.
           </p>
         </div>
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <Link href="/employer/dashboard">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Overview
               </button>
             </Link>
-            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-medium">
               Employees
             </button>
             <Link href="/employer/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Reports
               </button>
             </Link>
@@ -598,18 +600,18 @@ export default function EmployeesPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <Users className="h-8 w-8 text-blue-600" />
+                    <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">{employees.length}</div>
-                    <p className="text-sm text-gray-600">Total Team Members</p>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{employees.length}</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Team Members</p>
                   </div>
                 </div>
               </CardContent>
@@ -820,7 +822,7 @@ export default function EmployeesPage() {
                                   {getRoleIcon(employee.role)}
                                 </motion.div>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
+                              <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2 sm:mb-3">
                                 <Mail className="h-4 w-4" />
                                 <span>{employee.email}</span>
                               </div>

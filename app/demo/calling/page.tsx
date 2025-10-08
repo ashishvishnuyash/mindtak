@@ -117,7 +117,7 @@ export default function CallingDemoPage() {
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">Phone App Demo</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">Phone App Demo</h1>
           <p className="text-gray-600">
             Try out the calling features with voice and video calls.
           </p>

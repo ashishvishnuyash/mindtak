@@ -5,7 +5,7 @@ import { useModal } from '@/contexts/modal-context';
 export default function Footer() {
   const { openContactModal } = useModal();
   return (
-    <footer className="bg-green-600 text-white py-8 sm:py-12">
+    <footer className="bg-green-600 dark:bg-gray-800 text-white py-8 sm:py-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-6 sm:gap-8 mb-8">
           {/* Logo */}
@@ -53,7 +53,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-green-500 pt-6 text-center text-gray-300 text-sm">
+        <div className="border-t border-green-500 dark:border-gray-600 pt-6 text-center text-gray-300 dark:text-gray-400 text-sm">
           © 2024 Diltak.ai. All rights reserved.
         </div>
       </div>

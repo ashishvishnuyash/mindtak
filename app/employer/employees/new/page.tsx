@@ -238,7 +238,7 @@ export default function NewEmployeePage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Employees
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Add New Employee</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Add New Employee</h1>
           <p className="text-gray-600 mt-2">
             Create an account for a new team member to start tracking their wellness.
           </p>

@@ -222,7 +222,7 @@ export default function ManagerAnalyticsPage() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Team Analytics</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Team Analytics</h1>
             <p className="text-gray-600 mt-2">
               Deep insights into your team's mental health and wellness trends
             </p>

@@ -92,7 +92,7 @@ const WellnessFeatures = () => {
 
   return (
     <motion.section 
-      className="py-20 bg-white"
+      className="py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
@@ -104,13 +104,13 @@ const WellnessFeatures = () => {
           className="text-center mb-16"
           variants={itemVariants}
         >
-          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6">
             Comprehensive Mental Health
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
               & Wellness Solutions
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
             From AI-powered support to expert consultations, we provide everything you need 
             for your mental health and wellness journey.
           </p>
@@ -128,17 +128,17 @@ const WellnessFeatures = () => {
               }}
               className="group"
             >
-              <Card className="h-full bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
+              <Card className="h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
                 <CardHeader className="pb-4">
                   <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 mb-2">
+                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                     {feature.description}
                   </p>
                   
@@ -146,7 +146,7 @@ const WellnessFeatures = () => {
                     {feature.features.map((item, idx) => (
                       <div key={idx} className="flex items-center space-x-2">
                         <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-700">{item}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
                       </div>
                     ))}
                   </div>

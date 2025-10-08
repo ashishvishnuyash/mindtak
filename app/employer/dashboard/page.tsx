@@ -46,6 +46,7 @@ import {
 import { db, auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { withAuth } from '@/components/auth/with-auth';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 function EmployerDashboardPage() {
   const { user, loading: userLoading } = useUser();
@@ -430,9 +431,9 @@ function EmployerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -440,8 +441,8 @@ function EmployerDashboardPage() {
                 <Building className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
-                <p className="text-sm text-gray-500">Employer Portal</p>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Employer Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -454,6 +455,7 @@ function EmployerDashboardPage() {
               <Button variant="outline" size="sm" className="p-2">
                 <BarChart3 className="h-4 w-4" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
@@ -479,25 +481,25 @@ function EmployerDashboardPage() {
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-yellow-600 mb-2">Employer Dashboard</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">Employer Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Monitor your team's wellness and mental health insights
           </p>
         </div>
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
               Overview
             </button>
             <Link href="/employer/employees">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Employees
               </button>
             </Link>
             <Link href="/employer/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Reports
               </button>
             </Link>
@@ -515,7 +517,7 @@ function EmployerDashboardPage() {
               <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
-                className="px-4 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -583,7 +585,7 @@ function EmployerDashboardPage() {
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{stats?.total_employees || 0}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{stats?.total_employees || 0}</div>
                 <p className="text-sm text-gray-600">
                   {stats?.total_managers || 0} managers, {stats?.total_employees || 0} employees
                 </p>
@@ -603,7 +605,7 @@ function EmployerDashboardPage() {
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900">{stats?.participation_rate || 0}%</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{stats?.participation_rate || 0}%</div>
                 <p className="text-sm text-gray-600">
                   {stats?.completed_reports || 0} reports this month
                 </p>
@@ -624,7 +626,7 @@ function EmployerDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-2">
-                  <div className="text-3xl font-bold text-gray-900">{stats?.average_wellness_score || 0}/10</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{stats?.average_wellness_score || 0}/10</div>
                   {stats?.wellness_trend && getTrendIcon(stats.wellness_trend)}
                 </div>
                 <p className="text-sm text-gray-600">
@@ -646,7 +648,7 @@ function EmployerDashboardPage() {
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-red-600">{stats?.high_risk_employees || 0}</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 leading-tight">{stats?.high_risk_employees || 0}</div>
                 <p className="text-sm text-gray-600">
                   Require immediate attention
                 </p>

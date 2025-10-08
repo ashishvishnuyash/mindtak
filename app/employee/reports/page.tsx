@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -219,9 +220,9 @@ export default function EmployeeReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -243,6 +244,7 @@ export default function EmployeeReportsPage() {
               <Button variant="outline" size="sm" className="p-2">
                 <Heart className="h-4 w-4" />
               </Button>
+              <ThemeToggle size="sm" />
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -263,7 +265,7 @@ export default function EmployeeReportsPage() {
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-yellow-600 mb-2">My Wellness Reports</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">My Wellness Reports</h1>
           <p className="text-gray-600">
             Track your mental health journey and view your progress over time.
           </p>
