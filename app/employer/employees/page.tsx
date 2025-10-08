@@ -453,12 +453,12 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Building className="h-5 w-5 text-white" />
               </div>
@@ -467,8 +467,8 @@ export default function EmployeesPage() {
                 <p className="text-sm text-gray-500">Employer Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Management
               </Button>
               <Button variant="outline" size="sm" className="p-2">
@@ -499,7 +499,7 @@ export default function EmployeesPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-yellow-600 mb-2">Team Management</h1>
@@ -510,7 +510,7 @@ export default function EmployeesPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-8 border-b border-gray-200">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
             <Link href="/employer/dashboard">
               <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
                 Overview
@@ -526,7 +526,7 @@ export default function EmployeesPage() {
             </Link>
           </div>
         </div>
-        <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+        <motion.div className="flex items-center space-x-2 sm:space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -591,7 +591,7 @@ export default function EmployeesPage() {
 
         {/* Stats Cards */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -690,7 +690,7 @@ export default function EmployeesPage() {
           <motion.div variants={itemVariants}>
             <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
@@ -784,7 +784,7 @@ export default function EmployeesPage() {
             /* List View */
             filteredEmployees.length > 0 ? (
               <motion.div
-                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
                 variants={containerVariants}
               >
                 {filteredEmployees.map((employee, index) => (

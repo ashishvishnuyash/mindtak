@@ -349,12 +349,12 @@ export default function EmployerReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group" onClick={() => router.push('/auth/login')}>
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 cursor-pointer group" onClick={() => router.push('/auth/login')}>
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-600 to-green-700 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                 <Shield className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
               </div>
@@ -389,7 +389,7 @@ export default function EmployerReportsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8 sm:mb-10 lg:mb-12">
           <motion.div

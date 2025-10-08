@@ -104,15 +104,17 @@ export default function HomePage() {
     <div className="min-h-screen bg-yellow-50 text-gray-900">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-sm">D</span>
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xs">D</span>
               </div>
-              <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700">Diltak.ai</span>
+              <span className="text-base sm:text-lg md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700">Diltak.ai</span>
             </div>
-            <div className="flex items-center space-x-6">
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
               <Link href="/">
                 <Button variant="ghost" className="text-gray-700 hover:bg-gray-100">
                   Home
@@ -175,6 +177,23 @@ export default function HomePage() {
                 Contact
               </Button>
             </div>
+
+            {/* Mobile Navigation */}
+            <div className="md:hidden flex items-center space-x-2">
+              <Link href="/auth/login">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 h-8">
+                  Login
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-gray-700 border-gray-300 text-xs px-2 py-1 h-8"
+                onClick={openContactModal}
+              >
+                Contact
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -185,11 +204,11 @@ export default function HomePage() {
         whileInView={sectionVariants}
         viewport={{ once: true }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
             <div className="text-left">
               <motion.h1
-                className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl xl:text-7xl mb-6 leading-tight"
+                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-gray-900 mb-4 sm:mb-6 leading-tight"
                 variants={titleVariants}
                 initial="hidden"
                 animate="visible"
@@ -201,7 +220,7 @@ export default function HomePage() {
                   Organizational Well-Being Reimagined
                 </motion.span>
               </motion.h1>
-              <p className="mt-6 text-lg leading-8 text-gray-600 max-w-lg mb-8">
+              <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-6 sm:leading-8 text-gray-600 max-w-full lg:max-w-lg mb-6 sm:mb-8">
                 Advanced AI-powered analytics platform delivering predictive mental health insights for Fortune 500 companies, universities, and healthcare systems.
               </p>
 
@@ -238,7 +257,7 @@ export default function HomePage() {
             <div className="flex justify-center items-center">
               {/* Hero Image - Robot */}
               <motion.div
-                className="relative w-full max-w-full sm:max-w-lg xl:max-w-xl h-[300px] sm:h-[500px] xl:h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 shadow-xl"
+                className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl h-[250px] sm:h-[350px] lg:h-[450px] xl:h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 shadow-xl mx-auto"
                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
@@ -450,7 +469,7 @@ export default function HomePage() {
         whileInView={sectionVariants}
         viewport={{ once: true }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-12 items-center">
             {/* Left side - AI Brain Image */}
             <div className="relative">

@@ -202,12 +202,12 @@ function EmployeeDashboard() {
   const wellnessStatus = latestReport ? getWellnessStatus(latestReport.overall_wellness) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Brain className="h-5 w-5 text-white" />
               </div>
@@ -216,8 +216,8 @@ function EmployeeDashboard() {
                 <p className="text-sm text-gray-500">Employee Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Engineering
               </Button>
               <Button variant="outline" size="sm" className="p-2">
@@ -243,7 +243,7 @@ function EmployeeDashboard() {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8 sm:mb-10 lg:mb-12">
           <motion.div
@@ -262,7 +262,7 @@ function EmployeeDashboard() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-8 border-b border-gray-200">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
             <button
               onClick={() => setActiveTab('Overview')}
               className={`pb-4 px-1 border-b-2 font-medium transition-colors ${
@@ -287,7 +287,7 @@ function EmployeeDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Link href="/employee/reports/new">
             <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
               <CardContent className="p-6">
@@ -341,7 +341,7 @@ function EmployeeDashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
@@ -436,7 +436,7 @@ function EmployeeDashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Wellness Trend Chart */}
           <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>

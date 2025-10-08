@@ -219,12 +219,12 @@ export default function EmployeeReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Brain className="h-5 w-5 text-white" />
               </div>
@@ -233,8 +233,8 @@ export default function EmployeeReportsPage() {
                 <p className="text-sm text-gray-500">Employee Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Engineering
               </Button>
               <Button variant="outline" size="sm" className="p-2">
@@ -260,7 +260,7 @@ export default function EmployeeReportsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-yellow-600 mb-2">My Wellness Reports</h1>
@@ -271,7 +271,7 @@ export default function EmployeeReportsPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-8 border-b border-gray-200">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
             <Link href="/employee/dashboard">
               <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
                 Overview
@@ -289,7 +289,7 @@ export default function EmployeeReportsPage() {
         </div>
         {/* Action Buttons */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <Button
               onClick={fetchReports}
               variant="outline"
@@ -326,7 +326,7 @@ export default function EmployeeReportsPage() {
         <div>
           <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -424,7 +424,7 @@ export default function EmployeeReportsPage() {
                       </div>
 
                       {/* Main Metrics Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
                         <motion.div
                           className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300"
                           whileHover={{ scale: 1.02, y: -2 }}
@@ -483,7 +483,7 @@ export default function EmployeeReportsPage() {
                       </div>
 
                       {/* Additional Metrics */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
                         <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
                           <div className="text-lg font-semibold text-gray-700">{report.work_life_balance}/10</div>
                           <div className="text-xs text-gray-600">Work-Life Balance</div>

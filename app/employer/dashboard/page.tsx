@@ -430,12 +430,12 @@ function EmployerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Building className="h-5 w-5 text-white" />
               </div>
@@ -444,8 +444,8 @@ function EmployerDashboardPage() {
                 <p className="text-sm text-gray-500">Employer Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Management
               </Button>
               <Button variant="outline" size="sm" className="p-2">
@@ -476,7 +476,7 @@ function EmployerDashboardPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-yellow-600 mb-2">Employer Dashboard</h1>
@@ -487,7 +487,7 @@ function EmployerDashboardPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-8 border-b border-gray-200">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
             <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
               Overview
             </button>
@@ -507,7 +507,7 @@ function EmployerDashboardPage() {
         {/* Action Controls */}
         <div className="flex items-center justify-between mb-8">
           <div></div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

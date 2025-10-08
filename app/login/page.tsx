@@ -6,11 +6,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Brain, 
-  Users, 
-  Building, 
-  Shield, 
+import {
+  Brain,
+  Users,
+  Building,
+  Shield,
   ArrowLeft,
   User,
   Crown
@@ -31,7 +31,7 @@ export default function LoginPage() {
   const handleRoleLogin = (role: string) => {
     // For demo purposes, we'll simulate login by redirecting to appropriate dashboard
     // In a real app, this would handle actual authentication
-    
+
     switch (role) {
       case 'employee':
         router.push('/employee/chat');
@@ -88,17 +88,17 @@ export default function LoginPage() {
   const selectedRoleData = roles.find(role => role.id === selectedRole);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 overflow-x-hidden">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
               <Brain className="h-8 w-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900">WellnessHub</span>
             </Link>
             <Link href="/">
-              <Button variant="ghost" className="flex items-center space-x-2">
+              <Button variant="ghost" className="flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base px-2 sm:px-3">
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Home</span>
               </Button>
@@ -107,13 +107,13 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-6 sm:py-8 lg:py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             {selectedRole ? `${selectedRoleData?.title} Login` : 'Choose Your Role'}
           </h1>
           <p className="text-lg text-gray-600">
-            {selectedRole 
+            {selectedRole
               ? `Access your ${selectedRoleData?.title.toLowerCase()} dashboard and features`
               : 'Select your role to access the appropriate dashboard and features'
             }
@@ -140,18 +140,18 @@ export default function LoginPage() {
                     ))}
                   </ul>
                 </div>
-                
+
                 <div className="space-y-3">
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     size="lg"
                     onClick={() => handleRoleLogin(selectedRole)}
                   >
                     Continue as {selectedRoleData?.title}
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
+
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => setSelectedRole('')}
                   >
@@ -171,7 +171,7 @@ export default function LoginPage() {
           // Role selection grid
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {roles.map((role) => (
-              <Card 
+              <Card
                 key={role.id}
                 className={`hover:shadow-lg transition-all duration-300 cursor-pointer ${role.color.replace('text-', 'border-').replace('bg-', 'border-')} hover:scale-105`}
                 onClick={() => setSelectedRole(role.id)}
@@ -202,14 +202,14 @@ export default function LoginPage() {
         <div className="mt-12 text-center">
           <Card className="max-w-2xl mx-auto bg-blue-50 border-blue-200">
             <CardContent className="p-6">
-              <div className="flex items-center justify-center space-x-2 mb-4">
+              <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-4">
                 <Crown className="h-6 w-6 text-blue-600" />
                 <h3 className="text-lg font-semibold text-blue-900">Demo Mode</h3>
               </div>
               <p className="text-blue-700 mb-4">
                 This is a demonstration version. No authentication is required - simply select your role to explore the features.
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs sm:text-sm">
                 <Badge variant="outline" className="text-blue-700">No Login Required</Badge>
                 <Badge variant="outline" className="text-blue-700">Full Feature Access</Badge>
                 <Badge variant="outline" className="text-blue-700">Sample Data</Badge>

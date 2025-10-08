@@ -60,12 +60,12 @@ function ManagerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => router.push('/auth/login')}>
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={() => router.push('/auth/login')}>
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Shield className="h-5 w-5 text-white" />
               </div>
@@ -74,8 +74,8 @@ function ManagerDashboardPage() {
                 <p className="text-sm text-gray-500">Manager Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Management
               </Button>
               <Button variant="outline" size="sm" className="p-2">
@@ -98,7 +98,7 @@ function ManagerDashboardPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-8 sm:mb-10 lg:mb-12">
           <motion.div
@@ -117,7 +117,7 @@ function ManagerDashboardPage() {
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-8 border-b border-gray-200">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
             <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
               Dashboard
             </button>
