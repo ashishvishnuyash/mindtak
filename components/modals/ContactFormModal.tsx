@@ -99,10 +99,10 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="relative">
-          <DialogTitle className="text-2xl font-bold text-gray-900 text-center">
+          <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
             Get Help with Wellness
           </DialogTitle>
-          <p className="text-gray-600 text-center mt-2">
+          <p className="text-gray-600 dark:text-gray-400 text-center mt-2">
             Get platform support, or help with implementing mental health analytics in your organization wellness programs.
           </p>
         </DialogHeader>
@@ -123,7 +123,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="firstName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         First Name
                       </Label>
                       <Input
@@ -138,7 +138,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Last Name
                       </Label>
                       <Input
@@ -155,7 +155,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email
                     </Label>
                     <Input
@@ -171,7 +171,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="organizationType" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="organizationType" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Organization Type
                     </Label>
                     <Select value={formData.organizationType} onValueChange={handleSelectChange} disabled={isSubmitting}>
@@ -188,7 +188,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="organization" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="organization" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Organization
                     </Label>
                     <Input
@@ -204,7 +204,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="supportRequirements" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="supportRequirements" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Support Requirements
                     </Label>
                     <Textarea
@@ -268,8 +268,8 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                   >
                     <CheckCircle className="h-8 w-8 text-green-600" />
                   </motion.div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Thank You!</h3>
-                  <p className="text-gray-600 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Thank You!</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-2">
                     Your message has been sent successfully. We'll get back to you soon!
                   </p>
                   <p className="text-sm text-gray-500">

@@ -228,7 +228,7 @@ export default function EmployeesPage() {
   };
 
   const getRiskBadgeColor = (riskLevel?: 'low' | 'medium' | 'high') => {
-    if (!riskLevel) return 'bg-gray-100 text-gray-700';
+    if (!riskLevel) return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
     const colors = {
       low: 'bg-green-100 text-green-700 border-green-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -241,7 +241,7 @@ export default function EmployeesPage() {
     switch (role) {
       case 'manager': return <Crown className="h-4 w-4 text-yellow-600" />;
       case 'hr': return <Shield className="h-4 w-4 text-blue-600" />;
-      default: return <User className="h-4 w-4 text-gray-600" />;
+      default: return <User className="h-4 w-4 text-gray-600 dark:text-gray-400" />;
     }
   };
 
@@ -301,7 +301,7 @@ export default function EmployeesPage() {
 
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <h3 className="font-semibold text-gray-900 text-lg">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
                 {employee.first_name} {employee.last_name}
               </h3>
               <motion.div
@@ -314,7 +314,7 @@ export default function EmployeesPage() {
                 {employee.role}
               </Badge>
             </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
+            <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
               <span className="flex items-center">
                 <Mail className="h-3 w-3 mr-1" />
                 {employee.email}
@@ -335,11 +335,11 @@ export default function EmployeesPage() {
               </Badge>
             )}
             <div className="text-right">
-              <div className="text-lg font-semibold text-gray-900">
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {employee.average_wellness || 'N/A'}
                 {employee.average_wellness && '/10'}
               </div>
-              <div className="text-xs text-gray-500">Wellness</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Wellness</div>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -443,7 +443,7 @@ export default function EmployeesPage() {
           >
             <Loader2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
           </motion.div>
-          <p className="text-lg text-gray-600">Loading your team...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading your team...</p>
         </motion.div>
       </div>
     );
@@ -629,7 +629,7 @@ export default function EmployeesPage() {
                     <CheckCircle className="h-8 w-8 text-green-600" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {employees.filter(emp => emp.latest_report?.risk_level === 'low').length}
                     </div>
                     <p className="text-sm text-gray-600">Low Risk</p>
@@ -650,7 +650,7 @@ export default function EmployeesPage() {
                     <Clock className="h-8 w-8 text-yellow-600" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {employees.filter(emp => emp.latest_report?.risk_level === 'medium').length}
                     </div>
                     <p className="text-sm text-gray-600">Medium Risk</p>
@@ -671,7 +671,7 @@ export default function EmployeesPage() {
                     <AlertTriangle className="h-8 w-8 text-red-600" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {employees.filter(emp => emp.latest_report?.risk_level === 'high').length}
                     </div>
                     <p className="text-sm text-gray-600">High Risk</p>
@@ -690,7 +690,7 @@ export default function EmployeesPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
+            <Card className="mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   <div className="relative">
@@ -746,9 +746,9 @@ export default function EmployeesPage() {
         >
           {viewMode === 'hierarchy' ? (
             <motion.div variants={itemVariants}>
-              <Card className="bg-white border border-gray-200 shadow-sm">
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-xl font-bold text-gray-900">
+                  <CardTitle className="flex items-center text-xl font-bold text-gray-900 dark:text-gray-100">
                     <motion.div
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.6 }}
@@ -775,8 +775,8 @@ export default function EmployeesPage() {
                       >
                         <Building className="h-8 w-8 text-white" />
                       </motion.div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Hierarchy Data</h3>
-                      <p className="text-gray-600">Add employees and set up manager relationships to see the organizational structure.</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Hierarchy Data</h3>
+                      <p className="text-gray-600 dark:text-gray-400">Add employees and set up manager relationships to see the organizational structure.</p>
                     </motion.div>
                   )}
                 </CardContent>
@@ -812,7 +812,7 @@ export default function EmployeesPage() {
                             </motion.div>
                             <div>
                               <div className="flex items-center space-x-2 mb-1">
-                                <h3 className="text-xl font-semibold text-gray-900">
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                                   {employee.first_name} {employee.last_name}
                                 </h3>
                                 <motion.div
@@ -955,8 +955,8 @@ export default function EmployeesPage() {
                     >
                       <Users className="h-8 w-8 text-white" />
                     </motion.div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Team Members Found</h3>
-                    <p className="text-gray-600 mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Team Members Found</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
                       {searchTerm || filterDepartment !== 'all' || filterRisk !== 'all'
                         ? 'No team members match your current filters. Try adjusting your search criteria.'
                         : 'You haven\'t added any team members yet. Start building your team!'

@@ -201,7 +201,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
           className="text-center"
         >
           <Loader2 className="h-16 w-16 animate-spin text-blue-400 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Loading team dashboard...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading team dashboard...</p>
         </motion.div>
       </div>
     );
@@ -230,10 +230,10 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
               <Crown className="h-6 w-6 text-white" />
             </motion.div>
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
                 {manager.first_name}&apos;s Team Dashboard
               </h1>
-              <p className="text-lg text-gray-600 mt-1">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mt-1">
                 Manage and monitor your team&apos;s wellness and performance
               </p>
             </div>

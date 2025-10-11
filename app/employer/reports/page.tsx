@@ -339,7 +339,7 @@ export default function EmployerReportsPage() {
           >
             <FileText className="h-16 w-16 text-green-600 mx-auto mb-4" />
           </motion.div>
-          <p className="text-lg text-gray-600">Loading wellness reports...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading wellness reports...</p>
         </motion.div>
       </div>
     );
@@ -370,11 +370,11 @@ export default function EmployerReportsPage() {
               <Button variant="outline" size="sm" className="hidden md:flex text-emerald-700 border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 font-semibold shadow-sm hover:shadow-md transition-all duration-300">
                 Management
               </Button>
-              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-                <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
               </Button>
-              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300">
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
               </Button>
               <ThemeToggle size="sm" />
               <Button
@@ -494,7 +494,7 @@ export default function EmployerReportsPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.05, y: -8 }}>
-            <Card className="bg-white/90 backdrop-blur-sm border border-gray-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-blue-300/50 group">
+            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-blue-300/50 dark:hover:border-blue-600/50 group">
               <CardContent className="p-4 sm:p-6 lg:p-8">
                 <div className="flex items-center space-x-3 sm:space-x-4">
                   <motion.div
@@ -505,8 +505,8 @@ export default function EmployerReportsPage() {
                     <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">{reports.length}</div>
-                    <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Reports</p>
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent leading-tight">{reports.length}</div>
+                    <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Reports</p>
                   </div>
                 </div>
               </CardContent>
@@ -514,7 +514,7 @@ export default function EmployerReportsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.05, y: -8 }}>
-            <Card className="bg-white/90 backdrop-blur-sm border border-gray-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-emerald-300/50 group">
+            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-emerald-300/50 dark:hover:border-emerald-600/50 group">
               <CardContent className="p-8">
                 <div className="flex items-center space-x-4">
                   <motion.div
@@ -531,7 +531,7 @@ export default function EmployerReportsPage() {
                         : 0
                       }/10
                     </div>
-                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Avg Wellness</p>
+                    <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Avg Wellness</p>
                   </div>
                 </div>
               </CardContent>
@@ -549,10 +549,10 @@ export default function EmployerReportsPage() {
                     <AlertTriangle className="h-8 w-8 text-red-600" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {reports.filter(r => r.risk_level === 'high').length}
                     </div>
-                    <p className="text-sm text-gray-600">High Risk</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">High Risk</p>
                   </div>
                 </div>
               </CardContent>
@@ -570,7 +570,7 @@ export default function EmployerReportsPage() {
                     <Calendar className="h-8 w-8 text-purple-600" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {reports.filter(r => {
                         const reportDate = new Date(r.created_at);
                         const weekAgo = new Date();
@@ -578,7 +578,7 @@ export default function EmployerReportsPage() {
                         return reportDate >= weekAgo;
                       }).length}
                     </div>
-                    <p className="text-sm text-gray-600">This Week</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">This Week</p>
                   </div>
                 </div>
               </CardContent>
@@ -690,7 +690,7 @@ export default function EmployerReportsPage() {
                             </div>
                           </motion.div>
                           <div>
-                            <h3 className="text-xl font-semibold text-gray-900">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                               {report.employee ? `${report.employee.first_name} ${report.employee.last_name}` : 'Employee Report'}
                             </h3>
                             <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -719,7 +719,7 @@ export default function EmployerReportsPage() {
                         <div className="flex items-center space-x-4">
                           {getRiskLevelBadge(report.risk_level)}
                           <div className="text-right">
-                            <div className="text-3xl font-bold text-gray-900">
+                            <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                               {report.overall_wellness}/10
                             </div>
                             <div className="text-sm text-gray-600">Overall Wellness</div>
@@ -729,7 +729,7 @@ export default function EmployerReportsPage() {
                             whileTap={{ scale: 0.95 }}
                           >
                             <Link href={`/employer/reports/${report.id}`}>
-                              <Button variant="outline" size="sm" className="bg-white/60 hover:bg-green-50">
+                              <Button variant="outline" size="sm" className="bg-white/60 dark:bg-gray-800/60 hover:bg-green-50 dark:hover:bg-green-900/20 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -859,8 +859,8 @@ export default function EmployerReportsPage() {
                   >
                     <FileText className="h-8 w-8 text-white" />
                   </motion.div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Reports Found</h3>
-                  <p className="text-gray-600 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Reports Found</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
                     {searchTerm || filterRisk !== 'all' || filterDepartment !== 'all'
                       ? 'No reports match your current filters. Try adjusting your search criteria.'
                       : 'No wellness reports have been submitted yet. Encourage your team to start tracking their wellness!'
@@ -882,7 +882,7 @@ export default function EmployerReportsPage() {
           <motion.div variants={itemVariants} className="mt-8">
             <Card className="bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
                   <Shield className="h-5 w-5 mr-2 text-green-600" />
                   Privacy & Confidentiality
                 </h3>

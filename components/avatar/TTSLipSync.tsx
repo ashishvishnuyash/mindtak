@@ -63,6 +63,11 @@ export class TTSLipSync {
 
         this.utterance.onerror = (event) => {
           this.isPlaying = false;
+          console.error('Speech synthesis error:', event);
+          // Clean up on error
+          if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+          }
           reject(new Error(`TTS Error: ${event.error}`));
         };
 
@@ -108,9 +113,12 @@ export class TTSLipSync {
    * Stop current speech
    */
   stop() {
-    if (this.isPlaying) {
+    this.isPlaying = false;
+    if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      this.isPlaying = false;
+    }
+    if (this.utterance) {
+      this.utterance = null;
     }
   }
 
@@ -187,14 +195,23 @@ export function useTTSLipSync() {
       console.error('TTS Error:', error);
       setIsPlaying(false);
       setCurrentViseme(null);
+      // Ensure speech synthesis is properly cleaned up
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     }
   }, []);
 
   const stop = useCallback(() => {
     if (ttsRef.current) {
       ttsRef.current.stop();
-      setIsPlaying(false);
-      setCurrentViseme(null);
+    }
+    // Ensure state is properly reset
+    setIsPlaying(false);
+    setCurrentViseme(null);
+    // Force stop speech synthesis
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
   }, []);
 

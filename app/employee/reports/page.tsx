@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Navbar } from '@/components/shared/navbar';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -30,12 +29,14 @@ import {
   Battery,
   Smile,
   ArrowRight,
-  Download
+  Download,
+  BarChart3
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { MentalHealthReport } from '@/types';
+import InteractiveAnalytics from '@/components/analytics/InteractiveAnalytics';
 
 
 export default function EmployeeReportsPage() {
@@ -46,6 +47,7 @@ export default function EmployeeReportsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRisk, setFilterRisk] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
+  const [viewMode, setViewMode] = useState<'analytics' | 'list'>('analytics');
   const router = useRouter();
 
   useEffect(() => {
@@ -97,7 +99,7 @@ export default function EmployeeReportsPage() {
   const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high' | undefined | null) => {
     // Provide a safe default if riskLevel is undefined or null
     const safeRiskLevel = riskLevel || 'low';
-    
+
     const colors = {
       low: 'bg-green-100 text-green-700 border-green-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -124,7 +126,7 @@ export default function EmployeeReportsPage() {
         range: '30d',
         risk: filterRisk
       });
-      
+
       // Redirect to the export page
       router.push(`/export/report?${params.toString()}`);
     } catch (error) {
@@ -209,7 +211,7 @@ export default function EmployeeReportsPage() {
           >
             <Brain className="h-16 w-16 text-green-600 mx-auto mb-4" />
           </motion.div>
-          <p className="text-lg text-gray-600">Loading your wellness reports...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading your wellness reports...</p>
         </motion.div>
       </div>
     );
@@ -230,8 +232,8 @@ export default function EmployeeReportsPage() {
                 <Brain className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
-                <p className="text-sm text-gray-500">Employee Portal</p>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Employee Portal</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -245,9 +247,9 @@ export default function EmployeeReportsPage() {
                 <Heart className="h-4 w-4" />
               </Button>
               <ThemeToggle size="sm" />
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="text-green-600 border-green-200"
                 onClick={() => {
                   auth.signOut();
@@ -266,16 +268,16 @@ export default function EmployeeReportsPage() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">My Wellness Reports</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Track your mental health journey and view your progress over time.
           </p>
         </div>
 
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <Link href="/employee/dashboard">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Overview
               </button>
             </Link>
@@ -283,10 +285,38 @@ export default function EmployeeReportsPage() {
               Analytics
             </button>
             <Link href="/employee/chat">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 AI Friend
               </button>
             </Link>
+          </div>
+        </div>
+
+        {/* View Mode Toggle */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('analytics')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'analytics'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+              >
+                <BarChart3 className="h-4 w-4 mr-2 inline" />
+                Interactive Analytics
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'list'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+              >
+                <Calendar className="h-4 w-4 mr-2 inline" />
+                Report List
+              </button>
+            </div>
           </div>
         </div>
         {/* Action Buttons */}
@@ -324,58 +354,75 @@ export default function EmployeeReportsPage() {
           </Link>
         </div>
 
-        {/* Filters and Search */}
-        <div>
-          <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search reports..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-white border-gray-300 focus:border-green-500 focus:ring-green-500"
-                  />
+        {/* Filters and Search - Only show in list view */}
+        {viewMode === 'list' && (
+          <div>
+            <Card className="mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search reports..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+
+                  <Select value={filterRisk} onValueChange={setFilterRisk}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Filter by risk" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Risk Levels</SelectItem>
+                      <SelectItem value="low">Low Risk</SelectItem>
+                      <SelectItem value="medium">Medium Risk</SelectItem>
+                      <SelectItem value="high">High Risk</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="oldest">Oldest First</SelectItem>
+                      <SelectItem value="wellness-high">Highest Wellness</SelectItem>
+                      <SelectItem value="wellness-low">Lowest Wellness</SelectItem>
+                      <SelectItem value="stress-high">Highest Stress</SelectItem>
+                      <SelectItem value="stress-low">Lowest Stress</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <span>{filteredReports.length} of {reports.length} reports</span>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-                <Select value={filterRisk} onValueChange={setFilterRisk}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Filter by risk" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Risk Levels</SelectItem>
-                    <SelectItem value="low">Low Risk</SelectItem>
-                    <SelectItem value="medium">Medium Risk</SelectItem>
-                    <SelectItem value="high">High Risk</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="bg-white border-gray-300 focus:border-green-500 focus:ring-green-500">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest First</SelectItem>
-                    <SelectItem value="oldest">Oldest First</SelectItem>
-                    <SelectItem value="wellness-high">Highest Wellness</SelectItem>
-                    <SelectItem value="wellness-low">Lowest Wellness</SelectItem>
-                    <SelectItem value="stress-high">Highest Stress</SelectItem>
-                    <SelectItem value="stress-low">Lowest Stress</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <div className="text-sm text-gray-600 flex items-center">
-                  <span>{filteredReports.length} of {reports.length} reports</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Interactive Analytics View */}
+        {viewMode === 'analytics' && sortedReports.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <InteractiveAnalytics
+              data={sortedReports[0]}
+              showComparison={sortedReports.length > 1}
+              previousData={sortedReports[1]}
+            />
+          </motion.div>
+        )}
 
         {/* Reports List */}
-        {sortedReports.length > 0 ? (
+        {viewMode === 'list' && sortedReports.length > 0 && (
           <motion.div
             className="space-y-6"
             initial="hidden"
@@ -386,7 +433,7 @@ export default function EmployeeReportsPage() {
               const previousReport = sortedReports[index + 1];
               return (
                 <motion.div key={report.id} variants={itemVariants}>
-                  <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+                  <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
                         <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -397,7 +444,7 @@ export default function EmployeeReportsPage() {
                             <Calendar className="h-6 w-6 text-white" />
                           </motion.div>
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                               {new Date(report.created_at).toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 year: 'numeric',
@@ -417,7 +464,7 @@ export default function EmployeeReportsPage() {
                         <div className="flex items-center space-x-4">
                           {getRiskLevelBadge(report.risk_level)}
                           <div className="text-right">
-                            <div className="text-3xl font-bold text-gray-900">
+                            <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                               {report.overall_wellness}/10
                             </div>
                             <div className="text-sm text-gray-600">Overall Wellness</div>
@@ -541,18 +588,25 @@ export default function EmployeeReportsPage() {
               );
             })}
           </motion.div>
-        ) : (
-          <motion.div variants={itemVariants}>
-            <Card className="bg-white border border-gray-200 shadow-sm">
+        )}
+
+        {/* Empty State */}
+        {sortedReports.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
               <CardContent className="p-12 text-center">
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 >
-                  <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                 </motion.div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">No Reports Found</h3>
-                <p className="text-gray-600 mb-6 text-lg">
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No Reports Found</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
                   {searchTerm || filterRisk !== 'all'
                     ? 'No reports match your current filters. Try adjusting your search criteria.'
                     : 'You haven\'t created any wellness reports yet. Start tracking your mental health today!'

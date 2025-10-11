@@ -149,9 +149,6 @@ export default function LipSyncDemo() {
                 <AvatarController
                   emotion={currentEmotion}
                   speaking={isSpeaking}
-                  lipSyncSource={lipSyncSource}
-                  audioElement={audioRef.current || undefined}
-                  speechText={demoMode === 'tts' ? ttsText : undefined}
                 />
               </div>
               

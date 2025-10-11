@@ -77,16 +77,16 @@ const UserCard: React.FC<UserCardProps> = ({
   };
 
   return (
-    <div className={`ml-${level * 6}`}>
+    <div className={`ml-0 sm:ml-${Math.min(level * 4, 16)}`}>
       <Card 
         className={`mb-2 hover:shadow-md transition-shadow cursor-pointer ${
-          compactView ? 'p-2' : 'p-4'
+          compactView ? 'p-1 sm:p-2' : 'p-2 sm:p-4'
         }`}
         onClick={() => onUserSelect?.(user)}
       >
-        <CardContent className={compactView ? 'p-2' : 'p-4'}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+        <CardContent className={compactView ? 'p-2 sm:p-3' : 'p-3 sm:p-4'}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
               {hasChildren && (
                 <Button
                   variant="ghost"
@@ -95,7 +95,7 @@ const UserCard: React.FC<UserCardProps> = ({
                     e.stopPropagation();
                     onToggle(user.id);
                   }}
-                  className="p-1 h-6 w-6"
+                  className="p-1 h-6 w-6 flex-shrink-0"
                 >
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4" />
@@ -105,45 +105,47 @@ const UserCard: React.FC<UserCardProps> = ({
                 </Button>
               )}
               
-              <Avatar className={compactView ? 'h-8 w-8' : 'h-10 w-10'}>
+              <Avatar className={`${compactView ? 'h-8 w-8' : 'h-10 w-10'} flex-shrink-0`}>
                 <AvatarFallback className="bg-blue-100 text-blue-700">
                   {user.first_name?.[0]}{user.last_name?.[0]}
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
-                  <h3 className={`font-semibold text-gray-900 ${
-                    compactView ? 'text-sm' : 'text-base'
+                  <h3 className={`font-semibold text-gray-900 dark:text-gray-100 truncate ${
+                    compactView ? 'text-sm' : 'text-sm sm:text-base'
                   }`}>
                     {user.first_name} {user.last_name}
                   </h3>
-                  {getRoleIcon(user.role)}
+                  <div className="flex-shrink-0">
+                    {getRoleIcon(user.role)}
+                  </div>
                 </div>
                 
-                <div className="flex items-center space-x-2 mt-1">
-                  <p className={`text-gray-600 ${compactView ? 'text-xs' : 'text-sm'}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mt-1 space-y-1 sm:space-y-0">
+                  <p className={`text-gray-600 dark:text-gray-400 truncate ${compactView ? 'text-xs' : 'text-xs sm:text-sm'}`}>
                     {user.position || 'Employee'}
                   </p>
                   {user.department && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs w-fit">
                       <Building className="h-3 w-3 mr-1" />
-                      {user.department}
+                      <span className="truncate max-w-20">{user.department}</span>
                     </Badge>
                   )}
                 </div>
                 
                 {!compactView && (
-                  <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-2 space-y-1 sm:space-y-0 text-xs text-gray-500 dark:text-gray-400">
                     {user.email && (
-                      <div className="flex items-center space-x-1">
-                        <Mail className="h-3 w-3" />
-                        <span>{user.email}</span>
+                      <div className="flex items-center space-x-1 min-w-0">
+                        <Mail className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{user.email}</span>
                       </div>
                     )}
                     {user.phone && (
                       <div className="flex items-center space-x-1">
-                        <Phone className="h-3 w-3" />
+                        <Phone className="h-3 w-3 flex-shrink-0" />
                         <span>{user.phone}</span>
                       </div>
                     )}
@@ -152,17 +154,17 @@ const UserCard: React.FC<UserCardProps> = ({
               </div>
             </div>
             
-            <div className="flex flex-col items-end space-y-2">
-              <Badge className={getRoleBadgeColor(user.role)}>
+            <div className="flex flex-row sm:flex-col items-start sm:items-end space-x-2 sm:space-x-0 sm:space-y-2 flex-wrap sm:flex-nowrap">
+              <Badge className={`${getRoleBadgeColor(user.role)} text-xs whitespace-nowrap`}>
                 {user.role.toUpperCase()}
               </Badge>
               
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs whitespace-nowrap">
                 {getHierarchyLevel()}
               </Badge>
               
               {hasChildren && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs whitespace-nowrap">
                   {children.length} {children.length === 1 ? 'Report' : 'Reports'}
                 </Badge>
               )}
@@ -170,7 +172,7 @@ const UserCard: React.FC<UserCardProps> = ({
               {showWellnessIndicators && (
                 <div className="flex items-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-xs text-gray-500">Wellness OK</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Wellness OK</span>
                 </div>
               )}
             </div>
@@ -180,7 +182,7 @@ const UserCard: React.FC<UserCardProps> = ({
       
       {/* Render children if expanded */}
       {hasChildren && isExpanded && (
-        <div className="ml-4 border-l-2 border-gray-200 pl-4">
+        <div className="ml-2 sm:ml-4 border-l-2 border-gray-200 dark:border-gray-600 pl-2 sm:pl-4">
           {children.map((child) => (
             <UserCard
               key={child.user.id}
@@ -249,13 +251,14 @@ export const OrgChart: React.FC<OrgChartProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Organization Chart</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Organization Chart</h2>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setExpandedNodes(new Set(hierarchy.map(n => n.user.id)))}
+            className="text-xs sm:text-sm px-2 sm:px-3"
           >
             Expand All
           </Button>
@@ -263,6 +266,7 @@ export const OrgChart: React.FC<OrgChartProps> = ({
             variant="outline"
             size="sm"
             onClick={() => setExpandedNodes(new Set())}
+            className="text-xs sm:text-sm px-2 sm:px-3"
           >
             Collapse All
           </Button>

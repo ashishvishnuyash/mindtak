@@ -4,7 +4,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/shared/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { AvatarController } from "@/components/avatar";
+import { AvatarController, useTTSLipSync } from "@/components/avatar";
+import AvatarSettings, { useAvatarSettings } from "@/components/avatar/AvatarSettings";
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 import {
@@ -39,6 +39,7 @@ import {
   X,
   Upload,
   UserCircle, // Replace User3D with UserCircle
+  Settings,
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
@@ -186,7 +187,7 @@ export default function EmployeeChatPage() {
 
   // Voice/Call state
   const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const [isAvatarMode, setIsAvatarMode] = useState(false);
+  const [isAvatarMode, setIsAvatarMode] = useState(true);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -194,9 +195,17 @@ export default function EmployeeChatPage() {
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
-  
+
   // Avatar state
   const [currentAvatarEmotion, setCurrentAvatarEmotion] = useState<string>("");
+
+  // Avatar Settings
+  const { config: avatarConfig, updateConfig: updateAvatarConfig, isOpen: isSettingsOpen, toggleSettings } = useAvatarSettings();
+  
+  // Enhanced TTS with lip sync
+  const { speak: speakWithLipSync, stop: stopTTS, isPlaying: isTTSPlaying } = useTTSLipSync();
+  const [currentTTSText, setCurrentTTSText] = useState<string>("");
+  const [lastAIMessage, setLastAIMessage] = useState<string>("");
 
   // File upload state
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -207,6 +216,9 @@ export default function EmployeeChatPage() {
   const [deepConversation, setDeepConversation] = useState(true);
 
   const [processingAudio, setProcessingAudio] = useState(false);
+
+  // Options panel state
+  const [showOptionsPanel, setShowOptionsPanel] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -261,52 +273,50 @@ export default function EmployeeChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Text to speech function
-  const speakText = (text: string) => {
-    if (!audioEnabled || !("speechSynthesis" in window)) return;
-
+  // Enhanced TTS with lip sync
+  const speakText = async (text: string) => {
+    if (!audioEnabled) return;
+    
     // Stop any current speech
+    stopTTS();
     window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-
-    utterance.volume = 1;
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    synthesisRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // Audio recording controls
-  const startRecording = async () => {
-    const success = await audioRecorderRef.current.startRecording();
-    if (success) {
-      setIsRecording(true);
-      toast.success("Recording started");
+    
+    setCurrentTTSText(text);
+    setIsSpeaking(true);
+    
+    if (isAvatarMode) {
+      // Use enhanced TTS with lip sync
+      try {
+        await speakWithLipSync(text, {
+          rate: 0.9,
+          pitch: 1.0,
+          volume: 1.0
+        });
+      } catch (error) {
+        console.error('Enhanced TTS Error:', error);
+        // Fallback to regular TTS
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(utterance);
+      }
     } else {
-      toast.error(
-        "Failed to start recording. Please check microphone permissions."
-      );
+      // Regular TTS for non-avatar mode
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      synthesisRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
     }
   };
 
-  const stopRecording = async () => {
-    setIsRecording(false);
-    setProcessingAudio(true);
-    const audioBlob = await audioRecorderRef.current.stopRecording();
-
-    if (audioBlob) {
-      await processAudioMessage(audioBlob);
-    } else {
-      toast.error("Failed to process audio recording");
-    }
-
-    setProcessingAudio(false);
-  };
+  // Audio recording controls (moved to enhanced version below)
 
   const processAudioMessage = async (audioBlob: Blob) => {
     try {
@@ -384,10 +394,8 @@ export default function EmployeeChatPage() {
       setSessionId(newSessionDoc.id);
 
       // Add welcome message from AI
-      const welcomeMessageContent = `Hello ${
-        user!.first_name || "there"
-      }! I'm your confidential AI wellness assistant. Let's chat for a few minutes about how you're doing. 
-`;
+      const welcomeMessageContent = `Hello ${user!.first_name || "there"
+        }! How are you?`;
       await addMessageToDb(welcomeMessageContent, "ai", newSessionDoc.id);
 
       // Set up real-time listener for messages
@@ -451,22 +459,22 @@ export default function EmployeeChatPage() {
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       ];
-      
+
       if (file.size > maxSize) {
         toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
         return false;
       }
-      
+
       if (!supportedTypes.includes(file.type)) {
         toast.error(`File type ${file.type} is not supported.`);
         return false;
       }
-      
+
       return true;
     });
-    
+
     setAttachedFiles(prev => [...prev, ...validFiles]);
-    
+
     // Clear the input
     if (event.target) {
       event.target.value = '';
@@ -486,12 +494,12 @@ export default function EmployeeChatPage() {
     // Check if message contains file attachment indicators
     const fileAttachmentRegex = /📎\s+([^\n,]+)/g;
     const hasAttachments = fileAttachmentRegex.test(content);
-    
+
     if (hasAttachments) {
       const parts = content.split('\n\nAttached files:');
       const messageText = parts[0];
       const fileList = parts[1];
-      
+
       return (
         <div>
           {messageText && (
@@ -511,7 +519,7 @@ export default function EmployeeChatPage() {
         </div>
       );
     }
-    
+
     return (
       <div className="prose prose-sm max-w-none">
         <ReactMarkdown>{content}</ReactMarkdown>
@@ -554,7 +562,7 @@ export default function EmployeeChatPage() {
       if (attachedFiles.length > 0) {
         // Handle file upload
         const formData = new FormData();
-        
+
         // Add JSON data
         formData.append('data', JSON.stringify({
           messages: messageHistoryForApi,
@@ -602,6 +610,9 @@ export default function EmployeeChatPage() {
       if (result.type === "message") {
         await addMessageToDb(result.data.content, "ai", sessionId);
         
+        // Store the last AI message for lip sync
+        setLastAIMessage(result.data.content);
+
         // Set avatar emotion based on message content
         if (isAvatarMode) {
           // Simple emotion detection
@@ -620,8 +631,8 @@ export default function EmployeeChatPage() {
             setCurrentAvatarEmotion('IDLE');
           }
         }
-        // Speak the AI response in voice mode
-        if (isVoiceMode && audioEnabled) {
+        // Speak the AI response in voice mode or avatar mode
+        if ((isVoiceMode || isAvatarMode) && audioEnabled) {
           speakText(result.data.content);
         }
       } else {
@@ -737,13 +748,12 @@ export default function EmployeeChatPage() {
                   report.sleep_quality +
                   (11 - report.stress_score) +
                   (11 - report.anxious_level)) /
-                  8
+                8
               )
             )
           ),
-          comments: `AI-generated report from ${
-            isVoiceMode ? "voice" : "text"
-          } session`,
+          comments: `AI-generated report from ${isVoiceMode ? "voice" : "text"
+            } session`,
           ai_analysis:
             report.complete_report || "Report generated successfully",
           sentiment_score: Math.max(0, Math.min(1, report.mood / 10)),
@@ -800,6 +810,37 @@ export default function EmployeeChatPage() {
     }
   };
 
+  // Enhanced recording functionality with lip sync feedback
+  const startRecording = async () => {
+    const success = await audioRecorderRef.current.startRecording();
+    if (success) {
+      setIsRecording(true);
+      if (isAvatarMode && !isVoiceMode) {
+        toast.success("Microphone test started - speak to see lip sync");
+      } else {
+        toast.success("Recording started");
+      }
+    } else {
+      toast.error(
+        "Failed to start recording. Please check microphone permissions."
+      );
+    }
+  };
+
+  const stopRecording = async () => {
+    setIsRecording(false);
+    setProcessingAudio(true);
+    const audioBlob = await audioRecorderRef.current.stopRecording();
+
+    if (audioBlob) {
+      await processAudioMessage(audioBlob);
+    } else {
+      toast.error("Failed to process audio recording");
+    }
+
+    setProcessingAudio(false);
+  };
+
   const toggleSpeaking = () => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
@@ -836,16 +877,10 @@ export default function EmployeeChatPage() {
               <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Engineering
               </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <Bot className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <UserCircle className="h-4 w-4" />
-              </Button>
               <ThemeToggle size="sm" />
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="text-green-600 border-green-200"
                 onClick={async () => {
                   try {
@@ -865,71 +900,281 @@ export default function EmployeeChatPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">
-            AI Wellness Assistant
-          </h1>
-          <p className="text-gray-600">
-            Your confidential space to reflect on your well-being.
-          </p>
+      {/* Tab Navigation */}
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
+        <div className="flex space-x-4 sm:space-x-6 md:space-x-8 overflow-x-auto">
+          <button
+            onClick={() => router.push('/employee/dashboard')}
+            className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => router.push('/employee/reports')}
+            className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+          >
+            Analytics
+          </button>
+          <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+            AI Friend
+          </button>
         </div>
+      </div>
 
-        {/* Tab Navigation */}
-        <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
-            <Link href="/employee/dashboard">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                Overview
-              </button>
-            </Link>
-            <Link href="/employee/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                Analytics
-              </button>
-            </Link>
-            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
-              AI Friend
-            </button>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+      {/* Full Screen Chat Container */}
+      <div className="flex flex-col h-[calc(100vh-8rem)] relative">
+        {/* Options Toggle Button - Floating */}
+        <Button
+          onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+          className="fixed top-20 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3 shadow-lg"
+          size="sm"
         >
-            <Card className="flex flex-col item-center justify-center bg-white border border-gray-200 shadow-sm w-auto rounded-3xl overflow-hidden">
-              <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 sm:space-x-3">
-                    <motion.div
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                      className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-lg"
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Collapsible Options Panel - Vertical Dropdown */}
+        {showOptionsPanel && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setShowOptionsPanel(false)}
+            />
+
+            {/* Vertical Scrollable Options Panel */}
+            <motion.div
+              initial={{ y: -300, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -300, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed top-16 right-4 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl z-50 max-h-96 overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">AI Friend Options</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowOptionsPanel(false)}
+                  className="p-1"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="overflow-y-auto scrollbar-hide max-h-80">
+                <div className="p-4 space-y-3">
+                  {/* Avatar Controls */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Avatar Controls</h4>
+
+                    {/* Enable/Disable Avatar */}
+                    <Button
+                      variant={isAvatarMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setIsAvatarMode(!isAvatarMode)}
+                      disabled={loading || sessionEnded}
+                      className="w-full justify-start text-sm"
                     >
-                      <Sparkles className="h-5 w-5 text-white" />
-                    </motion.div>
-                    <span className="text-gray-900 font-semibold">Wellness Chat</span>
+                      <UserCircle className="h-4 w-4 mr-2" />
+                      {isAvatarMode ? "Disable Avatar" : "Enable Avatar"}
+                    </Button>
+
+                    {/* Avatar Settings */}
+                    {isAvatarMode && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleSettings}
+                        disabled={loading || sessionEnded}
+                        className="w-full justify-start text-sm"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Avatar Settings
+                      </Button>
+                    )}
+
+                    {/* Lip Sync Testing */}
+                    {isAvatarMode && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (isRecording) {
+                              stopRecording();
+                            } else {
+                              startRecording();
+                            }
+                          }}
+                          disabled={loading || sessionEnded}
+                          className="w-full justify-start text-sm"
+                        >
+                          <Mic className="h-4 w-4 mr-2" />
+                          {isRecording ? "Stop Mic Test" : "Test Microphone"}
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const testText = "Hello! This is a test of the text-to-speech lip sync system. Watch my mouth move as I speak!";
+                            speakText(testText);
+                          }}
+                          disabled={loading || sessionEnded || isSpeaking}
+                          className="w-full justify-start text-sm"
+                        >
+                          <Volume2 className="h-4 w-4 mr-2" />
+                          Test TTS Lip Sync
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* File Controls */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">File Controls</h4>
+
+                    {/* Add Images */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.multiple = true;
+                        input.accept = 'image/*';
+                        input.onchange = (e) => handleFileSelect(e as any);
+                        input.click();
+                      }}
+                      disabled={loading || sessionEnded}
+                      className="w-full justify-start text-sm"
+                    >
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      Add Images
+                    </Button>
+
+                    {/* Add Files */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.multiple = true;
+                        input.accept = '.txt,.pdf,.doc,.docx';
+                        input.onchange = (e) => handleFileSelect(e as any);
+                        input.click();
+                      }}
+                      disabled={loading || sessionEnded}
+                      className="w-full justify-start text-sm"
+                    >
+                      <Paperclip className="h-4 w-4 mr-2" />
+                      Add Files
+                    </Button>
+                  </div>
+
+                  {/* Chat Features */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Chat Features</h4>
+
+                    {/* Deep Conversation */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        toast.info("🚀 Deep Conversation mode is coming soon! This exciting feature will provide enhanced AI analysis with real-time data and advanced reasoning capabilities.", {
+                          duration: 5000,
+                          style: {
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '14px',
+                            padding: '16px',
+                            boxShadow: '0 10px 25px rgba(102, 126, 234, 0.3)',
+                          },
+                        });
+                      }}
+                      disabled={loading || sessionEnded}
+                      className="w-full justify-start text-sm text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                    >
+                      <Brain className="h-4 w-4 mr-2" />
+                      Deep Conversation
+                      <span className="ml-auto text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">Soon</span>
+                    </Button>
+                  </div>
+
+                  {/* Lip Sync Help */}
+                  {isAvatarMode && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Lip Sync Info</h4>
+                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-xs text-blue-800 dark:text-blue-200">
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            <span>🎙️ Microphone: Real-time lip sync</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span>🎤 TTS: AI speech with lip sync</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span>💬 Text: Phoneme-based animation</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+
+
+
+
+
+        {/* Horizontal Split Layout */}
+        <div className="flex flex-1 h-full">
+          {/* Chat Section */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className={`flex flex-col bg-white dark:bg-gray-900 ${isAvatarMode ? 'w-1/2' : 'w-full'} transition-all duration-300`}
+          >
+            {/* Chat Header */}
+            <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-4 sm:px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-lg"
+                  >
+                    <Sparkles className="h-5 w-5 text-white" />
+                  </motion.div>
+                  <span className="text-gray-900 dark:text-gray-100 font-semibold">AI Wellness Assistant</span>
                   <Badge
                     variant={
                       sessionEnded
                         ? "destructive"
                         : isVoiceMode
-                        ? "default"
-                        : isAvatarMode
-                        ? "outline"
-                        : "secondary"
+                          ? "default"
+                          : isAvatarMode
+                            ? "outline"
+                            : "secondary"
                     }
                   >
                     {sessionEnded
                       ? "Session Ended"
                       : isVoiceMode
-                      ? `Voice Mode ${formatCallDuration(callDuration)}`
-                      : isAvatarMode
-                      ? "Avatar Mode"
-                      : "Text Mode"}
+                        ? `Voice Mode ${formatCallDuration(callDuration)}`
+                        : isAvatarMode
+                          ? "Avatar Mode"
+                          : "Text Mode"}
                   </Badge>
                   {isVoiceMode && (
                     <div className="flex items-center space-x-2">
@@ -946,238 +1191,22 @@ export default function EmployeeChatPage() {
                   )}
                 </div>
 
-                {/* Desktop Buttons */}
-                <div className="hidden sm:flex items-center space-x-1 sm:space-x-2">
-                  {!sessionEnded && !isVoiceMode && (
-                    <Button
-                      onClick={() => setIsAvatarMode(!isAvatarMode)}
-                      disabled={loading}
-                      variant={isAvatarMode ? "secondary" : "outline"}
-                      size="sm"
-                    >
-                      <UserCircle className="h-4 w-4 mr-2" />
-                      {isAvatarMode ? "Disable" : "Enable"} 3D Avatar
-                    </Button>
-                  )}
-                  {!sessionEnded && !isVoiceMode && (
-                    <Button
-                      onClick={startCall}
-                      disabled={loading}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Phone className="h-4 w-4 mr-2" />
-                      Start Voice Chat
-                    </Button>
-                  )}
+                {/* Status Indicators Only */}
+                <div className="flex items-center space-x-2">
                   {isVoiceMode && (
-                    <>
-                      <Button
-                        onClick={() => setAudioEnabled(!audioEnabled)}
-                        variant="outline"
-                        size="sm"
-                        title={
-                          audioEnabled ? "Disable AI voice" : "Enable AI voice"
-                        }
-                      >
-                        {audioEnabled ? (
-                          <Volume2 className="h-4 w-4" />
-                        ) : (
-                          <VolumeX className="h-4 w-4" />
-                        )}
-                      </Button>
-                      {isSpeaking && (
-                        <Button
-                          onClick={toggleSpeaking}
-                          variant="outline"
-                          size="sm"
-                          title="Stop AI speaking"
-                        >
-                          <Square className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        onClick={toggleRecording}
-                        disabled={processingAudio || loading}
-                        variant={isRecording ? "destructive" : "outline"}
-                        size="sm"
-                        title={
-                          isRecording ? "Stop recording" : "Start recording"
-                        }
-                      >
-                        {processingAudio ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : isRecording ? (
-                          <Square className="h-4 w-4" />
-                        ) : (
-                          <Mic className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        onClick={endCall}
-                        disabled={loading}
-                        variant="destructive"
-                        size="sm"
-                      >
-                        <PhoneOff className="h-4 w-4 mr-2" />
-                        End Voice Chat
-                      </Button>
-                    </>
-                  )}
-                  {!sessionEnded && !isVoiceMode && (
-                    <Button
-                      onClick={handleEndSession}
-                      disabled={loading}
-                      variant="secondary"
-                      size="sm"
-                    >
-                      {loading && messages.length > 0 ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <FileText className="h-4 w-4 mr-2" />
-                      )}
-                      End Session & Generate Report
-                    </Button>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                      <span>Call Duration: {formatCallDuration(callDuration)}</span>
+                    </div>
                   )}
                 </div>
-
-                {/* Mobile Hamburger */}
-                <div className="sm:hidden">
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Menu className="h-5 w-5" />
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="right" className="w-64">
-                      <SheetHeader>
-                        <SheetTitle>Actions</SheetTitle>
-                        <SheetDescription>
-                          Manage your wellness chat session
-                        </SheetDescription>
-                      </SheetHeader>
-
-                      <div className="mt-4 flex flex-col space-y-3">
-                        {!sessionEnded && !isVoiceMode && (
-                          <Button
-                            onClick={() => setIsAvatarMode(!isAvatarMode)}
-                            disabled={loading}
-                            variant={isAvatarMode ? "secondary" : "outline"}
-                          >
-                            <UserCircle className="h-4 w-4 mr-2" />
-                            {isAvatarMode ? "Disable" : "Enable"} 3D Avatar
-                          </Button>
-                        )}
-                        
-                        {!sessionEnded && !isVoiceMode && (
-                          <Button
-                            onClick={startCall}
-                            disabled={loading}
-                            variant="outline"
-                          >
-                            <Phone className="h-4 w-4 mr-2" />
-                            Start Voice Chat
-                          </Button>
-                        )}
-
-                        {isVoiceMode && (
-                          <>
-                            <Button
-                              onClick={() => setAudioEnabled(!audioEnabled)}
-                              variant="outline"
-                            >
-                              {audioEnabled ? (
-                                <Volume2 className="h-4 w-4 mr-2" />
-                              ) : (
-                                <VolumeX className="h-4 w-4 mr-2" />
-                              )}
-                              {audioEnabled ? "Mute AI" : "Unmute AI"}
-                            </Button>
-
-                            {isSpeaking && (
-                              <Button
-                                onClick={toggleSpeaking}
-                                variant="outline"
-                              >
-                                <Square className="h-4 w-4 mr-2" /> Stop AI
-                                Speaking
-                              </Button>
-                            )}
-
-                            <Button
-                              onClick={toggleRecording}
-                              disabled={processingAudio || loading}
-                              variant={isRecording ? "destructive" : "outline"}
-                            >
-                              {processingAudio ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : isRecording ? (
-                                <Square className="h-4 w-4 mr-2" />
-                              ) : (
-                                <Mic className="h-4 w-4 mr-2" />
-                              )}
-                              {isRecording
-                                ? "Stop Recording"
-                                : "Start Recording"}
-                            </Button>
-
-                            <Button
-                              onClick={endCall}
-                              disabled={loading}
-                              variant="destructive"
-                            >
-                              <PhoneOff className="h-4 w-4 mr-2" />
-                              End Voice Chat
-                            </Button>
-                          </>
-                        )}
-
-                        {!sessionEnded && !isVoiceMode && (
-                          <Button
-                            onClick={handleEndSession}
-                            disabled={loading}
-                            variant="secondary"
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            End Session & Generate Report
-                          </Button>
-                        )}
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </div>
-              </CardTitle>
-            </CardHeader>
-
-            {/* Deep Conversation Toggle */}
-            {!sessionEnded && false && (
-              <div className="px-2 sm:px-4 py-2 border-b bg-gray-50/50 sm:flex sm:justify-between sm:items-center">
-                <DeepConversationToggle
-                  deepConversation={deepConversation}
-                  onDeepConversationChange={setDeepConversation}
-                  disabled={loading || isVoiceMode}
-                />
               </div>
-            )}
+            </div>
 
-            {/* 3D Avatar */}
-            {isAvatarMode && !isVoiceMode && (
-              <div className="h-[400px] w-full bg-gradient-to-b from-blue-50 to-gray-50 border-b border-gray-200 overflow-hidden">
-                <AvatarController 
-                  emotion={currentAvatarEmotion || 'IDLE'}
-                  speaking={isSpeaking}
-                  scale={1.5}
-                  lipSyncSource={isVoiceMode ? 'microphone' : 'text'}
-                  speechText={messages[messages.length - 1]?.sender === 'ai' ? messages[messages.length - 1]?.content : undefined}
-                />
-              </div>
-            )}
-            
             {/* Chat Messages */}
-            <CardContent className={`flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 ${isAvatarMode ? 'min-h-[200px] max-h-[300px]' : 'min-h-[400px] max-h-[600px]'}`}>
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 dark:from-gray-800/80 dark:to-gray-900/80">
               {messages.length === 0 && !loading && (
                 <div className="flex items-center justify-center h-full min-h-[300px]">
-                  <motion.div 
+                  <motion.div
                     className="text-center"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -1192,19 +1221,18 @@ export default function EmployeeChatPage() {
                     </motion.div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">Welcome to Wellness Chat</h3>
                     <p className="text-gray-600 text-sm max-w-md leading-relaxed">
-                      Start a conversation with your AI wellness assistant. Share how you&apos;re feeling, 
+                      Start a conversation with your AI wellness assistant. Share how you&apos;re feeling,
                       discuss your day, or ask for support. Your conversation is confidential.
                     </p>
                   </motion.div>
                 </div>
               )}
-              
+
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   <div
                     className={`flex items-start space-x-2 sm:space-x-3 
@@ -1233,11 +1261,10 @@ export default function EmployeeChatPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
-                      className={`rounded-2xl shadow-lg px-4 py-3 text-sm leading-relaxed max-w-[85%] sm:max-w-[75%] ${
-                        message.sender === "user"
-                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                          : "bg-white text-gray-800 border border-gray-200"
-                      }`}
+                      className={`rounded-2xl shadow-lg px-4 py-3 text-sm leading-relaxed max-w-[85%] sm:max-w-[75%] ${message.sender === "user"
+                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                        : "bg-white text-gray-800 border border-gray-200"
+                        }`}
                     >
                       {message.sender === "ai" ? (
                         <div>
@@ -1275,8 +1302,8 @@ export default function EmployeeChatPage() {
                           {processingAudio
                             ? "Processing audio..."
                             : deepConversation
-                            ? "Searching latest info..."
-                            : "AI is thinking..."}
+                              ? "Searching latest info..."
+                              : "AI is thinking..."}
                         </span>
                       </div>
                     </div>
@@ -1362,309 +1389,110 @@ export default function EmployeeChatPage() {
               )}
 
               <div ref={messagesEndRef} />
-            </CardContent>
+            </div>
 
-            {/* Voice Chat UI - Full Screen Overlay */}
-            {isVoiceMode && (
-              <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
-                {/* Background Animation */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
-                </div>
-
-                {/* Main Voice Interface */}
-                <div className="relative z-10 flex flex-col items-center justify-center text-white">
-                  {/* Header */}
-                  <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-lg font-medium">
-                        Voice Session Active
-                      </span>
-                    </div>
-                    <div className="text-lg font-mono">
-                      {formatCallDuration(callDuration)}
-                    </div>
-                  </div>
-
-                  {/* Central Glowing Circle */}
-                  <div className="relative mb-12">
-                    {/* Outer glow rings */}
-                    <div
-                      className={`absolute inset-0 rounded-full ${
-                        isRecording
-                          ? "animate-ping bg-red-400/30"
-                          : isSpeaking
-                          ? "animate-pulse bg-green-400/30"
-                          : processingAudio
-                          ? "animate-spin bg-yellow-400/30"
-                          : "animate-pulse bg-blue-400/30"
-                      } scale-150`}
-                    ></div>
-
-                    <div
-                      className={`absolute inset-0 rounded-full ${
-                        isRecording
-                          ? "animate-pulse bg-red-400/20"
-                          : isSpeaking
-                          ? "animate-pulse bg-green-400/20"
-                          : processingAudio
-                          ? "animate-pulse bg-yellow-400/20"
-                          : "animate-pulse bg-blue-400/20"
-                      } scale-125`}
-                    ></div>
-
-                    {/* Main circle */}
-                    <div
-                      className={`relative w-64 h-64 rounded-full border-4 ${
-                        isRecording
-                          ? "border-red-400 bg-red-500/20 shadow-red-400/50"
-                          : isSpeaking
-                          ? "border-green-400 bg-green-500/20 shadow-green-400/50"
-                          : processingAudio
-                          ? "border-yellow-400 bg-yellow-500/20 shadow-yellow-400/50"
-                          : "border-blue-400 bg-blue-500/20 shadow-blue-400/50"
-                      } shadow-2xl backdrop-blur-sm flex items-center justify-center transition-all duration-300`}
-                    >
-                      {/* Inner content */}
-                      <div className="text-center">
-                        {isRecording && (
-                          <>
-                            <Mic className="w-16 h-16 mx-auto mb-4 text-red-400 animate-pulse" />
-                            <p className="text-xl font-medium text-red-300">
-                              Listening...
-                            </p>
-                            <p className="text-sm text-red-200 mt-2">
-                              Speak naturally
-                            </p>
-                          </>
-                        )}
-
-                        {isSpeaking && (
-                          <>
-                            <Volume2 className="w-16 h-16 mx-auto mb-4 text-green-400 animate-pulse" />
-                            <p className="text-xl font-medium text-green-300">
-                              AI Speaking...
-                            </p>
-                            <div className="flex justify-center space-x-1 mt-4">
-                              <div className="w-2 h-8 bg-green-400 rounded animate-pulse"></div>
-                              <div className="w-2 h-6 bg-green-400 rounded animate-pulse delay-100"></div>
-                              <div className="w-2 h-10 bg-green-400 rounded animate-pulse delay-200"></div>
-                              <div className="w-2 h-4 bg-green-400 rounded animate-pulse delay-300"></div>
-                              <div className="w-2 h-7 bg-green-400 rounded animate-pulse delay-400"></div>
-                            </div>
-                          </>
-                        )}
-
-                        {processingAudio && (
-                          <>
-                            <Loader2 className="w-16 h-16 mx-auto mb-4 text-yellow-400 animate-spin" />
-                            <p className="text-xl font-medium text-yellow-300">
-                              Processing...
-                            </p>
-                            <p className="text-sm text-yellow-200 mt-2">
-                              Understanding your message
-                            </p>
-                          </>
-                        )}
-
-                        {!isRecording && !isSpeaking && !processingAudio && (
-                          <>
-                            <Bot className="w-16 h-16 mx-auto mb-4 text-blue-400" />
-                            <p className="text-xl font-medium text-blue-300">
-                              Ready to Listen
-                            </p>
-                            <p className="text-sm text-blue-200 mt-2">
-                              Tap to speak
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status Text */}
-                  <div className="text-center mb-8">
-                    {isRecording && (
-                      <p className="text-lg text-red-300">
-                        🎤 Recording your voice...
-                      </p>
-                    )}
-                    {isSpeaking && (
-                      <p className="text-lg text-green-300">
-                        🔊 AI is responding...
-                      </p>
-                    )}
-                    {processingAudio && (
-                      <p className="text-lg text-yellow-300">
-                        ⚡ Processing your message...
-                      </p>
-                    )}
-                    {!isRecording && !isSpeaking && !processingAudio && (
-                      <p className="text-lg text-blue-300">
-                        💬 Continuous voice conversation
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Control Buttons */}
-                  <div className="flex items-center space-x-6">
-                    {/* Record Button */}
-                    <button
-                      onClick={isRecording ? stopRecording : startRecording}
-                      disabled={processingAudio || isSpeaking}
-                      className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
-                        isRecording
-                          ? "bg-red-500 border-red-400 hover:bg-red-600 shadow-red-400/50"
-                          : "bg-white/10 border-white/30 hover:bg-white/20 hover:border-white/50"
-                      } shadow-lg backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      {isRecording ? (
-                        <Square className="w-6 h-6 text-white" />
-                      ) : (
-                        <Mic className="w-6 h-6 text-white" />
-                      )}
-                    </button>
-
-                    {/* Mute/Unmute Button */}
-                    <button
-                      onClick={() => setAudioEnabled(!audioEnabled)}
-                      className="w-16 h-16 rounded-full border-2 border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50 flex items-center justify-center transition-all duration-300 shadow-lg backdrop-blur-sm"
-                    >
-                      {audioEnabled ? (
-                        <Volume2 className="w-6 h-6 text-white" />
-                      ) : (
-                        <VolumeX className="w-6 h-6 text-white" />
-                      )}
-                    </button>
-
-                    {/* End Call Button */}
-                    <button
-                      onClick={endCall}
-                      className="w-16 h-16 rounded-full border-2 border-red-400 bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all duration-300 shadow-lg shadow-red-400/50"
-                    >
-                      <PhoneOff className="w-6 h-6 text-white" />
-                    </button>
-                  </div>
-
-                  {/* Instructions */}
-                  <div className="absolute bottom-8 left-8 right-8 text-center">
-                    <p className="text-white/70 text-sm">
-                      Tap and hold the microphone to speak • Voice responses are
-                      automatic
-                    </p>
-                    <p className="text-white/50 text-xs mt-2">
-                      End the call when you&apos;re ready to receive your wellness
-                      report
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="border-t p-4 bg-white">
-              {/* File attachments preview */}
-              {attachedFiles.length > 0 && (
-                <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Attached Files ({attachedFiles.length})
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {attachedFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
-                        <div className="flex items-center space-x-2">
-                          {file.type.startsWith('image/') ? (
-                            <ImageIcon className="h-4 w-4 text-blue-500" />
-                          ) : (
-                            <FileText className="h-4 w-4 text-gray-500" />
-                          )}
-                          <span className="text-sm text-gray-700 truncate max-w-[200px]">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({(file.size / 1024).toFixed(1)} KB)
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                          className="h-6 w-6 p-0"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+            {/* Simple Input Area */}
+            <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
               <div className="flex space-x-2">
-                {/* File attachment button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={openFileDialog}
-                  disabled={loading || sessionEnded || isVoiceMode}
-                  className="px-3"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*,.txt,.pdf,.doc,.docx"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  aria-label="Attach files"
-                />
-
                 <Input
-                  placeholder={
-                    sessionEnded
-                      ? "This session has ended."
-                      : isVoiceMode
-                      ? "Voice mode active - switch to text if needed..."
-                      : "Type your message or attach files..."
-                  }
+                  placeholder="Type your message here..."
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  disabled={
-                    loading || sessionEnded || processingAudio || isVoiceMode
-                  }
-                  className="flex-1 bg-white border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-xl"
+                  disabled={loading || sessionEnded}
+                  className="flex-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 rounded-xl text-gray-900 dark:text-gray-100"
                 />
                 <Button
                   onClick={() => handleSendMessage()}
-                  disabled={
-                    loading ||
-                    sessionEnded ||
-                    (!currentMessage.trim() && attachedFiles.length === 0) ||
-                    processingAudio ||
-                    isVoiceMode
-                  }
+                  disabled={loading || sessionEnded || !currentMessage.trim()}
                   className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl px-6"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
-
-              {!sessionEnded && !isVoiceMode && (
-                <p className="text-xs text-gray-500 mt-2">
-                  Press Enter to send. Attach images or documents for analysis. When you&apos;re ready, end the session to get your report.
-                </p>
-              )}
             </div>
-          </Card>
-        </motion.div>
+          </motion.div>
+
+          {/* Avatar Section */}
+          {isAvatarMode && (
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 30 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="w-1/2 bg-gradient-to-b from-blue-50 to-gray-50 dark:from-blue-900/20 dark:to-gray-800/20 border-l border-gray-200 dark:border-gray-700 overflow-hidden relative flex flex-col"
+            >
+              {/* Avatar Header */}
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center">
+                      <UserCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">3D Avatar + Lip Sync</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="outline" className="text-xs">
+                      {currentAvatarEmotion || 'IDLE'}
+                    </Badge>
+                    {(isTTSPlaying || isRecording) && (
+                      <Badge variant="secondary" className="text-xs">
+                        {isTTSPlaying ? '🎤 TTS' : '🎙️ Mic'}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 3D Avatar Display */}
+              <div className="flex-1 relative">
+                <AvatarController
+                  emotion={currentAvatarEmotion || 'IDLE'}
+                  speaking={isSpeaking || isRecording}
+                  scale={avatarConfig.scale}
+                  interactive={avatarConfig.interactive}
+                  showEnvironment={avatarConfig.showEnvironment}
+                  enableFloating={avatarConfig.enableFloating}
+                  quality={avatarConfig.quality}
+                  lipSyncSource={
+                    isRecording ? 'microphone' : 
+                    isTTSPlaying ? 'text' : 
+                    isVoiceMode ? 'microphone' : 'text'
+                  }
+                  speechText={currentTTSText || lastAIMessage}
+                />
+
+                {/* Avatar Status Indicator */}
+                {(isSpeaking || isRecording) && (
+                  <div className="absolute top-4 right-4 bg-black/80 text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-2 backdrop-blur-sm">
+                    {isRecording && (
+                      <>
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        <span>🎤 Recording</span>
+                      </>
+                    )}
+                    {isSpeaking && !isRecording && (
+                      <>
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span>💬 Speaking</span>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* Avatar Info Panel */}
+                <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg p-3 text-xs text-gray-600 max-w-xs">
+                  <div className="font-medium text-gray-800 mb-1">🎭 3D Avatar Active</div>
+                  <div className="space-y-1">
+                    <div>• Emotion: {currentAvatarEmotion || 'IDLE'}</div>
+                    <div>• Speaking: {isSpeaking ? "🟢 Active" : "⚪ Inactive"}</div>
+                    <div>• Mode: {isVoiceMode ? "Voice Chat" : "Text Chat"}</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   );

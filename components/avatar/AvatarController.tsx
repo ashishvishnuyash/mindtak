@@ -1,14 +1,23 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import * as THREE from 'three';
 import AvatarModel from './AvatarModel';
+import { useLipSync } from './LipSyncController';
+import { useTTSLipSync } from './TTSLipSync';
 
 interface AvatarControllerProps {
   message?: string;
   emotion?: string;
   speaking: boolean;
   scale?: number;
+  interactive?: boolean;
+  showEnvironment?: boolean;
+  enableFloating?: boolean;
+  quality?: 'low' | 'medium' | 'high';
+  // Lip sync props
   lipSyncSource?: 'microphone' | 'playback' | 'text';
   audioElement?: HTMLAudioElement;
   speechText?: string;
+  onLipSyncUpdate?: (state: any) => void;
 }
 
 export default function AvatarController({ 
@@ -16,13 +25,80 @@ export default function AvatarController({
   emotion = 'IDLE', 
   speaking, 
   scale = 1.5,
+  interactive = true,
+  showEnvironment = true,
+  enableFloating = true,
+  quality = 'high',
   lipSyncSource = 'microphone',
   audioElement,
-  speechText
+  speechText,
+  onLipSyncUpdate
 }: AvatarControllerProps) {
   // Track viseme animation timing for more natural mouth movements
   const [visemeActive, setVisemeActive] = useState(false);
   const [speakingIntensity, setSpeakingIntensity] = useState(0);
+  
+  // Avatar ref for lip sync
+  const avatarRef = useRef<THREE.Group>(null);
+  
+  // Simplified lip sync state
+  const [currentViseme, setCurrentViseme] = useState('sil');
+  const [lipSyncActive, setLipSyncActive] = useState(false);
+  
+  // TTS lip sync for enhanced speech
+  const { speak: speakWithLipSync, stop: stopTTS, isPlaying: isTTSPlaying } = useTTSLipSync();
+  
+  // Simple lip sync logic without useFrame
+  useEffect(() => {
+    if (speaking && lipSyncSource) {
+      setLipSyncActive(true);
+      
+      if (lipSyncSource === 'text' && speechText) {
+        // Simple text-based viseme simulation
+        const words = speechText.toLowerCase().split(' ');
+        let wordIndex = 0;
+        
+        const interval = setInterval(() => {
+          if (wordIndex < words.length) {
+            const word = words[wordIndex];
+            // Simple phoneme mapping
+            if (word.includes('a') || word.includes('e')) {
+              setCurrentViseme('aa');
+            } else if (word.includes('o') || word.includes('u')) {
+              setCurrentViseme('O');
+            } else if (word.includes('i')) {
+              setCurrentViseme('I');
+            } else if (word.includes('p') || word.includes('b') || word.includes('m')) {
+              setCurrentViseme('PP');
+            } else if (word.includes('f') || word.includes('v')) {
+              setCurrentViseme('FF');
+            } else if (word.includes('s') || word.includes('z')) {
+              setCurrentViseme('SS');
+            } else {
+              setCurrentViseme('aa');
+            }
+            wordIndex++;
+          } else {
+            setCurrentViseme('sil');
+            clearInterval(interval);
+          }
+        }, 200); // Change viseme every 200ms
+        
+        return () => clearInterval(interval);
+      } else if (lipSyncSource === 'microphone') {
+        // Simple microphone simulation
+        const interval = setInterval(() => {
+          const visemes = ['aa', 'E', 'I', 'O', 'U', 'PP', 'FF', 'SS'];
+          setCurrentViseme(visemes[Math.floor(Math.random() * visemes.length)]);
+        }, 100);
+        
+        return () => clearInterval(interval);
+      }
+    } else {
+      setLipSyncActive(false);
+      setCurrentViseme('sil');
+    }
+  }, [speaking, lipSyncSource, speechText]);
   
   // Function to simulate natural speech patterns with more variation
   const simulateSpeechPattern = useCallback(() => {
@@ -54,10 +130,14 @@ export default function AvatarController({
     
     // Use recursive setTimeout for variable timing
     let timeoutId: NodeJS.Timeout;
+    let isActive = true;
     
     const updateSpeaking = () => {
+      if (!isActive) return;
+      
       const nextInterval = simulateSpeechPattern();
       timeoutId = setTimeout(() => {
+        if (!isActive) return;
         // Vary speaking intensity for more realism
         setSpeakingIntensity(Math.random() * 0.4 + 0.6); // 0.6-1.0 range
         updateSpeaking();
@@ -67,6 +147,7 @@ export default function AvatarController({
     updateSpeaking();
     
     return () => {
+      isActive = false;
       clearTimeout(timeoutId);
       setVisemeActive(false);
       setSpeakingIntensity(0);
@@ -119,12 +200,16 @@ export default function AvatarController({
         }}
       >
         <AvatarModel 
+          ref={avatarRef}
           emotion={emotion as any} 
-          speaking={speaking && visemeActive} 
+          speaking={speaking && (visemeActive || lipSyncActive)} 
           scale={scale}
-          lipSyncSource={lipSyncSource}
-          audioElement={audioElement}
-          speechText={speechText || message}
+          interactive={interactive}
+          showEnvironment={showEnvironment}
+          enableFloating={enableFloating}
+          quality={quality}
+          lipSyncActive={lipSyncActive}
+          currentViseme={currentViseme}
         />
       </div>
     </div>

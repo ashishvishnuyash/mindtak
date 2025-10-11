@@ -50,7 +50,7 @@ function ManagerDashboardPage() {
           className="text-center"
         >
           <Loader2 className="h-16 w-16 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Loading your dashboard...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading your dashboard...</p>
         </motion.div>
       </div>
     );

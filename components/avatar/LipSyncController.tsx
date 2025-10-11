@@ -117,54 +117,23 @@ export function useLipSync({
     }
   }, [speaking, audioSource, audioElement, text, handleVisemeUpdate]);
 
-  // Animation loop for smooth blendshape transitions
-  useFrame((_, delta) => {
-    if (!avatarRef.current) return;
-
-    // Handle text-based animation
+  // Store animation data for use in Canvas component
+  React.useEffect(() => {
     if (audioSource === 'text' && speaking && textVisemesRef.current.length > 0) {
-      const elapsed = Date.now() - textStartTimeRef.current;
-      const currentViseme = textVisemesRef.current.find(v => 
-        Math.abs(v.timestamp - elapsed) < 100 // 100ms tolerance
-      );
-      
-      if (currentViseme) {
-        handleVisemeUpdate(currentViseme);
-      }
-    }
-
-    // Smooth blendshape weight transitions
-    const animState = animationStateRef.current;
-    let hasChanges = false;
-
-    Object.keys(animState.targetWeights).forEach(shapeName => {
-      const target = animState.targetWeights[shapeName] || 0;
-      const current = animState.currentWeights[shapeName] || 0;
-      
-      if (Math.abs(target - current) > 0.001) {
-        const newWeight = THREE.MathUtils.lerp(
-          current, 
-          target, 
-          delta * animState.transitionSpeed
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - textStartTimeRef.current;
+        const currentViseme = textVisemesRef.current.find(v => 
+          Math.abs(v.timestamp - elapsed) < 100 // 100ms tolerance
         );
-        animState.currentWeights[shapeName] = newWeight;
-        hasChanges = true;
-
-        // Apply to avatar mesh
-        if (avatarRef.current) {
-          applyBlendShapeWeight(avatarRef.current, shapeName, newWeight);
+        
+        if (currentViseme) {
+          handleVisemeUpdate(currentViseme);
         }
-      }
-    });
+      }, 16); // ~60fps
 
-    // Update state if there were changes
-    if (hasChanges) {
-      setLipSyncState(prev => ({
-        ...prev,
-        blendShapeWeights: { ...animState.currentWeights }
-      }));
+      return () => clearInterval(interval);
     }
-  });
+  }, [audioSource, speaking, handleVisemeUpdate]);
 
   return lipSyncState;
 }

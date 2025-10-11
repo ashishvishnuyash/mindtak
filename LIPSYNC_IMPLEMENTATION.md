@@ -16,11 +16,11 @@ This implementation provides real-time lip sync animation for Ready Player Me av
 ### 1. Basic Integration
 
 ```tsx
-import { AvatarController } from '@/components/avatar';
+import { AvatarController } from "@/components/avatar";
 
 function MyChat() {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [currentMessage, setCurrentMessage] = useState('');
+  const [currentMessage, setCurrentMessage] = useState("");
 
   return (
     <div className="h-96">
@@ -38,7 +38,7 @@ function MyChat() {
 ### 2. Microphone Lip Sync
 
 ```tsx
-import { AvatarController } from '@/components/avatar';
+import { AvatarController } from "@/components/avatar";
 
 function MicrophoneLipSync() {
   const [isRecording, setIsRecording] = useState(false);
@@ -56,11 +56,11 @@ function MicrophoneLipSync() {
 ### 3. Text-to-Speech with Lip Sync
 
 ```tsx
-import { AvatarController, useTTSLipSync } from '@/components/avatar';
+import { AvatarController, useTTSLipSync } from "@/components/avatar";
 
 function TTSLipSync() {
   const { speak, isPlaying } = useTTSLipSync();
-  const [text, setText] = useState('Hello, how are you today?');
+  const [text, setText] = useState("Hello, how are you today?");
 
   const handleSpeak = () => {
     speak(text);
@@ -84,14 +84,14 @@ function TTSLipSync() {
 
 ### AvatarController Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `emotion` | `string` | `'IDLE'` | Avatar emotion/animation |
-| `speaking` | `boolean` | `false` | Whether avatar is currently speaking |
-| `scale` | `number` | `1.5` | Avatar scale factor |
-| `lipSyncSource` | `'microphone' \| 'playback' \| 'text'` | `'microphone'` | Audio source for lip sync |
-| `audioElement` | `HTMLAudioElement` | `undefined` | Audio element for playback mode |
-| `speechText` | `string` | `undefined` | Text for text-based lip sync |
+| Prop            | Type                                   | Default        | Description                          |
+| --------------- | -------------------------------------- | -------------- | ------------------------------------ |
+| `emotion`       | `string`                               | `'IDLE'`       | Avatar emotion/animation             |
+| `speaking`      | `boolean`                              | `false`        | Whether avatar is currently speaking |
+| `scale`         | `number`                               | `1.5`          | Avatar scale factor                  |
+| `lipSyncSource` | `'microphone' \| 'playback' \| 'text'` | `'microphone'` | Audio source for lip sync            |
+| `audioElement`  | `HTMLAudioElement`                     | `undefined`    | Audio element for playback mode      |
+| `speechText`    | `string`                               | `undefined`    | Text for text-based lip sync         |
 
 ### useLipSync Hook
 
@@ -112,11 +112,11 @@ const lipSyncState = useLipSync({
 const { speak, stop, isPlaying, currentViseme } = useTTSLipSync();
 
 // Usage
-await speak('Hello world', {
+await speak("Hello world", {
   voice: selectedVoice,
   rate: 0.9,
   pitch: 1.0,
-  volume: 1.0
+  volume: 1.0,
 });
 ```
 
@@ -124,34 +124,36 @@ await speak('Hello world', {
 
 The system maps audio analysis to these visemes, which correspond to Ready Player Me blendshapes:
 
-| Viseme | Sounds | Description |
-|--------|--------|-------------|
-| `sil` | Silence | Mouth closed |
-| `PP` | P, B, M | Lips pressed together |
-| `FF` | F, V | Lower lip to upper teeth |
-| `TH` | TH | Tongue between teeth |
-| `DD` | T, D, N, L | Tongue to roof of mouth |
-| `kk` | K, G | Back of tongue raised |
-| `CH` | CH, J, SH | Tongue raised, lips forward |
-| `SS` | S, Z | Tongue near roof, air flow |
-| `nn` | N | Nasal sounds |
-| `RR` | R | Tongue curled |
-| `aa` | A (cat) | Open mouth, low tongue |
-| `E` | E (bed) | Mid-open mouth |
-| `I` | I (bit) | Slightly open, tongue high |
-| `O` | O (hot) | Rounded lips, open |
-| `U` | U (book) | Rounded lips, closed |
+| Viseme | Sounds     | Description                 |
+| ------ | ---------- | --------------------------- |
+| `sil`  | Silence    | Mouth closed                |
+| `PP`   | P, B, M    | Lips pressed together       |
+| `FF`   | F, V       | Lower lip to upper teeth    |
+| `TH`   | TH         | Tongue between teeth        |
+| `DD`   | T, D, N, L | Tongue to roof of mouth     |
+| `kk`   | K, G       | Back of tongue raised       |
+| `CH`   | CH, J, SH  | Tongue raised, lips forward |
+| `SS`   | S, Z       | Tongue near roof, air flow  |
+| `nn`   | N          | Nasal sounds                |
+| `RR`   | R          | Tongue curled               |
+| `aa`   | A (cat)    | Open mouth, low tongue      |
+| `E`    | E (bed)    | Mid-open mouth              |
+| `I`    | I (bit)    | Slightly open, tongue high  |
+| `O`    | O (hot)    | Rounded lips, open          |
+| `U`    | U (book)   | Rounded lips, closed        |
 
 ## 🔧 Advanced Usage
 
 ### Custom Viseme Handling
 
 ```tsx
-import { LipSyncAnalyzer, VisemeData } from '@/components/avatar';
+import { LipSyncAnalyzer, VisemeData } from "@/components/avatar";
 
 function CustomLipSync() {
   const handleVisemeUpdate = (viseme: VisemeData) => {
-    console.log(`Current viseme: ${viseme.viseme}, intensity: ${viseme.intensity}`);
+    console.log(
+      `Current viseme: ${viseme.viseme}, intensity: ${viseme.intensity}`
+    );
     // Custom logic here
   };
 
@@ -161,7 +163,7 @@ function CustomLipSync() {
       lipSyncSource="microphone"
       onLipSyncUpdate={(state) => {
         // Handle lip sync state changes
-        console.log('Lip sync state:', state);
+        console.log("Lip sync state:", state);
       }}
     />
   );
@@ -216,13 +218,13 @@ this.analyser.fftSize = 256; // 256, 512, 1024, 2048
 this.analyser.smoothingTimeConstant = 0.8;
 
 // Transition speed for blendshape animations
-transitionSpeed: 8.0 // Higher = faster transitions
+transitionSpeed: 8.0; // Higher = faster transitions
 ```
 
 ### TTS Voice Selection
 
 ```tsx
-import { TTSLipSync } from '@/components/avatar';
+import { TTSLipSync } from "@/components/avatar";
 
 // Get available voices
 const voices = TTSLipSync.getVoices();
@@ -232,11 +234,11 @@ const recommendedVoice = TTSLipSync.getRecommendedVoice();
 
 // Use specific voice
 const { speak } = useTTSLipSync();
-speak('Hello world', {
+speak("Hello world", {
   voice: recommendedVoice,
-  rate: 0.9,    // 0.1 to 10
-  pitch: 1.0,   // 0 to 2
-  volume: 1.0   // 0 to 1
+  rate: 0.9, // 0.1 to 10
+  pitch: 1.0, // 0 to 2
+  volume: 1.0, // 0 to 1
 });
 ```
 
@@ -245,16 +247,19 @@ speak('Hello world', {
 ### Common Issues
 
 1. **No lip sync animation**
+
    - Ensure your Ready Player Me model has the required blendshapes
    - Check that `speaking` prop is `true`
    - Verify audio permissions for microphone mode
 
 2. **Choppy animation**
+
    - Reduce `transitionSpeed` in LipSyncController
    - Increase `smoothingTimeConstant` in audio analyzer
    - Check performance - lip sync is CPU intensive
 
 3. **Microphone not working**
+
    - Ensure HTTPS (required for microphone access)
    - Check browser permissions
    - Test with different browsers
@@ -287,13 +292,13 @@ this.analyser.fftSize = 128; // Smaller = faster but less accurate
 
 ```tsx
 // Before
-<AvatarController 
+<AvatarController
   emotion="IDLE"
   speaking={isSpeaking}
 />
 
 // After
-<AvatarController 
+<AvatarController
   emotion="IDLE"
   speaking={isSpeaking}
   lipSyncSource={isVoiceMode ? 'microphone' : 'text'}
@@ -304,11 +309,11 @@ this.analyser.fftSize = 128; // Smaller = faster but less accurate
 ### Step 2: Handle TTS in your chat
 
 ```tsx
-import { useTTSLipSync } from '@/components/avatar';
+import { useTTSLipSync } from "@/components/avatar";
 
 function ChatInterface() {
   const { speak, isPlaying } = useTTSLipSync();
-  
+
   // When AI responds
   const handleAIResponse = (message: string) => {
     if (voiceModeEnabled) {
@@ -331,22 +336,17 @@ function ChatInterface() {
 ```tsx
 function VoiceChat() {
   const [isRecording, setIsRecording] = useState(false);
-  
+
   const startRecording = async () => {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       setIsRecording(true);
     } catch (error) {
-      console.error('Microphone access denied');
+      console.error("Microphone access denied");
     }
   };
 
-  return (
-    <AvatarController
-      speaking={isRecording}
-      lipSyncSource="microphone"
-    />
-  );
+  return <AvatarController speaking={isRecording} lipSyncSource="microphone" />;
 }
 ```
 
@@ -355,7 +355,7 @@ function VoiceChat() {
 A complete demo is available in `components/avatar/LipSyncDemo.tsx` that shows all features:
 
 ```tsx
-import { LipSyncDemo } from '@/components/avatar';
+import { LipSyncDemo } from "@/components/avatar";
 
 function DemoPage() {
   return <LipSyncDemo />;

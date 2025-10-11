@@ -237,13 +237,13 @@ export default function ManagerTeamReportsPage() {
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-8 w-8 text-green-600" />
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {reports.length > 0 
                       ? Math.round(reports.reduce((sum, report) => sum + report.overall_wellness, 0) / reports.length * 10) / 10
                       : 0
                     }/10
                   </div>
-                  <p className="text-sm text-gray-600">Avg Team Wellness</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Avg Team Wellness</p>
                 </div>
               </div>
             </CardContent>
@@ -254,10 +254,10 @@ export default function ManagerTeamReportsPage() {
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="h-8 w-8 text-red-600" />
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {reports.filter(r => r.risk_level === 'high').length}
                   </div>
-                  <p className="text-sm text-gray-600">High Risk</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">High Risk</p>
                 </div>
               </div>
             </CardContent>
@@ -268,10 +268,10 @@ export default function ManagerTeamReportsPage() {
               <div className="flex items-center space-x-2">
                 <Users className="h-8 w-8 text-purple-600" />
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {teamMembers.length}
                   </div>
-                  <p className="text-sm text-gray-600">Team Members</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Team Members</p>
                 </div>
               </div>
             </CardContent>
@@ -450,8 +450,8 @@ export default function ManagerTeamReportsPage() {
           <Card>
             <CardContent className="p-12 text-center">
               <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Team Reports Found</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Team Reports Found</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
                 {searchTerm || filterRisk !== 'all' || filterEmployee !== 'all'
                   ? 'No reports match your current filters. Try adjusting your search criteria.'
                   : 'Your team members haven\'t submitted any wellness reports yet. Encourage them to start tracking their wellness!'

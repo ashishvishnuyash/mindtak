@@ -275,16 +275,18 @@ function EmployeeDashboard() {
             >
               Overview
             </button>
-            <Link href="/employee/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
-                Analytics
-              </button>
-            </Link>
-            <Link href="/employee/chat">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
-                AI Friend
-              </button>
-            </Link>
+            <button 
+              onClick={() => router.push('/employee/reports')}
+              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+            >
+              Analytics
+            </button>
+            <button 
+              onClick={() => router.push('/employee/chat')}
+              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+            >
+              AI Friend
+            </button>
           </div>
         </div>
 
@@ -342,101 +344,232 @@ function EmployeeDashboard() {
           </Link>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
-                <Smile className="h-4 w-4 mr-2 text-blue-500" />
-                Current Mood
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center space-x-3">
-              <div className="bg-blue-100 p-3 rounded-2xl">
-                <Smile className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {latestReport ? latestReport.mood_rating : '-'}/10
+        {/* Interactive Stats Overview */}
+        {latestReport ? (
+          <div className="mb-6 sm:mb-8">
+            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-700 shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Current Wellness Snapshot
+                  </h2>
+                  <Link href="/employee/reports">
+                    <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50">
+                      View Interactive Analytics
+                      <BarChart3 className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
                 </div>
-                <Progress 
-                  value={latestReport ? latestReport.mood_rating * 10 : 0} 
-                  className="w-full h-2 mt-2" 
-                />
-              </div>
-            </CardContent>
-          </Card>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {/* Mood */}
+                  <motion.div 
+                    className="text-center"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="relative w-20 h-20 mx-auto mb-2">
+                      <svg className="w-20 h-20 transform -rotate-90">
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          className="text-gray-200 dark:text-gray-700"
+                        />
+                        <motion.circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="#3B82F6"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={226}
+                          strokeDashoffset={226 - (latestReport.mood_rating / 10) * 226}
+                          initial={{ strokeDashoffset: 226 }}
+                          animate={{ strokeDashoffset: 226 - (latestReport.mood_rating / 10) * 226 }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Smile className="h-4 w-4 text-blue-600 mb-1" />
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          {latestReport.mood_rating}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Mood</p>
+                  </motion.div>
 
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
-                <AlertTriangle className="h-4 w-4 mr-2 text-orange-500" />
-                Stress Level
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center space-x-3">
-              <div className="bg-orange-100 p-3 rounded-2xl">
-                <AlertTriangle className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {latestReport ? latestReport.stress_level : '-'}/10
-                </div>
-                <Progress 
-                  value={latestReport ? latestReport.stress_level * 10 : 0} 
-                  className="w-full h-2 mt-2" 
-                />
-              </div>
-            </CardContent>
-          </Card>
+                  {/* Energy */}
+                  <motion.div 
+                    className="text-center"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="relative w-20 h-20 mx-auto mb-2">
+                      <svg className="w-20 h-20 transform -rotate-90">
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          className="text-gray-200 dark:text-gray-700"
+                        />
+                        <motion.circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="#10B981"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={226}
+                          strokeDashoffset={226 - (latestReport.energy_level / 10) * 226}
+                          initial={{ strokeDashoffset: 226 }}
+                          animate={{ strokeDashoffset: 226 - (latestReport.energy_level / 10) * 226 }}
+                          transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Battery className="h-4 w-4 text-green-600 mb-1" />
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          {latestReport.energy_level}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Energy</p>
+                  </motion.div>
 
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
-                <Battery className="h-4 w-4 mr-2 text-green-500" />
-                Energy Level
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center space-x-3">
-              <div className="bg-green-100 p-3 rounded-2xl">
-                <Battery className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {latestReport ? latestReport.energy_level : '-'}/10
-                </div>
-                <Progress 
-                  value={latestReport ? latestReport.energy_level * 10 : 0} 
-                  className="w-full h-2 mt-2" 
-                />
-              </div>
-            </CardContent>
-          </Card>
+                  {/* Stress (inverted) */}
+                  <motion.div 
+                    className="text-center"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="relative w-20 h-20 mx-auto mb-2">
+                      <svg className="w-20 h-20 transform -rotate-90">
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          className="text-gray-200 dark:text-gray-700"
+                        />
+                        <motion.circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="#EF4444"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={226}
+                          strokeDashoffset={226 - (latestReport.stress_level / 10) * 226}
+                          initial={{ strokeDashoffset: 226 }}
+                          animate={{ strokeDashoffset: 226 - (latestReport.stress_level / 10) * 226 }}
+                          transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <AlertTriangle className="h-4 w-4 text-red-600 mb-1" />
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          {latestReport.stress_level}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Stress</p>
+                  </motion.div>
 
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center">
-                <Brain className="h-4 w-4 mr-2 text-purple-500" />
-                Overall Wellness
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center space-x-3">
-              <div className="bg-purple-100 p-3 rounded-2xl">
-                <Brain className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {latestReport ? latestReport.overall_wellness : '-'}/10
+                  {/* Overall Wellness */}
+                  <motion.div 
+                    className="text-center"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="relative w-20 h-20 mx-auto mb-2">
+                      <svg className="w-20 h-20 transform -rotate-90">
+                        <circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                          className="text-gray-200 dark:text-gray-700"
+                        />
+                        <motion.circle
+                          cx="40"
+                          cy="40"
+                          r="36"
+                          stroke="#8B5CF6"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={226}
+                          strokeDashoffset={226 - (latestReport.overall_wellness / 10) * 226}
+                          initial={{ strokeDashoffset: 226 }}
+                          animate={{ strokeDashoffset: 226 - (latestReport.overall_wellness / 10) * 226 }}
+                          transition={{ duration: 1.5, ease: "easeOut", delay: 0.6 }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Brain className="h-4 w-4 text-purple-600 mb-1" />
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          {latestReport.overall_wellness}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Wellness</p>
+                    {wellnessStatus && (
+                      <Badge className={`${wellnessStatus.textColor} bg-opacity-20 mt-1 text-xs`}>
+                        {wellnessStatus.label}
+                      </Badge>
+                    )}
+                  </motion.div>
                 </div>
-                {wellnessStatus && (
-                  <Badge className={`${wellnessStatus.textColor} bg-opacity-20 mt-2`}>
-                    {wellnessStatus.label}
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-6 text-center">
+                <Smile className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <div className="text-lg font-semibold text-gray-400 dark:text-gray-500">No Data</div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Mood</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-6 text-center">
+                <Battery className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <div className="text-lg font-semibold text-gray-400 dark:text-gray-500">No Data</div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Energy</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-6 text-center">
+                <AlertTriangle className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <div className="text-lg font-semibold text-gray-400 dark:text-gray-500">No Data</div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Stress</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-6 text-center">
+                <Brain className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <div className="text-lg font-semibold text-gray-400 dark:text-gray-500">No Data</div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Wellness</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Wellness Trend Chart */}

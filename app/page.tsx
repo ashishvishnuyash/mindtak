@@ -9,7 +9,9 @@ import {
   ChevronRight,
   Plus,
   Minus,
-  ChevronDown
+  ChevronDown,
+  Menu,
+  X
 } from 'lucide-react';
 import Footer from '@/components/Footer';
 import { useState } from 'react';
@@ -25,6 +27,7 @@ export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { openContactModal, openComingSoonModal } = useModal();
 
   const toggleFaq = (index: number) => {
@@ -37,6 +40,10 @@ export default function HomePage() {
 
   const toggleMobileProducts = () => {
     setIsMobileProductsOpen(!isMobileProductsOpen);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   // Animation variants
@@ -175,55 +182,106 @@ export default function HomePage() {
               <ThemeToggle />
             </div>
 
-            {/* Mobile Navigation */}
-            <div className="md:hidden flex items-center space-x-1">
-              {/* Mobile Products Dropdown */}
-              <div className="relative">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 text-xs px-2 py-1 h-8 flex items-center space-x-1"
-                  onClick={toggleMobileProducts}
-                >
-                  <span>Products</span>
-                  <ChevronDown className={`h-3 w-3 transition-transform ${isMobileProductsOpen ? 'rotate-180' : ''}`} />
-                </Button>
-
-                {isMobileProductsOpen && (
-                  <div className="absolute top-full right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                    <div className="py-2">
-                      <Link href="/auth/login">
-                        <div className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm">
-                          Wellness Hub
-                        </div>
-                      </Link>
-                      <div
-                        className="px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                        onClick={openComingSoonModal}
-                      >
-                        AI Friend
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <Link href="/auth/login">
-                <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 h-8">
-                  Login
-                </Button>
-              </Link>
+            {/* Mobile Navigation - Hamburger Menu */}
+            <div className="md:hidden flex items-center space-x-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="text-gray-700 border-gray-300 text-xs px-2 py-1 h-8 dark:text-gray-300 dark:border-gray-600"
-                onClick={openContactModal}
+                onClick={toggleMobileMenu}
+                className="p-2"
               >
-                Contact
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </Button>
-
               <ThemeToggle size="sm" />
             </div>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+              <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                  <div className="flex flex-col space-y-3">
+                    <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                        Home
+                      </Button>
+                    </Link>
+
+                    {/* Mobile Products Section */}
+                    <div>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        onClick={toggleMobileProducts}
+                      >
+                        <span>Products</span>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isMobileProductsOpen ? 'rotate-180' : ''}`} />
+                      </Button>
+                      
+                      {isMobileProductsOpen && (
+                        <div className="ml-4 mt-2 space-y-2">
+                          <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                            <Button variant="ghost" className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                              Wellness Hub
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="ghost" 
+                            className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            onClick={() => {
+                              openComingSoonModal();
+                              setIsMobileMenuOpen(false);
+                            }}
+                          >
+                            AI Friend
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
+                    <Link href="#wellness" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                        Solutions
+                      </Button>
+                    </Link>
+
+                    <Link href="#advantage" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                        About
+                      </Button>
+                    </Link>
+
+                    <Link href="#faq" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                        FAQ
+                      </Button>
+                    </Link>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                      onClick={() => {
+                        openContactModal();
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Contact
+                    </Button>
+
+                    <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                          Login
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -467,9 +525,11 @@ export default function HomePage() {
               </Button>
               <Button
                 className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={openContactModal}
+                asChild
               >
-                Email Us
+                <a href="mailto:info@diltak.ai">
+                  Email Us
+                </a>
               </Button>
             </div>
           </div>

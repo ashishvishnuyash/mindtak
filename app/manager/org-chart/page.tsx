@@ -516,57 +516,57 @@ export default function OrgChartPage() {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-8"
         >
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
+              <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
                 <Shield className="h-5 w-5 text-green-500" />
                 <span>Your Access Level</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 text-sm">
                 <div>
-                  <h4 className="font-semibold mb-4 text-gray-900 flex items-center">
+                  <h4 className="font-semibold mb-4 text-gray-900 dark:text-gray-100 flex items-center">
                     <Brain className="h-4 w-4 mr-2 text-blue-500" />
                     Permissions
                   </h4>
                   <div className="space-y-3">
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">View direct reports</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_view_direct_reports ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">View direct reports</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${permissions.can_view_direct_reports ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                         }`}>
                         {permissions.can_view_direct_reports ? '✓' : '✗'}
                       </div>
                     </motion.div>
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">View team reports</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_view_team_reports ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">View team reports</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${permissions.can_view_team_reports ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                         }`}>
                         {permissions.can_view_team_reports ? '✓' : '✗'}
                       </div>
                     </motion.div>
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">View subordinate teams</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_view_subordinate_teams ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">View subordinate teams</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${permissions.can_view_subordinate_teams ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                         }`}>
                         {permissions.can_view_subordinate_teams ? '✓' : '✗'}
                       </div>
                     </motion.div>
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">Access analytics</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_access_analytics ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">Access analytics</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${permissions.can_access_analytics ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                         }`}>
                         {permissions.can_access_analytics ? '✓' : '✗'}
                       </div>
@@ -575,45 +575,45 @@ export default function OrgChartPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-4 text-gray-900 flex items-center">
+                  <h4 className="font-semibold mb-4 text-gray-900 dark:text-gray-100 flex items-center">
                     <TrendingUp className="h-4 w-4 mr-2 text-purple-500" />
                     Hierarchy Info
                   </h4>
                   <div className="space-y-3">
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">Your level</span>
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">Your level</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs whitespace-nowrap">
                         {user.hierarchy_level || 'Not set'}
                       </Badge>
                     </motion.div>
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">Access depth</span>
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">Access depth</span>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs whitespace-nowrap">
                         {permissions.hierarchy_access_level} levels
                       </Badge>
                     </motion.div>
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">Department head</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${user.is_department_head ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">Department head</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${user.is_department_head ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                         }`}>
                         {user.is_department_head ? '✓' : '✗'}
                       </div>
                     </motion.div>
                     <motion.div
-                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
-                      <span className="font-medium">Skip-level access</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${user.skip_level_access ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                      <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">Skip-level access</span>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${user.skip_level_access ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                         }`}>
                         {user.skip_level_access ? '✓' : '✗'}
                       </div>
