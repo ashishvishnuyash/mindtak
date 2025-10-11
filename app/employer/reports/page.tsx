@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   FileText,
   Download,
@@ -34,7 +35,8 @@ import {
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 import { MentalHealthReport, User } from '@/types';
 
 import { toast } from 'sonner';
@@ -168,15 +170,15 @@ export default function EmployerReportsPage() {
       // Search filter
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
-        const employeeName = report.employee 
+        const employeeName = report.employee
           ? `${report.employee.first_name} ${report.employee.last_name}`.toLowerCase()
           : '';
         const employeeEmail = report.employee?.email?.toLowerCase() || '';
         const department = report.employee?.department?.toLowerCase() || '';
-        
-        if (!employeeName.includes(searchLower) && 
-            !employeeEmail.includes(searchLower) && 
-            !department.includes(searchLower)) {
+
+        if (!employeeName.includes(searchLower) &&
+          !employeeEmail.includes(searchLower) &&
+          !department.includes(searchLower)) {
           return false;
         }
       }
@@ -247,7 +249,7 @@ export default function EmployerReportsPage() {
   const exportData = async () => {
     try {
       toast.info('Preparing comprehensive report...');
-      
+
       // Build query parameters for the export page
       const params = new URLSearchParams({
         type: 'company',
@@ -255,12 +257,41 @@ export default function EmployerReportsPage() {
         department: filterDepartment,
         risk: filterRisk
       });
-      
+
       // Redirect to the export page
       router.push(`/export/report?${params.toString()}`);
     } catch (error) {
       console.error('Export error:', error);
       toast.error('Failed to prepare export');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Sign out from Firebase Auth first
+      await signOut(auth);
+
+      // Clear any local storage or session storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear any cookies if needed
+      document.cookie.split(";").forEach((c) => {
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      });
+
+      // Show logout message
+      toast.success('Logged out successfully');
+
+      // Redirect to login page
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Error during logout');
+      // Still redirect even if there's an error
+      router.push('/auth/login');
     }
   };
 
@@ -277,8 +308,8 @@ export default function EmployerReportsPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.6, ease: easeOut }
     }
@@ -319,82 +350,121 @@ export default function EmployerReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={floatingAnimation}
-        />
-        <motion.div 
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{
-            ...floatingAnimation,
-            transition: { ...floatingAnimation.transition, delay: 2 }
-          }}
-        />
-      </div>
-
-      <Navbar user={user || undefined} />
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div 
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <div className="flex items-center space-x-3 mb-4">
-              <motion.div
-                animate={floatingAnimation}
-                className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
-              >
-                <FileText className="h-6 w-6 text-white" />
-              </motion.div>
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900">Wellness Reports</h1>
-                <p className="text-lg text-gray-600 mt-1">
-                  View wellness reports from your team members and track their mental health progress.
-                </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
+      {/* Header */}
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 cursor-pointer group" onClick={() => router.push('/auth/login')}>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-600 to-green-700 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <Shield className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:to-green-700 transition-all duration-300">
+                  Wellness Hub
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Employer Portal</p>
               </div>
             </div>
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+              <Button variant="outline" size="sm" className="hidden md:flex text-emerald-700 border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 font-semibold shadow-sm hover:shadow-md transition-all duration-300">
+                Management
+              </Button>
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+              </Button>
+              <ThemeToggle size="sm" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-emerald-700 border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 font-semibold shadow-sm hover:shadow-md transition-all duration-300 px-2 sm:px-3"
+                onClick={handleLogout}
+              >
+                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
+        {/* Welcome Section */}
+        <div className="mb-8 sm:mb-10 lg:mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
+              Wellness Reports
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
+              View comprehensive wellness reports from your team members and track their mental health progress with advanced analytics.
+            </p>
           </motion.div>
-          <motion.div className="flex items-center space-x-4 mt-4 sm:mt-0" variants={itemVariants}>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8 sm:mb-10 lg:mb-12">
+          <div className="flex space-x-4 sm:space-x-8 lg:space-x-12 border-b border-gray-200/60 dark:border-gray-700/60 overflow-x-auto">
+            <Link href="/employer/dashboard">
+              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
+                Overview
+              </button>
+            </Link>
+            <Link href="/employer/employees">
+              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
+                Employees
+              </button>
+            </Link>
+            <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold sm:font-bold text-sm sm:text-base lg:text-lg relative whitespace-nowrap">
+              Reports
+              <div className="absolute -bottom-0.5 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
+            </button>
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+          <div></div>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 w-full sm:w-auto">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={generateReport}
-                className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
+                className="border-emerald-200 text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base"
               >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                Generate Report
+                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Generate Report</span>
+                <span className="sm:hidden">Generate</span>
               </Button>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button 
-                onClick={handleRefresh} 
+              <Button
+                onClick={handleRefresh}
                 variant="outline"
                 disabled={refreshing}
-                className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
+                className="border-blue-200 text-blue-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3"
               >
                 {refreshing ? (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <RefreshCw className="h-5 w-5 mr-2" />
                   </motion.div>
                 ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-5 w-5 mr-2" />
                 )}
                 Refresh
               </Button>
@@ -403,63 +473,65 @@ export default function EmployerReportsPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Button 
+              <Button
                 variant="outline"
                 onClick={exportData}
-                className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
+                className="border-purple-200 text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-5 w-5 mr-2" />
                 Export Data
               </Button>
             </motion.div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Summary Stats */}
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.05, y: -8 }}>
+            <Card className="bg-white/90 backdrop-blur-sm border border-gray-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-blue-300/50 group">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <div className="flex items-center space-x-3 sm:space-x-4">
                   <motion.div
-                    whileHover={{ rotate: 360 }}
+                    whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
+                    className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
                   >
-                    <FileText className="h-8 w-8 text-blue-600" />
+                    <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">{reports.length}</div>
-                    <p className="text-sm text-gray-600">Total Reports</p>
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">{reports.length}</div>
+                    <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Reports</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.05, y: -8 }}>
+            <Card className="bg-white/90 backdrop-blur-sm border border-gray-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-emerald-300/50 group">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-4">
                   <motion.div
-                    whileHover={{ rotate: 360 }}
+                    whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
+                    className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
                   >
-                    <TrendingUp className="h-8 w-8 text-green-600" />
+                    <TrendingUp className="h-8 w-8 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
-                      {reports.length > 0 
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
+                      {reports.length > 0
                         ? Math.round(reports.reduce((sum, report) => sum + report.overall_wellness, 0) / reports.length)
                         : 0
                       }/10
                     </div>
-                    <p className="text-sm text-gray-600">Avg Wellness</p>
+                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Avg Wellness</p>
                   </div>
                 </div>
               </CardContent>
@@ -467,7 +539,7 @@ export default function EmployerReportsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
@@ -488,7 +560,7 @@ export default function EmployerReportsPage() {
           </motion.div>
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3">
                   <motion.div
@@ -522,7 +594,7 @@ export default function EmployerReportsPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                   <div className="relative">
@@ -531,12 +603,12 @@ export default function EmployerReportsPage() {
                       placeholder="Search reports..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-white/60 backdrop-blur-sm border-white/20 focus:border-green-400 focus:ring-green-400"
+                      className="pl-10 border-green-200 text-green-600 border-white/20 focus:border-green-400 focus:ring-green-400"
                     />
                   </div>
-                  
+
                   <Select value={filterRisk} onValueChange={setFilterRisk}>
-                    <SelectTrigger className="bg-white/60 backdrop-blur-sm border-white/20">
+                    <SelectTrigger className="border-green-200 text-green-600 border-white/20">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Filter by risk" />
                     </SelectTrigger>
@@ -549,7 +621,7 @@ export default function EmployerReportsPage() {
                   </Select>
 
                   <Select value={filterDepartment} onValueChange={setFilterDepartment}>
-                    <SelectTrigger className="bg-white/60 backdrop-blur-sm border-white/20">
+                    <SelectTrigger className="border-green-200 text-green-600 border-white/20">
                       <SelectValue placeholder="Filter by department" />
                     </SelectTrigger>
                     <SelectContent>
@@ -561,7 +633,7 @@ export default function EmployerReportsPage() {
                   </Select>
 
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="bg-white/60 backdrop-blur-sm border-white/20">
+                    <SelectTrigger className="border-green-200 text-green-600 border-white/20">
                       <SelectValue placeholder="Sort by" />
                     </SelectTrigger>
                     <SelectContent>
@@ -592,7 +664,7 @@ export default function EmployerReportsPage() {
           variants={containerVariants}
         >
           {filteredAndSortedReports.length > 0 ? (
-            <motion.div 
+            <motion.div
               className="space-y-6"
               variants={containerVariants}
             >
@@ -603,7 +675,7 @@ export default function EmployerReportsPage() {
                   whileHover={{ scale: 1.02, y: -5 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+                  <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4">
                         <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -643,7 +715,7 @@ export default function EmployerReportsPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-4">
                           {getRiskLevelBadge(report.risk_level)}
                           <div className="text-right">
@@ -669,7 +741,7 @@ export default function EmployerReportsPage() {
 
                       {/* Metrics Grid */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl"
                           whileHover={{ scale: 1.05 }}
                         >
@@ -682,7 +754,7 @@ export default function EmployerReportsPage() {
                           <div className="text-xs text-blue-600">Mood</div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-xl"
                           whileHover={{ scale: 1.05 }}
                         >
@@ -695,7 +767,7 @@ export default function EmployerReportsPage() {
                           <div className="text-xs text-red-600">Stress</div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl"
                           whileHover={{ scale: 1.05 }}
                         >
@@ -708,7 +780,7 @@ export default function EmployerReportsPage() {
                           <div className="text-xs text-green-600">Energy</div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                           className="text-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl"
                           whileHover={{ scale: 1.05 }}
                         >
@@ -744,7 +816,7 @@ export default function EmployerReportsPage() {
 
                       {/* AI Analysis */}
                       {report.ai_analysis && (
-                        <motion.div 
+                        <motion.div
                           className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -760,7 +832,7 @@ export default function EmployerReportsPage() {
 
                       {/* Note: Comments are not shown to maintain employee privacy */}
                       {report.comments && (
-                        <motion.div 
+                        <motion.div
                           className="mt-4 p-4 bg-gray-50 rounded-xl"
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -779,7 +851,7 @@ export default function EmployerReportsPage() {
             </motion.div>
           ) : (
             <motion.div variants={itemVariants}>
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <Card className="bg-white border border-gray-200 shadow-sm">
                 <CardContent className="p-12 text-center">
                   <motion.div
                     animate={floatingAnimation}
@@ -808,7 +880,7 @@ export default function EmployerReportsPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} className="mt-8">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-6">
                 <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
                   <Shield className="h-5 w-5 mr-2 text-green-600" />

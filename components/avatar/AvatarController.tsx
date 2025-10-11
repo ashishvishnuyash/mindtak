@@ -6,9 +6,20 @@ interface AvatarControllerProps {
   emotion?: string;
   speaking: boolean;
   scale?: number;
+  lipSyncSource?: 'microphone' | 'playback' | 'text';
+  audioElement?: HTMLAudioElement;
+  speechText?: string;
 }
 
-export default function AvatarController({ message, emotion = 'IDLE', speaking, scale = 1.5 }: AvatarControllerProps) {
+export default function AvatarController({ 
+  message, 
+  emotion = 'IDLE', 
+  speaking, 
+  scale = 1.5,
+  lipSyncSource = 'microphone',
+  audioElement,
+  speechText
+}: AvatarControllerProps) {
   // Track viseme animation timing for more natural mouth movements
   const [visemeActive, setVisemeActive] = useState(false);
   const [speakingIntensity, setSpeakingIntensity] = useState(0);
@@ -110,7 +121,10 @@ export default function AvatarController({ message, emotion = 'IDLE', speaking, 
         <AvatarModel 
           emotion={emotion as any} 
           speaking={speaking && visemeActive} 
-          scale={scale} 
+          scale={scale}
+          lipSyncSource={lipSyncSource}
+          audioElement={audioElement}
+          speechText={speechText || message}
         />
       </div>
     </div>

@@ -239,12 +239,12 @@ export default function DemoPage() {
               <Sparkles className="h-4 w-4 text-green-600" />
               <span className="text-sm font-medium text-green-700">Interactive Demo Available</span>
             </div>
-            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Experience the Future of
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
-                Mental Health Care
-              </span>
-            </h1>
+          <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-6">
+            Experience the Future of
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
+              Mental Health Care
+            </span>
+          </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Explore our comprehensive wellness platform with realistic sample data.
               No registration required - jump right into any role or feature.
@@ -253,7 +253,7 @@ export default function DemoPage() {
 
           {/* Feature Highlights */}
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
+            className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-4 gap-6 mb-12"
             variants={itemVariants}
           >
             {features.map((feature, index) => (
@@ -284,7 +284,7 @@ export default function DemoPage() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-5 gap-4"
+            className="grid grid-cols-1 md:grid-cols-5 xl:grid-cols-5 gap-4"
             variants={containerVariants}
           >
             {quickActions.map((action, index) => (
@@ -430,7 +430,7 @@ export default function DemoPage() {
                 </p>
               </motion.div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+              <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-8 text-center">
                 <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-white/60 backdrop-blur-sm rounded-xl p-6"

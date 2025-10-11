@@ -479,17 +479,17 @@ export default function SignUpPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-center">
                       <Heart className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <h5 className="font-semibold text-gray-900 text-sm mb-1">AI Wellness Chat</h5>
+                      <h5 className="font-semibold text-gray-900 text-sm mb-2">AI Wellness Chat</h5>
                       <p className="text-gray-600 text-xs">Personalized mental health support</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-center">
                       <TrendingUp className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                      <h5 className="font-semibold text-gray-900 text-sm mb-1">Analytics Dashboard</h5>
+                      <h5 className="font-semibold text-gray-900 text-sm mb-2">Analytics Dashboard</h5>
                       <p className="text-gray-600 text-xs">Comprehensive wellness insights</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-center">
                       <Users className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                      <h5 className="font-semibold text-gray-900 text-sm mb-1">Team Management</h5>
+                      <h5 className="font-semibold text-gray-900 text-sm mb-2">Team Management</h5>
                       <p className="text-gray-600 text-xs">Organize and monitor your team</p>
                     </div>
                   </div>

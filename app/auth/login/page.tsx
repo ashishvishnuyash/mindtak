@@ -24,6 +24,7 @@ import {
   TrendingUp,
   ArrowRight
 } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -167,7 +168,7 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -185,7 +186,7 @@ export default function LoginPage() {
 
       {/* Header */}
       <motion.header
-        className="relative z-10 border-b bg-white/80 backdrop-blur-sm"
+        className="relative z-10 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm transition-colors duration-300"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -199,14 +200,17 @@ export default function LoginPage() {
               >
                 <Brain className="h-5 w-5 text-white" />
               </motion.div>
-              <span className="text-2xl font-bold text-gray-900">MindCare</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">MindCare</span>
             </Link>
-            <Link href="/">
-              <Button variant="ghost" className="flex items-center space-x-2 hover:bg-green-50 hover:text-green-600">
-                <ArrowLeft className="h-4 w-4" />
-                <span>Back to Home</span>
-              </Button>
-            </Link>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle size="sm" />
+              <Link href="/">
+                <Button variant="ghost" className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-gray-800 hover:text-green-600 dark:hover:text-green-400">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Home</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </motion.header>
@@ -222,23 +226,23 @@ export default function LoginPage() {
             className="max-w-md mx-auto lg:mx-0"
           >
             <motion.div variants={itemVariants} className="text-center lg:text-left mb-8">
-              <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-green-200 mb-6">
-                <Sparkles className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">Secure Login</span>
+              <div className="inline-flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-4 py-2 rounded-full border border-green-200 dark:border-green-700 mb-6">
+                <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">Secure Login</span>
               </div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                 Welcome Back to
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
                   MindCare
                 </span>
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 dark:text-gray-400">
                 Sign in to access your personalized mental health dashboard and AI-powered wellness tools.
               </p>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-2xl rounded-2xl overflow-hidden">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-2xl rounded-2xl overflow-hidden">
                 <CardHeader className="text-center pb-4">
                   <motion.div
                     className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
@@ -247,8 +251,8 @@ export default function LoginPage() {
                   >
                     <Brain className="h-8 w-8 text-white" />
                   </motion.div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">Sign In</CardTitle>
-                  <p className="text-gray-600">Enter your credentials to continue</p>
+                  <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Sign In</CardTitle>
+                  <p className="text-gray-600 dark:text-gray-400">Enter your credentials to continue</p>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <form onSubmit={handleLogin} className="space-y-6">
@@ -259,8 +263,8 @@ export default function LoginPage() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                         >
-                          <Alert variant="destructive" className="border-red-200 bg-red-50">
-                            <AlertDescription className="text-red-700">{error}</AlertDescription>
+                          <Alert variant="destructive" className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50">
+                            <AlertDescription className="text-red-700 dark:text-red-300">{error}</AlertDescription>
                           </Alert>
                         </motion.div>
                       )}
@@ -270,11 +274,11 @@ export default function LoginPage() {
                       className="space-y-2"
                       whileFocus={{ scale: 1.02 }}
                     >
-                      <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                      <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                         Email Address
                       </Label>
                       <div className="relative">
-                        <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${focusedField === 'email' ? 'text-green-500' : 'text-gray-400'
+                        <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${focusedField === 'email' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
                           }`} />
                         <Input
                           id="email"
@@ -285,8 +289,8 @@ export default function LoginPage() {
                           onFocus={() => setFocusedField('email')}
                           onBlur={() => setFocusedField('')}
                           className={`pl-10 transition-all duration-300 ${focusedField === 'email'
-                            ? 'border-green-500 ring-2 ring-green-200'
-                            : 'border-gray-300 hover:border-gray-400'
+                            ? 'border-green-500 dark:border-green-400 ring-2 ring-green-200 dark:ring-green-800'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                             }`}
                           disabled={loading}
                           required
@@ -298,11 +302,11 @@ export default function LoginPage() {
                       className="space-y-2"
                       whileFocus={{ scale: 1.02 }}
                     >
-                      <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                      <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                         Password
                       </Label>
                       <div className="relative">
-                        <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${focusedField === 'password' ? 'text-green-500' : 'text-gray-400'
+                        <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 transition-colors ${focusedField === 'password' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
                           }`} />
                         <Input
                           id="password"
@@ -313,8 +317,8 @@ export default function LoginPage() {
                           onFocus={() => setFocusedField('password')}
                           onBlur={() => setFocusedField('')}
                           className={`pl-10 pr-10 transition-all duration-300 ${focusedField === 'password'
-                            ? 'border-green-500 ring-2 ring-green-200'
-                            : 'border-gray-300 hover:border-gray-400'
+                            ? 'border-green-500 dark:border-green-400 ring-2 ring-green-200 dark:ring-green-800'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                             }`}
                           disabled={loading}
                           required
@@ -322,7 +326,7 @@ export default function LoginPage() {
                         <motion.button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
                           disabled={loading}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -362,14 +366,14 @@ export default function LoginPage() {
 
                   <div className="space-y-4">
                     <div className="text-center text-sm">
-                      <span className="text-gray-600">Don&apos;t have an account? </span>
-                      <Link href="/auth/signup" className="text-green-600 hover:text-green-700 font-semibold hover:underline">
+                      <span className="text-gray-600 dark:text-gray-400">Don&apos;t have an account? </span>
+                      <Link href="/auth/signup" className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline">
                         Contact your administrator
                       </Link>
                     </div>
 
                     <div className="text-center">
-                      <Link href="/auth/forgot-password" className="text-sm text-green-600 hover:text-green-700 font-semibold hover:underline">
+                      <Link href="/auth/forgot-password" className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline">
                         Forgot your password?
                       </Link>
                     </div>
@@ -389,10 +393,10 @@ export default function LoginPage() {
           >
             <motion.div variants={itemVariants} className="space-y-8">
               <div className="text-center lg:text-left">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
                   Your Mental Health Journey Starts Here
                 </h2>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
                   Access personalized wellness tools, AI-powered support, and comprehensive mental health resources.
                 </p>
               </div>
@@ -404,11 +408,11 @@ export default function LoginPage() {
                     key={index}
                     variants={itemVariants}
                     whileHover={{ scale: 1.05, y: -5 }}
-                    className="bg-white/60 backdrop-blur-sm rounded-xl p-6 hover:bg-white/80 transition-all duration-300"
+                    className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300"
                   >
-                    <feature.icon className={`h-8 w-8 mb-3 ${feature.color}`} />
-                    <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-sm text-gray-600">{feature.description}</p>
+                    <feature.icon className={`h-8 w-8 mb-3 ${feature.color} dark:brightness-125`} />
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{feature.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{feature.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -423,7 +427,7 @@ export default function LoginPage() {
                   <h3 className="text-2xl font-bold mb-4">Trusted by Thousands</h3>
                   <div className="grid grid-cols-3 gap-6">
                     <div>
-                      <div className="text-2xl font-bold">7K+</div>
+                      <div className="text-2xl font-bold">3K+</div>
                       <div className="text-sm text-green-100">People Helped</div>
                     </div>
                     <div>
@@ -440,13 +444,13 @@ export default function LoginPage() {
 
               {/* Security Badge */}
               <motion.div
-                className="bg-white/60 backdrop-blur-sm rounded-xl p-6 text-center"
+                className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-6 text-center"
                 variants={itemVariants}
                 whileHover={{ scale: 1.02 }}
               >
-                <Shield className="h-12 w-12 mx-auto mb-4 text-green-600" />
-                <h3 className="font-semibold text-gray-900 mb-2">Secure & Private</h3>
-                <p className="text-sm text-gray-600">
+                <Shield className="h-12 w-12 mx-auto mb-4 text-green-600 dark:text-green-400" />
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Secure & Private</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Your data is protected with industry-leading security measures
                 </p>
               </motion.div>

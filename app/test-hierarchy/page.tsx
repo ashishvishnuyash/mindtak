@@ -262,7 +262,7 @@ export default function TestHierarchyPage() {
   return (
     <div className="max-w-6xl mx-auto p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Hierarchy System Test</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">Hierarchy System Test</h1>
         <p className="text-gray-600">Test the organizational hierarchy features and permissions</p>
       </div>
 

@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/shared/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AvatarController } from "@/components/avatar";
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 import {
   Send,
@@ -54,7 +56,8 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
+import { signOut } from 'firebase/auth';
 import {
   Sheet,
   SheetContent,
@@ -815,67 +818,92 @@ export default function EmployeeChatPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={{
-            y: [-10, 10, -10],
-            transition: {
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }
-          }}
-        />
-        <motion.div 
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{
-            y: [10, -10, 10],
-            transition: {
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2
-            }
-          }}
-        />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+      {/* Header */}
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Brain className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
+                <p className="text-sm text-gray-500">Employee Portal</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+                Engineering
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Bot className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <UserCircle className="h-4 w-4" />
+              </Button>
+              <ThemeToggle size="sm" />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-green-600 border-green-200"
+                onClick={async () => {
+                  try {
+                    await signOut(auth);
+                    router.push('/auth/login');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    router.push('/auth/login');
+                  }
+                }}
+              >
+                <PhoneOff className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Navbar user={user || undefined} />
-
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div 
-          className="mb-8 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
-          >
-            <Brain className="h-8 w-8 text-white" />
-          </motion.div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+      <div className="max-w-4xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">
             AI Wellness Assistant
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-gray-600">
             Your confidential space to reflect on your well-being.
           </p>
-        </motion.div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+            <Link href="/employee/dashboard">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Overview
+              </button>
+            </Link>
+            <Link href="/employee/reports">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Analytics
+              </button>
+            </Link>
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+              AI Friend
+            </button>
+          </div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-            <Card className="flex flex-col item-center justify-center bg-white/80 backdrop-blur-sm border-0 shadow-2xl w-auto rounded-3xl overflow-hidden">
+            <Card className="flex flex-col item-center justify-center bg-white border border-gray-200 shadow-sm w-auto rounded-3xl overflow-hidden">
               <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
                     <motion.div
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.6 }}
@@ -919,7 +947,7 @@ export default function EmployeeChatPage() {
                 </div>
 
                 {/* Desktop Buttons */}
-                <div className="hidden sm:flex items-center space-x-2">
+                <div className="hidden sm:flex items-center space-x-1 sm:space-x-2">
                   {!sessionEnded && !isVoiceMode && (
                     <Button
                       onClick={() => setIsAvatarMode(!isAvatarMode)}
@@ -1139,6 +1167,8 @@ export default function EmployeeChatPage() {
                   emotion={currentAvatarEmotion || 'IDLE'}
                   speaking={isSpeaking}
                   scale={1.5}
+                  lipSyncSource={isVoiceMode ? 'microphone' : 'text'}
+                  speechText={messages[messages.length - 1]?.sender === 'ai' ? messages[messages.length - 1]?.content : undefined}
                 />
               </div>
             )}

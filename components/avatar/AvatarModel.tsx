@@ -4,6 +4,7 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 // Fix the import for FBXLoader
 import { FBXLoader } from 'three/examples/jsm/Addons.js';
+import { useLipSync } from './LipSyncController';
 
 // Animation mapping to emotional states
 const ANIMATIONS = {
@@ -24,9 +25,19 @@ interface AvatarProps {
   emotion?: AnimationState;
   speaking?: boolean;
   scale?: number;
+  lipSyncSource?: 'microphone' | 'playback' | 'text';
+  audioElement?: HTMLAudioElement;
+  speechText?: string;
 }
 
-function Avatar({ emotion = 'IDLE', speaking = false, scale = 1 }: AvatarProps) {
+function Avatar({ 
+  emotion = 'IDLE', 
+  speaking = false, 
+  scale = 1,
+  lipSyncSource = 'microphone',
+  audioElement,
+  speechText
+}: AvatarProps) {
   const group = useRef<THREE.Group>(null);
   const { scene, camera } = useThree();
   
@@ -36,6 +47,19 @@ function Avatar({ emotion = 'IDLE', speaking = false, scale = 1 }: AvatarProps) 
   // Load the animation
   const [mixer] = useState(() => new THREE.AnimationMixer(modelScene));
   const [animationClip, setAnimationClip] = useState<THREE.AnimationClip | null>(null);
+
+  // Initialize lip sync
+  const lipSyncState = useLipSync({
+    avatarRef: group,
+    audioSource: lipSyncSource,
+    audioElement,
+    text: speechText,
+    speaking,
+    onLipSyncUpdate: (state) => {
+      // Optional: Handle lip sync state updates
+      console.log('Lip sync update:', state.currentViseme, state.intensity);
+    }
+  });
   
   // Load animation based on emotion
   useEffect(() => {
@@ -80,15 +104,32 @@ interface AvatarModelProps {
   emotion?: AnimationState;
   speaking?: boolean;
   scale?: number;
+  lipSyncSource?: 'microphone' | 'playback' | 'text';
+  audioElement?: HTMLAudioElement;
+  speechText?: string;
 }
 
-export default function AvatarModel({ emotion = 'IDLE', speaking = false, scale = 1 }: AvatarModelProps) {
+export default function AvatarModel({ 
+  emotion = 'IDLE', 
+  speaking = false, 
+  scale = 1,
+  lipSyncSource = 'microphone',
+  audioElement,
+  speechText
+}: AvatarModelProps) {
   return (
     <div className="h-full w-full">
       <Canvas shadows>
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
-        <Avatar emotion={emotion} speaking={speaking} scale={scale} />
+        <Avatar 
+          emotion={emotion} 
+          speaking={speaking} 
+          scale={scale}
+          lipSyncSource={lipSyncSource}
+          audioElement={audioElement}
+          speechText={speechText}
+        />
         <OrbitControls enableZoom={false} enablePan={false} minPolarAngle={Math.PI / 4} maxPolarAngle={Math.PI / 2} />
       </Canvas>
     </div>

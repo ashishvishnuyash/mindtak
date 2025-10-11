@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Navbar } from '@/components/shared/navbar';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -240,54 +241,83 @@ export default function EmployeeReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={floatingAnimation}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{
-            ...floatingAnimation,
-            transition: { ...floatingAnimation.transition, delay: 2 }
-          }}
-        />
-      </div>
-
-      <Navbar user={user || undefined} />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants}>
-            <div className="flex items-center space-x-3 mb-4">
-              <motion.div
-                animate={floatingAnimation}
-                className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
-              >
-                <Calendar className="h-6 w-6 text-white" />
-              </motion.div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Brain className="h-5 w-5 text-white" />
+              </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">My Wellness Reports</h1>
-                <p className="text-lg text-gray-600 mt-1">
-                  Track your mental health journey and view your progress over time.
-                </p>
+                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
+                <p className="text-sm text-gray-500">Employee Portal</p>
               </div>
             </div>
-          </motion.div>
-          <motion.div className="flex items-center space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+                Engineering
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Calendar className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Heart className="h-4 w-4" />
+              </Button>
+              <ThemeToggle size="sm" />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-green-600 border-green-200"
+                onClick={() => {
+                  auth.signOut();
+                  router.push('/auth/login');
+                }}
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">My Wellness Reports</h1>
+          <p className="text-gray-600">
+            Track your mental health journey and view your progress over time.
+          </p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 overflow-x-auto">
+            <Link href="/employee/dashboard">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                Overview
+              </button>
+            </Link>
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+              Analytics
+            </button>
+            <Link href="/employee/chat">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                AI Friend
+              </button>
+            </Link>
+          </div>
+        </div>
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <Button
               onClick={fetchReports}
               variant="outline"
               size="sm"
-              className="bg-white/60 backdrop-blur-sm hover:bg-green-50 border-green-200"
+              className="border-green-200 text-green-600 hover:bg-green-50"
               disabled={refreshing}
             >
               {refreshing ? (
@@ -301,25 +331,25 @@ export default function EmployeeReportsPage() {
               onClick={exportMyReports}
               variant="outline"
               size="sm"
-              className="bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50"
             >
               <Download className="h-4 w-4 mr-2" />
               Export My Reports
             </Button>
-            <Link href="/employee/reports/new">
-              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg">
-                <Plus className="h-4 w-4 mr-2" />
-                New Report
-              </Button>
-            </Link>
-          </motion.div>
-        </motion.div>
+          </div>
+          <Link href="/employee/reports/new">
+            <Button className="bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              New Report
+            </Button>
+          </Link>
+        </div>
 
         {/* Filters and Search */}
-        <motion.div variants={itemVariants}>
-          <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+        <div>
+          <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
@@ -363,7 +393,7 @@ export default function EmployeeReportsPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Reports List */}
         {sortedReports.length > 0 ? (
@@ -558,7 +588,7 @@ export default function EmployeeReportsPage() {
           </motion.div>
         ) : (
           <motion.div variants={itemVariants}>
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white border border-gray-200 shadow-sm">
               <CardContent className="p-12 text-center">
                 <motion.div
                   animate={{ rotate: 360 }}

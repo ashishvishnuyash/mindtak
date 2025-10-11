@@ -2,18 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
-import { Navbar } from '@/components/shared/navbar';
 import { OrgChart } from '@/components/hierarchy/org-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { 
-  Users, 
-  Building, 
-  Crown, 
+import {
+  Users,
+  Building,
+  Crown,
   Shield,
   RefreshCw,
   Download,
@@ -22,9 +22,14 @@ import {
   Brain,
   TrendingUp,
   BarChart3,
-  Eye
+  Eye,
+  ArrowRight,
+  FileText
 } from 'lucide-react';
 import { getTeamHierarchy, getManagerPermissions } from '@/lib/hierarchy-service';
+import { db, auth } from '@/lib/firebase';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { signOut } from 'firebase/auth';
 import type { User, HierarchyNode } from '@/types/index';
 import { toast } from 'sonner';
 
@@ -56,15 +61,15 @@ export default function OrgChartPage() {
 
   const fetchOrgChart = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
-      
+
       // For managers, show their team hierarchy
       // For HR/Admin, show company-wide hierarchy (would need additional logic)
       const teamHierarchy = await getTeamHierarchy(user.id, 4);
       setHierarchy(teamHierarchy);
-      
+
     } catch (error) {
       console.error('Error fetching org chart:', error);
       toast.error('Failed to load organization chart');
@@ -84,21 +89,28 @@ export default function OrgChartPage() {
     toast.info('Exporting organization chart...');
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      router.push('/auth/login');
+    }
+  };
+
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <Navbar user={user || undefined} />
-        <div className="flex items-center justify-center h-64">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <Loader2 className="h-16 w-16 animate-spin text-blue-400 mx-auto mb-4" />
-            <p className="text-lg text-gray-600">Loading organization chart...</p>
-          </motion.div>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
+          <Loader2 className="h-16 w-16 animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-lg text-gray-600">Loading organization chart...</p>
+        </motion.div>
       </div>
     );
   }
@@ -110,77 +122,113 @@ export default function OrgChartPage() {
   const permissions = getManagerPermissions(user);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
-          animate={{ y: [-10, 10, -10] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
-          animate={{ y: [10, -10, 10] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
+      {/* Header */}
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer" onClick={() => router.push('/auth/login')}>
+              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-green-600 transition-colors">Wellness Hub</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Manager Portal</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+                Management
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <FileText className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <BarChart3 className="h-4 w-4" />
+              </Button>
+              <ThemeToggle size="sm" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-600 border-green-200"
+                onClick={handleLogout}
+              >
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Navbar user={user || undefined} />
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div 
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
+        {/* Welcome Section */}
+        <div className="mb-8 sm:mb-10 lg:mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.8 }}
           >
-            <div className="flex items-center space-x-3 mb-4">
-              <motion.div
-                animate={{ y: [-5, 5, -5] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg"
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
+              Organization Chart
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
+              View your team structure and reporting relationships.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <Link href="/manager/dashboard">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Dashboard
+              </button>
+            </Link>
+            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-medium">
+              Org Chart
+            </button>
+            <Link href="/manager/team-reports">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Team Reports
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex items-center justify-between mb-8">
+          <div></div>
+          <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant="outline"
+                onClick={fetchOrgChart}
+                className="border-green-200 text-green-600 hover:bg-green-50"
               >
-                <Building className="h-6 w-6 text-white" />
-              </motion.div>
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900">Organization Chart</h1>
-                <p className="text-lg text-gray-600 mt-1">
-                  View your team structure and reporting relationships
-                </p>
-              </div>
-            </div>
-          </motion.div>
-          
-          <motion.div 
-            className="flex items-center space-x-4 mt-4 sm:mt-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <Button 
-              variant="outline" 
-              onClick={fetchOrgChart}
-              className="bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-300"
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={exportOrgChart}
-              className="bg-white/60 backdrop-blur-sm hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-all duration-300"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          </motion.div>
-        </motion.div>
+              <Button
+                variant="outline"
+                onClick={exportOrgChart}
+                className="border-green-200 text-green-600 hover:bg-green-50"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </motion.div>
+          </div>
+        </div>
 
         {/* Controls */}
         <motion.div
@@ -188,10 +236,10 @@ export default function OrgChartPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <Card className="mb-8 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-gray-900">
-                <Settings className="h-5 w-5 text-blue-500" />
+              <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
+                <Settings className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 <span>View Options</span>
               </CardTitle>
             </CardHeader>
@@ -207,7 +255,7 @@ export default function OrgChartPage() {
                     Show Wellness Indicators
                   </label>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <Switch
                     id="compact-view"
@@ -218,30 +266,30 @@ export default function OrgChartPage() {
                     Compact View
                   </label>
                 </div>
-                
+
                 <div className="flex items-center space-x-6 text-sm text-gray-600">
-                  <motion.div 
+                  <motion.div
                     className="flex items-center space-x-2 p-2 rounded-lg bg-yellow-50"
                     whileHover={{ scale: 1.05 }}
                   >
                     <Crown className="h-4 w-4 text-yellow-600" />
                     <span className="font-medium">Executive</span>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className="flex items-center space-x-2 p-2 rounded-lg bg-blue-50"
                     whileHover={{ scale: 1.05 }}
                   >
                     <Shield className="h-4 w-4 text-blue-600" />
                     <span className="font-medium">HR</span>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className="flex items-center space-x-2 p-2 rounded-lg bg-green-50"
                     whileHover={{ scale: 1.05 }}
                   >
                     <Users className="h-4 w-4 text-green-600" />
                     <span className="font-medium">Manager</span>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     className="flex items-center space-x-2 p-2 rounded-lg bg-gray-50"
                     whileHover={{ scale: 1.05 }}
                   >
@@ -255,17 +303,17 @@ export default function OrgChartPage() {
         </motion.div>
 
         {/* Team Stats */}
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <motion.div 
-            whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -5 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <motion.div
@@ -276,7 +324,7 @@ export default function OrgChartPage() {
                     <Users className="h-6 w-6 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                       {hierarchy.reduce((total, node) => {
                         const countNodes = (n: HierarchyNode): number => {
                           return 1 + n.children.reduce((sum, child) => sum + countNodes(child), 0);
@@ -291,23 +339,23 @@ export default function OrgChartPage() {
             </Card>
           </motion.div>
 
-          <motion.div 
-            whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -5 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
-                    className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg"
+                    className="w-12 h-12 bg-yellow-600 rounded-2xl flex items-center justify-center shadow-lg"
                   >
                     <Crown className="h-6 w-6 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
-                      {hierarchy.filter(node => 
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
+                      {hierarchy.filter(node =>
                         node.user.role === 'manager' || node.user.role === 'admin'
                       ).length}
                     </div>
@@ -318,22 +366,22 @@ export default function OrgChartPage() {
             </Card>
           </motion.div>
 
-          <motion.div 
-            whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -5 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
-                    className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg"
+                    className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg"
                   >
                     <Building className="h-6 w-6 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                       {[...new Set(hierarchy.map(node => node.user.department).filter((dept): dept is string => Boolean(dept)))].length}
                     </div>
                     <p className="text-sm text-gray-600">Departments</p>
@@ -343,25 +391,25 @@ export default function OrgChartPage() {
             </Card>
           </motion.div>
 
-          <motion.div 
-            whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+          <motion.div
+            whileHover={{ scale: 1.02, y: -5 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
-                    className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg"
+                    className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center shadow-lg"
                   >
                     <Shield className="h-6 w-6 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">
                       {Math.max(...hierarchy.map(node => {
                         const getDepth = (n: HierarchyNode): number => {
-                          return n.children.length > 0 
+                          return n.children.length > 0
                             ? 1 + Math.max(...n.children.map(getDepth))
                             : 1;
                         };
@@ -382,7 +430,7 @@ export default function OrgChartPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <OrgChart
                 hierarchy={hierarchy}
@@ -402,7 +450,7 @@ export default function OrgChartPage() {
             transition={{ duration: 0.6 }}
             className="mt-8"
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white border border-gray-200 shadow-sm">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-900">
                   <Eye className="h-5 w-5 text-blue-500" />
@@ -435,7 +483,7 @@ export default function OrgChartPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-3">
                     {permissions.can_view_team_reports && (
                       <Button
@@ -468,7 +516,7 @@ export default function OrgChartPage() {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-8"
         >
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-gray-900">
                 <Shield className="h-5 w-5 text-green-500" />
@@ -483,60 +531,56 @@ export default function OrgChartPage() {
                     Permissions
                   </h4>
                   <div className="space-y-3">
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       <span className="font-medium">View direct reports</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        permissions.can_view_direct_reports ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_view_direct_reports ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {permissions.can_view_direct_reports ? '✓' : '✗'}
                       </div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       <span className="font-medium">View team reports</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        permissions.can_view_team_reports ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_view_team_reports ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {permissions.can_view_team_reports ? '✓' : '✗'}
                       </div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       <span className="font-medium">View subordinate teams</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        permissions.can_view_subordinate_teams ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_view_subordinate_teams ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {permissions.can_view_subordinate_teams ? '✓' : '✗'}
                       </div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       <span className="font-medium">Access analytics</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        permissions.can_access_analytics ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${permissions.can_access_analytics ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {permissions.can_access_analytics ? '✓' : '✗'}
                       </div>
                     </motion.div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold mb-4 text-gray-900 flex items-center">
                     <TrendingUp className="h-4 w-4 mr-2 text-purple-500" />
                     Hierarchy Info
                   </h4>
                   <div className="space-y-3">
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
@@ -545,7 +589,7 @@ export default function OrgChartPage() {
                         {user.hierarchy_level || 'Not set'}
                       </Badge>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
@@ -554,25 +598,23 @@ export default function OrgChartPage() {
                         {permissions.hierarchy_access_level} levels
                       </Badge>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       <span className="font-medium">Department head</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        user.is_department_head ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${user.is_department_head ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {user.is_department_head ? '✓' : '✗'}
                       </div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       <span className="font-medium">Skip-level access</span>
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        user.skip_level_access ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${user.skip_level_access ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                        }`}>
                         {user.skip_level_access ? '✓' : '✗'}
                       </div>
                     </motion.div>

@@ -119,7 +119,7 @@ const WellnessTestimonials = () => {
           className="text-center mb-16"
           variants={itemVariants}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6">
             What Our Community Says
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -128,7 +128,7 @@ const WellnessTestimonials = () => {
         </motion.div>
 
         {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
@@ -185,8 +185,8 @@ const WellnessTestimonials = () => {
         </div>
 
         {/* Stats Section */}
-        <motion.div 
-          className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-8"
+        <motion.div
+          className="mt-16 grid grid-cols-1 md:grid-cols-4 xl:grid-cols-4 gap-8"
           variants={itemVariants}
         >
           {[
