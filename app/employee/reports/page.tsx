@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -38,10 +38,37 @@ import { auth, db } from '@/lib/firebase';
 import type { MentalHealthReport } from '@/types';
 import InteractiveAnalytics from '@/components/analytics/InteractiveAnalytics';
 
+// Extend MentalHealthReport locally to include metrics fields for type safety
+interface UIMentalHealthReport extends MentalHealthReport {
+  metrics?: {
+    emotional_tone: number;
+    stress_anxiety: number;
+    motivation_engagement: number;
+    social_connectedness: number;
+    self_esteem: number;
+    assertiveness: number;
+    work_life_balance_metric: number;
+    cognitive_functioning: number;
+    emotional_regulation: number;
+    substance_use: number;
+  };
+  metrics_explanation?: {
+    emotional_tone: string;
+    stress_anxiety: string;
+    motivation_engagement: string;
+    social_connectedness: string;
+    self_esteem: string;
+    assertiveness: string;
+    work_life_balance_metric: string;
+    cognitive_functioning: string;
+    emotional_regulation: string;
+    substance_use: string;
+  };
+}
 
 export default function EmployeeReportsPage() {
   const { user, loading: userLoading } = useUser();
-  const [reports, setReports] = useState<MentalHealthReport[]>([]);
+  const [reports, setReports] = useState<UIMentalHealthReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,6 +76,34 @@ export default function EmployeeReportsPage() {
   const [sortBy, setSortBy] = useState<string>('newest');
   const [viewMode, setViewMode] = useState<'analytics' | 'list'>('analytics');
   const router = useRouter();
+
+  // Wrap fetchReports in useCallback
+  const fetchReports = useCallback(async () => {
+    if (!user) return;
+    try {
+      setRefreshing(true);
+      const reportsCollection = collection(db, 'mental_health_reports');
+      const q = query(
+        reportsCollection,
+        where('employee_id', '==', user.id)
+      );
+      const querySnapshot = await getDocs(q);
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as UIMentalHealthReport[];
+      // Sort by created_at in JavaScript to avoid Firestore index requirements
+      const sortedData = data.sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setReports(sortedData);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [user, db]);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -63,8 +118,9 @@ export default function EmployeeReportsPage() {
     if (user) {
       fetchReports();
     }
-  }, [user, userLoading, router]);
+  }, [user, userLoading, router, fetchReports]);
 
+<<<<<<< HEAD
   const fetchReports = async () => {
     if (!user) return;
 
@@ -100,6 +156,9 @@ export default function EmployeeReportsPage() {
     // Provide a safe default if riskLevel is undefined or null
     const safeRiskLevel = riskLevel || 'low';
 
+=======
+  const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high') => {
+>>>>>>> 1fedc4f84a4ede7d48e5c4d9193166e97ac64699
     const colors = {
       low: 'bg-green-100 text-green-700 border-green-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -111,9 +170,9 @@ export default function EmployeeReportsPage() {
       high: <AlertTriangle className="h-3 w-3" />,
     };
     return (
-      <Badge className={`${colors[safeRiskLevel]} flex items-center space-x-1`}>
-        {icons[safeRiskLevel]}
-        <span>{safeRiskLevel.toUpperCase()}</span>
+      <Badge className={`${colors[riskLevel]} flex items-center space-x-1`}>
+        {icons[riskLevel]}
+        <span>{riskLevel?.toUpperCase()}</span>
       </Badge>
     );
   };
@@ -430,10 +489,16 @@ export default function EmployeeReportsPage() {
             variants={containerVariants}
           >
             {sortedReports.map((report, index) => {
-              const previousReport = sortedReports[index + 1];
+              const previousReport = sortedReports[index + 1] as UIMentalHealthReport | undefined;
+              const r = report as UIMentalHealthReport;
               return (
+<<<<<<< HEAD
                 <motion.div key={report.id} variants={itemVariants}>
                   <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+=======
+                <motion.div key={r.id} variants={itemVariants}>
+                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
+>>>>>>> 1fedc4f84a4ede7d48e5c4d9193166e97ac64699
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
                         <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -472,84 +537,107 @@ export default function EmployeeReportsPage() {
                         </div>
                       </div>
 
-                      {/* Main Metrics Grid */}
-                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                        <motion.div
-                          className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300"
-                          whileHover={{ scale: 1.02, y: -2 }}
-                        >
-                          <div className="flex items-center justify-center space-x-1 mb-2">
-                            <Smile className="h-5 w-5 text-blue-600" />
-                            <span className="text-xl font-semibold text-blue-700">
-                              {report.mood_rating}/10
-                            </span>
-                            {previousReport && getTrendIcon(report.mood_rating, previousReport.mood_rating)}
+                      {/* Main Metrics Grid - replaced with AI Metrics */}
+                      {r.metrics ? (
+                        <div className="mb-6">
+                          <h4 className="text-md font-semibold text-green-700 mb-2 flex items-center">
+                            <Sparkles className="h-4 w-4 mr-2" />AI Metrics Breakdown
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(r.metrics).map(([key, value]) => {
+                              const explanations = r.metrics_explanation || {};
+                              const labels: Record<string, string> = {
+                                emotional_tone: 'Emotional Tone',
+                                stress_anxiety: 'Stress & Anxiety',
+                                motivation_engagement: 'Motivation & Engagement',
+                                social_connectedness: 'Social Connectedness',
+                                self_esteem: 'Self-Esteem',
+                                assertiveness: 'Assertiveness',
+                                work_life_balance_metric: 'Work-Life Balance',
+                                cognitive_functioning: 'Cognitive Functioning',
+                                emotional_regulation: 'Emotional Regulation',
+                                substance_use: 'Substance Use',
+                              };
+                              const colors = [
+                                'bg-green-100 text-green-800',
+                                'bg-yellow-100 text-yellow-800',
+                                'bg-orange-100 text-orange-800',
+                                'bg-red-100 text-red-800',
+                              ];
+                              return (
+                                <div key={key} className={`rounded-lg border p-3 ${colors[Number(value)] || ''}`}>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium">{labels[key] || key}</span>
+                                    <span className="font-bold text-lg">{String(value)}/3</span>
+                                  </div>
+                                  <div className="text-xs text-gray-700">
+                                    {(explanations as Record<string, string>)[key] || ''}
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                          <div className="text-sm text-blue-600 font-medium">Mood</div>
-                        </motion.div>
-
-                        <motion.div
-                          className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-md transition-all duration-300"
-                          whileHover={{ scale: 1.02, y: -2 }}
-                        >
-                          <div className="flex items-center justify-center space-x-1 mb-2">
-                            <AlertTriangle className="h-5 w-5 text-red-600" />
-                            <span className="text-xl font-semibold text-red-700">
-                              {report.stress_level}/10
-                            </span>
-                            {previousReport && getTrendIcon(previousReport.stress_level, report.stress_level)}
+                        </div>
+                      ) : (
+                        // Fallback: show old metrics if new metrics are not present
+                        <>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <Smile className="h-5 w-5 text-blue-600" />
+                                <span className="text-xl font-semibold text-blue-700">{report.mood_rating}/10</span>
+                                {previousReport && getTrendIcon(report.mood_rating, previousReport.mood_rating)}
+                              </div>
+                              <div className="text-sm text-blue-600 font-medium">Mood</div>
+                            </motion.div>
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <AlertTriangle className="h-5 w-5 text-red-600" />
+                                <span className="text-xl font-semibold text-red-700">{report.stress_level}/10</span>
+                                {previousReport && getTrendIcon(report.stress_level, report.stress_level)}
+                              </div>
+                              <div className="text-sm text-red-600 font-medium">Stress</div>
+                            </motion.div>
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <Battery className="h-5 w-5 text-green-600" />
+                                <span className="text-xl font-semibold text-green-700">{report.energy_level}/10</span>
+                                {previousReport && getTrendIcon(report.energy_level, previousReport.energy_level)}
+                              </div>
+                              <div className="text-sm text-green-600 font-medium">Energy</div>
+                            </motion.div>
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <Heart className="h-5 w-5 text-purple-600" />
+                                <span className="text-xl font-semibold text-purple-700">{report.work_satisfaction}/10</span>
+                                {previousReport && getTrendIcon(report.work_satisfaction, previousReport.work_satisfaction)}
+                              </div>
+                              <div className="text-sm text-purple-600 font-medium">Work Satisfaction</div>
+                            </motion.div>
                           </div>
-                          <div className="text-sm text-red-600 font-medium">Stress</div>
-                        </motion.div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.work_life_balance}/10</div>
+                              <div className="text-xs text-gray-600">Work-Life Balance</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.anxiety_level}/10</div>
+                              <div className="text-xs text-gray-600">Anxiety</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.confidence_level}/10</div>
+                              <div className="text-xs text-gray-600">Confidence</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.sleep_quality}/10</div>
+                              <div className="text-xs text-gray-600">Sleep Quality</div>
+                            </div>
+                          
 
-                        <motion.div
-                          className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all duration-300"
-                          whileHover={{ scale: 1.02, y: -2 }}
-                        >
-                          <div className="flex items-center justify-center space-x-1 mb-2">
-                            <Battery className="h-5 w-5 text-green-600" />
-                            <span className="text-xl font-semibold text-green-700">
-                              {report.energy_level}/10
-                            </span>
-                            {previousReport && getTrendIcon(report.energy_level, previousReport.energy_level)}
+                            
                           </div>
-                          <div className="text-sm text-green-600 font-medium">Energy</div>
-                        </motion.div>
-
-                        <motion.div
-                          className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-300"
-                          whileHover={{ scale: 1.02, y: -2 }}
-                        >
-                          <div className="flex items-center justify-center space-x-1 mb-2">
-                            <Heart className="h-5 w-5 text-purple-600" />
-                            <span className="text-xl font-semibold text-purple-700">
-                              {report.work_satisfaction}/10
-                            </span>
-                            {previousReport && getTrendIcon(report.work_satisfaction, previousReport.work_satisfaction)}
-                          </div>
-                          <div className="text-sm text-purple-600 font-medium">Work Satisfaction</div>
-                        </motion.div>
-                      </div>
-
-                      {/* Additional Metrics */}
-                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
-                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                          <div className="text-lg font-semibold text-gray-700">{report.work_life_balance}/10</div>
-                          <div className="text-xs text-gray-600">Work-Life Balance</div>
-                        </div>
-                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                          <div className="text-lg font-semibold text-gray-700">{report.anxiety_level}/10</div>
-                          <div className="text-xs text-gray-600">Anxiety</div>
-                        </div>
-                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                          <div className="text-lg font-semibold text-gray-700">{report.confidence_level}/10</div>
-                          <div className="text-xs text-gray-600">Confidence</div>
-                        </div>
-                        <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                          <div className="text-lg font-semibold text-gray-700">{report.sleep_quality}/10</div>
-                          <div className="text-xs text-gray-600">Sleep Quality</div>
-                        </div>
-                      </div>
+                        </>
+                      )}
 
                       {/* Comments */}
                       {report.comments && (

@@ -235,7 +235,7 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
       Object.keys(targetVisemeWeights).forEach(shapeName => {
         const target = targetVisemeWeights[shapeName] || 0;
         const current = currentVisemeWeights[shapeName] || 0;
-        
+
         if (Math.abs(target - current) > 0.001) {
           const newWeight = THREE.MathUtils.lerp(current, target, delta * 8); // 8 = transition speed
           newCurrentWeights[shapeName] = newWeight;
@@ -323,15 +323,15 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
   useEffect(() => {
     if (lipSyncActive && currentViseme !== 'sil') {
       const newWeights: Record<string, number> = {};
-      
+
       // Reset all viseme weights
       ['sil', 'PP', 'FF', 'TH', 'DD', 'kk', 'CH', 'SS', 'nn', 'RR', 'aa', 'E', 'I', 'O', 'U'].forEach(viseme => {
         newWeights[`viseme_${viseme}`] = 0;
       });
-      
+
       // Set current viseme weight
       newWeights[`viseme_${currentViseme}`] = 0.8;
-      
+
       setTargetVisemeWeights(newWeights);
     } else {
       // Reset all weights when not active
