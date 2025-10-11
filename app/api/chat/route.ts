@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import type { ChatMessage } from '@/types/index';
 import { getRecentReports, generateReportsAnalytics, formatReportsForAI, getPersonalHistory, formatPersonalHistoryForAI } from '@/lib/reports-service';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // File processing utilities
 interface FileAttachment {
@@ -397,7 +399,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (endSession) {
-      return await generateWellnessReport(messages, sessionType, sessionDuration);
+      return await generateWellnessReport(messages, sessionType, sessionDuration, userId, companyId);
     } else {
       return await generateChatResponse(messages, sessionType, userId, companyId, deepSearch, aiProvider, files);
     }
@@ -865,7 +867,7 @@ DEEP SEARCH MODE: You have access to real-time web search capabilities. When the
   }
 }
 
-async function generateWellnessReport(messages: ChatMessage[], sessionType: string, sessionDuration: number): Promise<NextResponse> {
+async function generateWellnessReport(messages: ChatMessage[], sessionType: string, sessionDuration: number, userId?: string, companyId?: string): Promise<NextResponse> {
   try {
     // Extract user messages for analysis
     const userMessages = messages
@@ -878,7 +880,7 @@ async function generateWellnessReport(messages: ChatMessage[], sessionType: stri
 User's responses:
 ${userMessages}
 
-Generate a JSON report with the following structure:
+Generate a JSON report with the following structure metrics must be available:
 {
   "mood": [1-10 scale],
   "stress_score": [1-10 scale, where 10 is highest stress],
@@ -892,16 +894,90 @@ Generate a JSON report with the following structure:
   "session_type": "${sessionType}",
   "session_duration": ${sessionDuration},
   "key_insights": ["3-5 key insights about the user's mental state"],
-  "recommendations": ["3-5 specific, actionable recommendations for improving wellness"]
+  "recommendations": ["3-5 specific, actionable recommendations for improving wellness"],
+  "metrics": {
+    "emotional_tone": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "stress_anxiety": 0-3, // 0=none, 1=neutral, 2=moderate, 3=high risk
+    "motivation_engagement": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "social_connectedness": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "self_esteem": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "assertiveness": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "work_life_balance_metric": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "cognitive_functioning": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "emotional_regulation": 0-3, // 0=positive, 1=neutral, 2=negative, 3=strong negative
+    "substance_use": 0-3 // 0=no mention, 1=mild, 2=frequent, 3=high risk
+  },
+  "metrics_explanation": {
+    "emotional_tone": "...",
+    "stress_anxiety": "...",
+    "motivation_engagement": "...",
+    "social_connectedness": "...",
+    "self_esteem": "...",
+    "assertiveness": "...",
+    "work_life_balance_metric": "...",
+    "cognitive_functioning": "...",
+    "emotional_regulation": "...",
+    "substance_use": "..."
+  }
 }
 
 Guidelines:
-- Base scores on actual conversation content
-- If information is missing, use reasonable estimates based on available data
-- Be empathetic and constructive in the complete_report
-- Make recommendations specific and actionable
-- Consider the ${sessionType} format in your analysis
-- Focus on patterns and themes in their responses`;
+- For each metric, use the following scoring:
+1. Emotional Tone / Affect
+  - Positive keywords = 0 points
+  - Neutral (okay, fine, alright, doing well) = 1 point
+  - Negative keywords = 2 points
+  - Strong negative (hopeless, horrible, crap, shit, pissed off) = 3 points
+2. Stress & Anxiety Levels
+  - Neutral stress words (busy, workload, tense) = 1 point
+  - Moderate stress (anxious, jittery, concerned, high strung) = 2 points
+  - High risk (panic, can’t cope, burnout, overwhelmed, afraid) = 3 points
+3. Motivation & Engagement
+  - Positive (motivated, excited, focused, attentive, growth) = 0 points
+  - Neutral (regular, consistent, initiative, locked-in) = 1 point
+  - Negative (bored, uninterested, distracted, doesn’t matter) = 2 points
+  - Strong negative (waste of time, stagnant, demotivated, pointless) = 3 points
+4. Social Connectedness / Isolation
+  - Positive (supported, connected, included, safe, validated) = 0 points
+  - Neutral (heard, relatable, important) = 1 point
+  - Negative (lonely, ignored, undervalued, not heard, outsider) = 2 points
+  - Strong negative (outcast, dismissed, disconnected, unimportant) = 3 points
+5. Self-Esteem & Confidence
+  - Positive (capable, confident, skilled, worthy, smart) = 0 points
+  - Neutral (approachable, sorted, enough, well liked) = 1 point
+  - Negative (insecure, doubtful, weak, awkward, underserving) = 2 points
+  - Strong negative (worthless, useless, failure, stupid, good for nothing) = 3 points
+6. Assertiveness & Communication Skills
+  - Positive (assertive, clear, respectful, constructive, stand up for myself) = 0 points
+  - Neutral (diplomatic, open communication) = 1 point
+  - Negative (quiet, passive, can’t speak up, insecure, unheard) = 2 points
+  - Strong negative (push over, people pleasing, not heard, resentful) = 3 points
+7. Work-Life Balance
+  - Positive (rest, family time, relaxed, hobbies, healthy routine) = 0 points
+  - Neutral (vacation, holidays, chilling, hanging out) = 1 point
+  - Negative (exhausted, no time, irregular sleep, stressed, unhealthy) = 2 points
+  - Strong negative (burnout, always working, drained, micro management, no social life) = 3 points
+8. Cognitive Functioning (Clarity & Focus)
+  - Positive (focused, sharp, alert, productive, quick, reliable) = 0 points
+  - Neutral (planning, reflect, comprehend, critical, recall) = 1 point
+  - Negative (distracted, unclear, inattentive, indecisive, overthink) = 2 points
+  - Strong negative (blank, lost, stuck, mental block, foggy) = 3 points
+9. Emotional Regulation
+  - Positive (calm, stable, mindful, composed, compassionate) = 0 points
+  - Neutral (balanced, considerate, humble, centred, self-aware) = 1 point
+  - Negative (irritable, reactive, touchy, sensitive, frustrated) = 2 points
+  - Strong negative (outburst, unstable, volatile, unpredictable, trust issues) = 3 points
+10. Substance Use
+  - No mention = 0 points
+  - Mild (drinking, smoking, caffeine, energy drinks) = 1 point
+  - Frequent (drunk, stoned, cigarettes, pills) = 2 points
+  - High risk (addicted, can’t stop, dependence, using to cope) = 3 points
+- For each metric, provide a brief explanation in metrics_explanation.
+- If information is missing, use reasonable estimates based on available data.
+- Be empathetic and constructive in the complete_report.
+- Make recommendations specific and actionable.
+- Consider the ${sessionType} format in your analysis.
+- Focus on patterns and themes in their responses.`;
 
     const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
@@ -921,7 +997,7 @@ Guidelines:
     }
 
     // Parse the JSON response
-    let report: WellnessReport;
+    let report: WellnessReport & { metrics?: any; metrics_explanation?: any };
     try {
       report = JSON.parse(aiResponse);
     } catch (parseError) {
@@ -940,8 +1016,126 @@ Guidelines:
         session_type: sessionType as 'text' | 'voice',
         session_duration: sessionDuration,
         key_insights: ["Analysis temporarily unavailable"],
-        recommendations: ["Please try another session for detailed recommendations"]
+        recommendations: ["Please try another session for detailed recommendations"],
+        metrics: {
+          emotional_tone: 1,
+          stress_anxiety: 1,
+          motivation_engagement: 1,
+          social_connectedness: 1,
+          self_esteem: 1,
+          assertiveness: 1,
+          work_life_balance_metric: 1,
+          cognitive_functioning: 1,
+          emotional_regulation: 1,
+          substance_use: 1
+        },
+        metrics_explanation: {
+          emotional_tone: "Neutral baseline due to parsing fallback.",
+          stress_anxiety: "Neutral baseline due to parsing fallback.",
+          motivation_engagement: "Neutral baseline due to parsing fallback.",
+          social_connectedness: "Neutral baseline due to parsing fallback.",
+          self_esteem: "Neutral baseline due to parsing fallback.",
+          assertiveness: "Neutral baseline due to parsing fallback.",
+          work_life_balance_metric: "Neutral baseline due to parsing fallback.",
+          cognitive_functioning: "Neutral baseline due to parsing fallback.",
+          emotional_regulation: "Neutral baseline due to parsing fallback.",
+          substance_use: "Neutral baseline due to parsing fallback."
+        }
       };
+    }
+
+    // Enforce metrics presence: ensure all required metrics exist with sane defaults (0-3)
+    const metricKeys = [
+      'emotional_tone',
+      'stress_anxiety',
+      'motivation_engagement',
+      'social_connectedness',
+      'self_esteem',
+      'assertiveness',
+      'work_life_balance_metric',
+      'cognitive_functioning',
+      'emotional_regulation',
+      'substance_use'
+    ] as const;
+
+    if (!report.metrics || typeof report.metrics !== 'object') {
+      report.metrics = {};
+    }
+    if (!report.metrics_explanation || typeof report.metrics_explanation !== 'object') {
+      report.metrics_explanation = {};
+    }
+
+    for (const key of metricKeys) {
+      const rawValue = (report.metrics as any)[key];
+      let valueNum = typeof rawValue === 'number' ? rawValue : parseInt(String(rawValue));
+      if (Number.isNaN(valueNum)) valueNum = 1; // default neutral
+      // clamp to [0,3]
+      valueNum = Math.max(0, Math.min(3, valueNum));
+      (report.metrics as any)[key] = valueNum;
+
+      if (!report.metrics_explanation[key]) {
+        (report.metrics_explanation as any)[key] = 'Derived default or not explicitly mentioned in chat.';
+      }
+    }
+
+    // Save to Firestore if userId and companyId are present
+    if (userId && companyId) {
+      // Map AI report to legacy fields for compatibility
+      const mood_rating = report.mood;
+      const stress_level = report.stress_score;
+      const anxiety_level = report.anxious_level;
+      const work_satisfaction = report.work_satisfaction;
+      const work_life_balance_score = report.work_life_balance;
+      const energy_level = report.energy_level;
+      const confidence_level = report.confident_level;
+      const sleep_quality = report.sleep_quality;
+
+      // Compute overall wellness: average of positive indicators and inverted negatives
+      const positiveIndicators = [
+        mood_rating,
+        10 - stress_level,
+        10 - anxiety_level,
+        energy_level,
+        work_satisfaction,
+        work_life_balance_score,
+        confidence_level,
+        sleep_quality
+      ];
+      const overall_wellness = Math.round(
+        positiveIndicators.reduce((sum, v) => sum + Math.max(0, Math.min(10, v)), 0) / positiveIndicators.length
+      );
+
+      // Derive simple risk level from stress and anxiety
+      const riskBasis = (stress_level + anxiety_level) / 2;
+      const risk_level: 'low' | 'medium' | 'high' = riskBasis >= 7 ? 'high' : riskBasis >= 4 ? 'medium' : 'low';
+
+      const reportToSave = {
+        employee_id: userId,
+        company_id: companyId,
+        mood_rating,
+        stress_level,
+        anxiety_level,
+        work_satisfaction,
+        work_life_balance: work_life_balance_score,
+        energy_level,
+        confidence_level,
+        sleep_quality,
+        overall_wellness,
+        risk_level,
+        ai_analysis: report.complete_report,
+        session_type: report.session_type,
+        session_duration: report.session_duration,
+        metrics: report.metrics,
+        metrics_explanation: report.metrics_explanation,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any;
+
+      try {
+        await addDoc(collection(db, 'mental_health_reports'), reportToSave);
+      } catch (firestoreError) {
+        console.error('Failed to save report to Firestore:', firestoreError);
+      }
     }
 
     return NextResponse.json({
