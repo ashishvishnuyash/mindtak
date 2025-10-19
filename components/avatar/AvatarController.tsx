@@ -34,6 +34,8 @@ export default function AvatarController({
   speechText,
   onLipSyncUpdate
 }: AvatarControllerProps) {
+  // Constrain scale to prevent avatar from getting too large
+  const constrainedScale = Math.max(0.8, Math.min(2.0, scale));
   // Track viseme animation timing for more natural mouth movements
   const [visemeActive, setVisemeActive] = useState(false);
   const [speakingIntensity, setSpeakingIntensity] = useState(0);
@@ -189,13 +191,13 @@ export default function AvatarController({
   }, [speaking]);
   
   return (
-    <div className="avatar-container h-full w-full relative">
-      {/* Enhanced subtle head movement when speaking */}
+    <div className="avatar-container">
+      {/* Enhanced subtle head movement when speaking - constrained to prevent overflow */}
       <div 
-        className="h-full w-full transition-all duration-300 ease-in-out"
+        className="avatar-constrained h-full w-full transition-all duration-300 ease-in-out"
         style={{
           transform: speaking ? 
-            `translate(${headPositionRef.current.x}px, ${headPositionRef.current.y}px) rotate(${headPositionRef.current.x * 0.2}deg)` : 
+            `translate(${Math.max(-5, Math.min(5, headPositionRef.current.x))}px, ${Math.max(-3, Math.min(3, headPositionRef.current.y))}px) rotate(${Math.max(-2, Math.min(2, headPositionRef.current.x * 0.1))}deg)` : 
             'none'
         }}
       >
@@ -203,7 +205,7 @@ export default function AvatarController({
           ref={avatarRef}
           emotion={emotion as any} 
           speaking={speaking && (visemeActive || lipSyncActive)} 
-          scale={scale}
+          scale={constrainedScale}
           interactive={interactive}
           showEnvironment={showEnvironment}
           enableFloating={enableFloating}

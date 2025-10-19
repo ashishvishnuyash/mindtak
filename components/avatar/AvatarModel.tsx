@@ -11,6 +11,7 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 
 // Animation mapping to emotional states
@@ -63,7 +64,9 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
   // Model loading state
   const [modelScene, setModelScene] = useState<THREE.Group | null>(null);
 
-  // Load the avatar model
+  // Load the avatar model with progress tracking
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
   useEffect(() => {
     const loadModel = async () => {
       try {
@@ -73,21 +76,52 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
             loader.load(
               modelUrl || '/model/default.fbx',
               resolve,
-              undefined,
+              (progress) => {
+                const percentComplete = (progress.loaded / progress.total) * 100;
+                setLoadingProgress(percentComplete);
+              },
               reject
             );
           });
           setModelScene(fbxScene);
         } else {
-          // Default to GLTF - useGLTF hook handles loading
-          const gltfData = useGLTF(modelUrl || '/model/68dce07322326403ec9e4358.glb');
+          // Default to GLTF with progress tracking
+          const loader = new GLTFLoader();
+          const gltfData = await new Promise<any>((resolve, reject) => {
+            loader.load(
+              modelUrl || '/model/68dce07322326403ec9e4358.glb',
+              resolve,
+              (progress) => {
+                const percentComplete = (progress.loaded / progress.total) * 100;
+                setLoadingProgress(percentComplete);
+              },
+              reject
+            );
+          });
           setModelScene(gltfData.scene);
         }
+        setLoadingProgress(100);
       } catch (error) {
         console.error('Failed to load model:', error);
         // Fallback to default GLTF
-        const gltfData = useGLTF('/model/68dce07322326403ec9e4358.glb');
-        setModelScene(gltfData.scene);
+        try {
+          const loader = new GLTFLoader();
+          const gltfData = await new Promise<any>((resolve, reject) => {
+            loader.load(
+              '/model/68dce07322326403ec9e4358.glb',
+              resolve,
+              (progress) => {
+                const percentComplete = (progress.loaded / progress.total) * 100;
+                setLoadingProgress(percentComplete);
+              },
+              reject
+            );
+          });
+          setModelScene(gltfData.scene);
+          setLoadingProgress(100);
+        } catch (fallbackError) {
+          console.error('Fallback model loading failed:', fallbackError);
+        }
       }
     };
 
@@ -125,7 +159,10 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
           loader.load(
             ANIMATIONS[emotion],
             resolve,
-            undefined,
+            (progress) => {
+              // Optional: track animation loading progress
+              console.log('Animation loading:', Math.round((progress.loaded / progress.total) * 100) + '%');
+            },
             reject
           );
         });
@@ -346,27 +383,48 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
   if (!modelScene) {
     return (
       <group ref={group} scale={[scale, scale, scale]} position={[0, -0.5, 0]}>
-        {/* Loading placeholder */}
+        {/* Loading placeholder with progress */}
         <Text
-          position={[0, 0, 0]}
-          fontSize={0.5}
+          position={[0, 0.2, 0]}
+          fontSize={0.3}
           color="#4F46E5"
           anchorX="center"
           anchorY="middle"
         >
-          Loading...
+          Loading Avatar...
         </Text>
+        <Text
+          position={[0, -0.2, 0]}
+          fontSize={0.2}
+          color="#888"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {Math.round(loadingProgress)}%
+        </Text>
+        {/* Loading bar */}
+        <mesh position={[0, -0.5, 0]}>
+          <boxGeometry args={[2, 0.1, 0.1]} />
+          <meshBasicMaterial color="#333" />
+        </mesh>
+        <mesh position={[-1 + (loadingProgress / 100), -0.5, 0.01]} scale={[loadingProgress / 100, 1, 1]}>
+          <boxGeometry args={[2, 0.1, 0.1]} />
+          <meshBasicMaterial color="#4CAF50" />
+        </mesh>
       </group>
     );
   }
 
+  // Constrain scale to prevent avatar from getting too large
+  const constrainedScale = Math.max(0.5, Math.min(2.5, scale)); // Limit scale between 0.5x and 2.5x
+
   return (
-    <group ref={group} scale={[scale, scale, scale]} position={[0, -0.5, 0]}>
+    <group ref={group} scale={[constrainedScale, constrainedScale, constrainedScale]} position={[0, -0.5, 0]}>
       {enableFloating ? (
         <Float
-          speed={speaking ? 2 : 1}
-          rotationIntensity={speaking ? 0.5 : 0.2}
-          floatIntensity={speaking ? 0.3 : 0.1}
+          speed={speaking ? 1.5 : 0.8} // Reduced speed to prevent excessive movement
+          rotationIntensity={speaking ? 0.3 : 0.1} // Reduced rotation to keep avatar contained
+          floatIntensity={speaking ? 0.2 : 0.05} // Reduced float intensity to prevent "blasting"
         >
           <group
             ref={avatarRef}
@@ -388,23 +446,23 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
         </group>
       )}
 
-      {/* Interactive elements */}
+      {/* Interactive elements - constrained size */}
       {speaking && (
         <DreiSparkles
-          count={20}
-          scale={[2, 2, 2]}
-          size={2}
-          speed={0.5}
-          opacity={0.6}
+          count={15} // Reduced particle count
+          scale={[1.5, 1.5, 1.5]} // Reduced sparkle size
+          size={1.5}
+          speed={0.4}
+          opacity={0.5}
           color="#4F46E5"
         />
       )}
 
-      {/* Emotion indicator */}
+      {/* Emotion indicator - positioned relative to constrained scale */}
       {emotion !== 'IDLE' && (
         <Text
-          position={[0, 2.2, 0]}
-          fontSize={0.25}
+          position={[0, 1.8 * constrainedScale, 0]} // Scale text position with avatar
+          fontSize={0.2 * constrainedScale} // Scale text size with avatar
           color="#4F46E5"
           anchorX="center"
           anchorY="middle"
@@ -450,29 +508,38 @@ const AvatarScene = React.forwardRef<THREE.Group, AvatarSceneProps>(({
 }, ref) => {
   const { camera } = useThree();
 
-  // Dynamic camera positioning based on emotion - adjusted for better visibility
+  // Constrained camera positioning based on emotion - prevents avatar from getting too large
   useEffect(() => {
     const positions = {
-      'IDLE': [0, 1.2, 4],
-      'HAPPY': [0.5, 1.4, 3.5],
-      'ANGRY': [-0.3, 1.0, 3.2],
-      'LAUGHING': [0, 1.5, 3.8],
-      'VICTORY': [0, 1.7, 4.2],
-      'CLAPPING': [0, 1.3, 3.5],
-      'DANCING': [0.8, 1.2, 3.8],
-      'SHAKE_FIST': [-0.5, 1.1, 3.4],
-      'SITTING_ANGRY': [0, 0.9, 3.5]
+      'IDLE': [0, 1.2, 5],
+      'HAPPY': [0.3, 1.3, 4.8],
+      'ANGRY': [-0.2, 1.1, 4.5],
+      'LAUGHING': [0, 1.4, 5.2],
+      'VICTORY': [0, 1.5, 5.5],
+      'CLAPPING': [0, 1.3, 4.8],
+      'DANCING': [0.5, 1.2, 5.0],
+      'SHAKE_FIST': [-0.3, 1.1, 4.7],
+      'SITTING_ANGRY': [0, 0.9, 4.5]
     };
 
     const targetPosition = positions[emotion] || positions['IDLE'];
+    
+    // Ensure minimum distance to prevent avatar from getting too large
+    const minDistance = 4.0;
+    const maxDistance = 6.0;
+    const clampedPosition = [
+      Math.max(-1, Math.min(1, targetPosition[0])), // Limit horizontal movement
+      Math.max(0.8, Math.min(2, targetPosition[1])), // Limit vertical movement
+      Math.max(minDistance, Math.min(maxDistance, targetPosition[2])) // Constrain distance
+    ];
 
-    // Smooth camera transition
+    // Smooth camera transition with bounds checking
     const startPosition = camera.position.clone();
-    const endPosition = new THREE.Vector3(...targetPosition);
+    const endPosition = new THREE.Vector3(...clampedPosition);
 
     let progress = 0;
     const animateCamera = () => {
-      progress += 0.02;
+      progress += 0.015; // Slightly slower transition
       if (progress <= 1) {
         camera.position.lerpVectors(startPosition, endPosition, progress);
         camera.lookAt(0, 0.8, 0);
@@ -533,16 +600,18 @@ const AvatarScene = React.forwardRef<THREE.Group, AvatarSceneProps>(({
         far={4.5}
       />
 
-      {/* Interactive Controls */}
+      {/* Interactive Controls - constrained to prevent excessive zooming */}
       <OrbitControls
         enableZoom={interactive}
         enablePan={false}
-        minPolarAngle={Math.PI / 8}
-        maxPolarAngle={Math.PI / 1.8}
-        minAzimuthAngle={-Math.PI / 3}
-        maxAzimuthAngle={Math.PI / 3}
+        minDistance={3.5} // Prevent zooming too close
+        maxDistance={8.0} // Prevent zooming too far
+        minPolarAngle={Math.PI / 6} // Slightly more restrictive
+        maxPolarAngle={Math.PI / 2.2} // Prevent looking too far up/down
+        minAzimuthAngle={-Math.PI / 4} // Slightly more restrictive horizontal rotation
+        maxAzimuthAngle={Math.PI / 4}
         enableDamping
-        dampingFactor={0.05}
+        dampingFactor={0.08} // Slightly more damping for smoother control
         target={[0, 0.8, 0]}
       />
     </>
@@ -595,13 +664,13 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
   }, [quality]);
 
   return (
-    <div className="h-full w-full relative">
-      <Canvas {...canvasProps}>
+    <div className="avatar-container">
+      <Canvas {...canvasProps} className="avatar-canvas">
         <AvatarScene
           ref={ref}
           emotion={emotion}
           speaking={speaking}
-          scale={scale}
+          scale={Math.max(0.5, Math.min(2.5, scale))} // Constrain scale at canvas level too
           interactive={interactive}
           showEnvironment={showEnvironment}
           enableFloating={enableFloating}
@@ -636,8 +705,15 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
 
       {/* Avatar visibility indicator */}
       <div className="absolute top-2 left-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-        Avatar: {scale.toFixed(1)}x scale
+        Avatar: {Math.max(0.5, Math.min(2.5, scale)).toFixed(1)}x scale
       </div>
+      
+      {/* Size constraint overlay - invisible but ensures bounds */}
+      <div className="absolute inset-0 pointer-events-none" style={{ 
+        maxWidth: '100%', 
+        maxHeight: '100%', 
+        overflow: 'hidden' 
+      }} />
     </div>
   );
 });

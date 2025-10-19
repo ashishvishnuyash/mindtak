@@ -509,6 +509,11 @@ function EmployerDashboardPage() {
             <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
               Overview
             </button>
+            <Link href="/employer/wellness-hub">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Wellness Toolkit
+              </button>
+            </Link>
             <Link href="/employer/employees">
               <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
                 Employees

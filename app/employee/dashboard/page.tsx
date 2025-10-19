@@ -276,6 +276,12 @@ function EmployeeDashboard() {
               Overview
             </button>
             <button 
+              onClick={() => router.push('/employee/wellness-hub')}
+              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+            >
+              Wellness Toolkit
+            </button>
+            <button 
               onClick={() => router.push('/employee/reports')}
               className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
             >
@@ -291,7 +297,7 @@ function EmployeeDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Link href="/employee/reports/new">
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
               <CardContent className="p-6">
@@ -304,6 +310,23 @@ function EmployeeDashboard() {
                     <p className="text-sm text-gray-600 dark:text-gray-400">Record your current state</p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors ml-auto" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/employee/wellness-hub">
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-emerald-100 p-3 rounded-2xl">
+                    <Sparkles className="h-6 w-6 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors">Wellness Toolkit</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Access wellness tools</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-emerald-500 transition-colors ml-auto" />
                 </div>
               </CardContent>
             </Card>

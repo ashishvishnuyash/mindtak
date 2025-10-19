@@ -103,7 +103,7 @@ export default function EmployeeReportsPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user, db]);
+  }, [user]);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -120,45 +120,10 @@ export default function EmployeeReportsPage() {
     }
   }, [user, userLoading, router, fetchReports]);
 
-<<<<<<< HEAD
-  const fetchReports = async () => {
-    if (!user) return;
-
-    try {
-      setRefreshing(true);
-      const reportsCollection = collection(db, 'mental_health_reports');
-      const q = query(
-        reportsCollection,
-        where('employee_id', '==', user.id)
-      );
-      const querySnapshot = await getDocs(q);
-
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as MentalHealthReport[];
-
-      // Sort by created_at in JavaScript to avoid Firestore index requirements
-      const sortedData = data.sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-
-      setReports(sortedData);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
   const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high' | undefined | null) => {
     // Provide a safe default if riskLevel is undefined or null
     const safeRiskLevel = riskLevel || 'low';
-
-=======
-  const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high') => {
->>>>>>> 1fedc4f84a4ede7d48e5c4d9193166e97ac64699
+    
     const colors = {
       low: 'bg-green-100 text-green-700 border-green-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -170,9 +135,9 @@ export default function EmployeeReportsPage() {
       high: <AlertTriangle className="h-3 w-3" />,
     };
     return (
-      <Badge className={`${colors[riskLevel]} flex items-center space-x-1`}>
-        {icons[riskLevel]}
-        <span>{riskLevel?.toUpperCase()}</span>
+      <Badge className={`${colors[safeRiskLevel]} flex items-center space-x-1`}>
+        {icons[safeRiskLevel]}
+        <span>{safeRiskLevel?.toUpperCase()}</span>
       </Badge>
     );
   };
@@ -243,15 +208,6 @@ export default function EmployeeReportsPage() {
       opacity: 1,
       y: 0,
       transition: { duration: 0.6, ease: "easeOut" as const }
-    }
-  };
-
-  const floatingAnimation = {
-    y: [-10, 10, -10],
-    transition: {
-      duration: 4,
-      repeat: Infinity,
-      ease: "easeInOut" as const
     }
   };
 
@@ -340,6 +296,11 @@ export default function EmployeeReportsPage() {
                 Overview
               </button>
             </Link>
+            <Link href="/employee/wellness-hub">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Wellness Toolkit
+              </button>
+            </Link>
             <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
               Analytics
             </button>
@@ -378,6 +339,7 @@ export default function EmployeeReportsPage() {
             </div>
           </div>
         </div>
+
         {/* Action Buttons */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -492,13 +454,8 @@ export default function EmployeeReportsPage() {
               const previousReport = sortedReports[index + 1] as UIMentalHealthReport | undefined;
               const r = report as UIMentalHealthReport;
               return (
-<<<<<<< HEAD
                 <motion.div key={report.id} variants={itemVariants}>
                   <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
-=======
-                <motion.div key={r.id} variants={itemVariants}>
-                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
->>>>>>> 1fedc4f84a4ede7d48e5c4d9193166e97ac64699
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
                         <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -537,7 +494,7 @@ export default function EmployeeReportsPage() {
                         </div>
                       </div>
 
-                      {/* Main Metrics Grid - replaced with AI Metrics */}
+                      {/* Main Metrics Grid */}
                       {r.metrics ? (
                         <div className="mb-6">
                           <h4 className="text-md font-semibold text-green-700 mb-2 flex items-center">
@@ -594,7 +551,7 @@ export default function EmployeeReportsPage() {
                               <div className="flex items-center justify-center space-x-1 mb-2">
                                 <AlertTriangle className="h-5 w-5 text-red-600" />
                                 <span className="text-xl font-semibold text-red-700">{report.stress_level}/10</span>
-                                {previousReport && getTrendIcon(report.stress_level, report.stress_level)}
+                                {previousReport && getTrendIcon(report.stress_level, previousReport.stress_level)}
                               </div>
                               <div className="text-sm text-red-600 font-medium">Stress</div>
                             </motion.div>
@@ -632,9 +589,6 @@ export default function EmployeeReportsPage() {
                               <div className="text-lg font-semibold text-gray-700">{report.sleep_quality}/10</div>
                               <div className="text-xs text-gray-600">Sleep Quality</div>
                             </div>
-                          
-
-                            
                           </div>
                         </>
                       )}
@@ -648,26 +602,10 @@ export default function EmployeeReportsPage() {
                           transition={{ delay: 0.2 }}
                         >
                           <h4 className="text-sm font-semibold text-blue-700 mb-2 flex items-center">
-                            <Brain className="h-4 w-4 mr-2" />
-                            Personal Notes:
-                          </h4>
-                          <p className="text-sm text-blue-600">{report.comments}</p>
-                        </motion.div>
-                      )}
-
-                      {/* AI Analysis */}
-                      {report.ai_analysis && (
-                        <motion.div
-                          className="mt-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 }}
-                        >
-                          <h4 className="text-sm font-semibold text-green-700 mb-2 flex items-center">
                             <Sparkles className="h-4 w-4 mr-2" />
-                            AI Insights:
+                            Your Notes
                           </h4>
-                          <p className="text-sm text-green-600">{report.ai_analysis}</p>
+                          <p className="text-gray-700 text-sm leading-relaxed">{report.comments}</p>
                         </motion.div>
                       )}
                     </CardContent>
@@ -679,37 +617,29 @@ export default function EmployeeReportsPage() {
         )}
 
         {/* Empty State */}
-        {sortedReports.length === 0 && (
+        {sortedReports.length === 0 && !loading && (
           <motion.div
+            className="text-center py-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <CardContent className="p-12 text-center">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                </motion.div>
-                <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No Reports Found</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
-                  {searchTerm || filterRisk !== 'all'
-                    ? 'No reports match your current filters. Try adjusting your search criteria.'
-                    : 'You haven\'t created any wellness reports yet. Start tracking your mental health today!'
-                  }
-                </p>
-                {!searchTerm && filterRisk === 'all' && (
-                  <Link href="/employee/reports/new">
-                    <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg px-8 py-3 text-lg">
-                      <Sparkles className="h-5 w-5 mr-2" />
-                      Create Your First Report
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
+            <motion.div
+              animate={{ y: [-10, 10, -10] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Brain className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+            </motion.div>
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">No Reports Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+              Start your wellness journey by creating your first mental health report. Track your progress and gain insights into your well-being.
+            </p>
+            <Link href="/employee/reports/new">
+              <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Plus className="h-5 w-5 mr-2" />
+                Create Your First Report
+              </Button>
+            </Link>
           </motion.div>
         )}
       </div>
