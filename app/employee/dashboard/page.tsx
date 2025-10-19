@@ -39,6 +39,8 @@ import { auth, db } from '@/lib/firebase';
 import { withAuth } from '@/components/auth/with-auth';
 import { useCallback } from 'react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import ComprehensiveMetrics from '@/components/dashboard/ComprehensiveMetrics';
+import { ComprehensiveReportExportService } from '@/lib/comprehensive-report-export-service';
 
 function EmployeeDashboard() {
   const { user, loading: userLoading } = useUser();
@@ -262,86 +264,231 @@ function EmployeeDashboard() {
           </motion.div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Enhanced Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
             <button
               onClick={() => setActiveTab('Overview')}
-              className={`pb-4 px-1 border-b-2 font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 activeTab === 'Overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-              Overview
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Overview</span>
+                </div>
             </button>
             <button 
               onClick={() => router.push('/employee/reports')}
-              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
             >
-              Analytics
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="h-4 w-4" />
+                  <span>Analytics</span>
+                </div>
             </button>
             <button 
               onClick={() => router.push('/employee/chat')}
-              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
-            >
-              AI Friend
-            </button>
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+              >
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>AI Chat</span>
+                </div>
+              </button>
+              <button 
+                onClick={() => router.push('/employee/support')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+              >
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>Support</span>
+                </div>
+              </button>
+              <button 
+                onClick={() => router.push('/employee/recommendations')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+              >
+                <div className="flex items-center space-x-2">
+                  <Sparkles className="h-4 w-4" />
+                  <span>Recommendations</span>
+                </div>
+              </button>
+              <button 
+                onClick={() => router.push('/employee/gamification')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+              >
+                <div className="flex items-center space-x-2">
+                  <Award className="h-4 w-4" />
+                  <span>Gamification</span>
+                </div>
+              </button>
+          <button
+            onClick={() => router.push('/employee/community')}
+            className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+          >
+            <div className="flex items-center space-x-2">
+              <User className="h-4 w-4" />
+              <span>Community</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('Metrics')}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+              activeTab === 'Metrics'
+                ? 'bg-blue-500 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="h-4 w-4" />
+              <span>Metrics</span>
+            </div>
+          </button>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        {/* Enhanced Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           <Link href="/employee/reports/new">
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
-              <CardContent className="p-6">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-blue-100 p-3 rounded-2xl">
-                    <Heart className="h-6 w-6 text-blue-600" />
+                  <div className="bg-blue-500 p-3 rounded-xl shadow-sm">
+                    <Heart className="h-6 w-6 text-white" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">New Wellness Check</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Record your current state</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors ml-auto" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
                 </div>
-              </CardContent>
-            </Card>
+              </motion.div>
           </Link>
 
           <Link href="/employee/chat">
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
-              <CardContent className="p-6">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-green-100 p-3 rounded-2xl">
-                    <MessageSquare className="h-6 w-6 text-green-600" />
+                  <div className="bg-green-500 p-3 rounded-xl shadow-sm">
+                    <MessageSquare className="h-6 w-6 text-white" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-green-600 transition-colors">AI Assistant</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Chat with our wellness AI</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors ml-auto" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors" />
                 </div>
-              </CardContent>
-            </Card>
+              </motion.div>
           </Link>
 
           <Link href="/employee/reports">
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
-              <CardContent className="p-6">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-purple-100 p-3 rounded-2xl">
-                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                  <div className="bg-purple-500 p-3 rounded-xl shadow-sm">
+                    <TrendingUp className="h-6 w-6 text-white" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors">View Reports</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Track your progress</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors ml-auto" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
                 </div>
-              </CardContent>
-            </Card>
+              </motion.div>
+            </Link>
+
+            <Link href="/employee/support">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-red-500 p-3 rounded-xl shadow-sm">
+                    <AlertTriangle className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors">Support & Escalation</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Get help when needed</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors" />
+                </div>
+              </motion.div>
+            </Link>
+
+            <Link href="/employee/recommendations">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-indigo-500 p-3 rounded-xl shadow-sm">
+                    <Sparkles className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 transition-colors">AI Recommendations</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Personalized wellness tips</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                </div>
+              </motion.div>
+            </Link>
+
+            <Link href="/employee/gamification">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-yellow-500 p-3 rounded-xl shadow-sm">
+                    <Award className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 transition-colors">Gamification</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Earn points & badges</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                </div>
+              </motion.div>
+            </Link>
+
+            <Link href="/employee/community">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border border-teal-200 dark:border-teal-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-teal-500 p-3 rounded-xl shadow-sm">
+                    <User className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-teal-600 transition-colors">Community</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Anonymous support space</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-teal-500 transition-colors" />
+                </div>
+              </motion.div>
           </Link>
+          </div>
         </div>
 
         {/* Interactive Stats Overview */}
@@ -702,6 +849,30 @@ function EmployeeDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Metrics Tab Content */}
+        {activeTab === 'Metrics' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-8"
+          >
+            <ComprehensiveMetrics
+              userId={user?.id}
+              companyId={user?.company_id}
+              showExport={true}
+              onExport={async (data) => {
+                try {
+                  await ComprehensiveReportExportService.exportToPDF(data, user);
+                } catch (error) {
+                  console.error('Export error:', error);
+                }
+              }}
+              userRole="employee"
+            />
+          </motion.div>
+        )}
       </div>
     </div>
   );

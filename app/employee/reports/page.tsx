@@ -103,7 +103,7 @@ export default function EmployeeReportsPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user, db]);
+  }, [user]);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -120,45 +120,7 @@ export default function EmployeeReportsPage() {
     }
   }, [user, userLoading, router, fetchReports]);
 
-<<<<<<< HEAD
-  const fetchReports = async () => {
-    if (!user) return;
-
-    try {
-      setRefreshing(true);
-      const reportsCollection = collection(db, 'mental_health_reports');
-      const q = query(
-        reportsCollection,
-        where('employee_id', '==', user.id)
-      );
-      const querySnapshot = await getDocs(q);
-
-      const data = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as MentalHealthReport[];
-
-      // Sort by created_at in JavaScript to avoid Firestore index requirements
-      const sortedData = data.sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-
-      setReports(sortedData);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high' | undefined | null) => {
-    // Provide a safe default if riskLevel is undefined or null
-    const safeRiskLevel = riskLevel || 'low';
-
-=======
   const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high') => {
->>>>>>> 1fedc4f84a4ede7d48e5c4d9193166e97ac64699
     const colors = {
       low: 'bg-green-100 text-green-700 border-green-200',
       medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -348,6 +310,26 @@ export default function EmployeeReportsPage() {
                 AI Friend
               </button>
             </Link>
+            <Link href="/employee/support">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Support
+              </button>
+            </Link>
+            <Link href="/employee/recommendations">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Recommendations
+              </button>
+            </Link>
+            <Link href="/employee/gamification">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Gamification
+              </button>
+            </Link>
+            <Link href="/employee/community">
+              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+                Community
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -492,13 +474,8 @@ export default function EmployeeReportsPage() {
               const previousReport = sortedReports[index + 1] as UIMentalHealthReport | undefined;
               const r = report as UIMentalHealthReport;
               return (
-<<<<<<< HEAD
-                <motion.div key={report.id} variants={itemVariants}>
-                  <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
-=======
                 <motion.div key={r.id} variants={itemVariants}>
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300">
->>>>>>> 1fedc4f84a4ede7d48e5c4d9193166e97ac64699
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
                         <div className="flex items-center space-x-4 mb-4 lg:mb-0">

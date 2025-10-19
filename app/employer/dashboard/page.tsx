@@ -32,7 +32,8 @@ import {
   Star,
   Eye,
   RefreshCw,
-  User as UserIcon
+  User as UserIcon,
+  FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { DashboardStats, MentalHealthReport, User } from '@/types/index';
@@ -49,6 +50,8 @@ import { db, auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { withAuth } from '@/components/auth/with-auth';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import ComprehensiveMetrics from '@/components/dashboard/ComprehensiveMetrics';
+import { ComprehensiveReportExportService } from '@/lib/comprehensive-report-export-service';
 
 function EmployerDashboardPage() {
   const { user, loading: userLoading } = useUser();
@@ -503,22 +506,71 @@ function EmployerDashboardPage() {
           </p>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Enhanced Navigation */}
         <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
-              Overview
-            </button>
-            <Link href="/employer/employees">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
-                Employees
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
+              <button className="px-3 py-2 rounded-md text-sm font-medium bg-blue-500 text-white shadow-sm whitespace-nowrap">
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Overview</span>
+                </div>
               </button>
-            </Link>
-            <Link href="/employer/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
-                Reports
+              <Link href="/employer/employees">
+                <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-4 w-4" />
+                    <span>Employees</span>
+                  </div>
+                </button>
+              </Link>
+              <Link href="/employer/reports">
+                <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Reports</span>
+                  </div>
+                </button>
+              </Link>
+              <Link href="/employer/analytics">
+                <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Analytics</span>
+                  </div>
+                </button>
+              </Link>
+              <Link href="/employee/support">
+                <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="h-4 w-4" />
+                    <span>Support Tickets</span>
+                  </div>
+                </button>
+              </Link>
+              <Link href="/employee/community">
+                <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-4 w-4" />
+                    <span>Community</span>
+                  </div>
+                </button>
+              </Link>
+              <Link href="/employee/gamification">
+                <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <Star className="h-4 w-4" />
+                    <span>Gamification</span>
+                  </div>
+                </button>
+              </Link>
+              <button className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap">
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Company Metrics</span>
+                </div>
               </button>
-            </Link>
+            </div>
           </div>
         </div>
 
@@ -1027,6 +1079,23 @@ function EmployerDashboardPage() {
             )}
           </motion.div>
         </motion.div>
+
+        {/* Company Metrics Section */}
+        <div className="mt-8">
+          <ComprehensiveMetrics
+            userId={user?.id}
+            companyId={user?.company_id}
+            showExport={true}
+            onExport={async (data) => {
+              try {
+                await ComprehensiveReportExportService.exportToPDF(data, user);
+              } catch (error) {
+                console.error('Export error:', error);
+              }
+            }}
+            userRole="employer"
+          />
+        </div>
       </div>
     </div>
   );

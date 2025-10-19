@@ -40,6 +40,7 @@ import {
   Upload,
   UserCircle, // Replace User3D with UserCircle
   Settings,
+  CheckCircle,
 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
@@ -210,6 +211,7 @@ export default function EmployeeChatPage() {
   // File upload state
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Deep Conversation state
@@ -219,6 +221,7 @@ export default function EmployeeChatPage() {
 
   // Options panel state
   const [showOptionsPanel, setShowOptionsPanel] = useState(false);
+  const [showEndConfirmation, setShowEndConfirmation] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -451,7 +454,19 @@ export default function EmployeeChatPage() {
   // File handling functions
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const validFiles = files.filter(file => {
+    processFiles(files);
+
+    // Clear the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const processFiles = (files: File[]) => {
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    files.forEach(file => {
       const maxSize = 10 * 1024 * 1024; // 10MB
       const supportedTypes = [
         'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -461,32 +476,61 @@ export default function EmployeeChatPage() {
       ];
 
       if (file.size > maxSize) {
-        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
-        return false;
+        errors.push(`${file.name} is too large (max 10MB)`);
+        return;
       }
 
       if (!supportedTypes.includes(file.type)) {
-        toast.error(`File type ${file.type} is not supported.`);
-        return false;
+        errors.push(`${file.name} has unsupported file type`);
+        return;
       }
 
-      return true;
+      validFiles.push(file);
     });
 
-    setAttachedFiles(prev => [...prev, ...validFiles]);
-
-    // Clear the input
-    if (event.target) {
-      event.target.value = '';
+    if (errors.length > 0) {
+      toast.error(`Some files couldn't be added: ${errors.join(', ')}`);
     }
+
+    if (validFiles.length > 0) {
+      setAttachedFiles(prev => [...prev, ...validFiles]);
+      toast.success(`Added ${validFiles.length} file(s)`);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
   };
 
   const removeFile = (index: number) => {
     setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+    toast.info('File removed');
   };
 
   const openFileDialog = () => {
     fileInputRef.current?.click();
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   // Function to render message content with file attachments
@@ -657,10 +701,23 @@ export default function EmployeeChatPage() {
   const handleEndSession = async () => {
     if (!sessionId || loading || sessionEnded || !user) return;
 
-    toast.info("Generating your wellness report...");
+    toast.info("Analyzing conversation and generating comprehensive wellness report...");
     setLoading(true);
 
     try {
+      // Calculate conversation metrics
+      const sessionDuration = callDuration || 
+        Math.floor((Date.now() - (callStartTime?.getTime() || Date.now())) / 1000);
+      
+      const messageCount = messages.length;
+      const userMessages = messages.filter(m => m.sender === 'user');
+      const aiMessages = messages.filter(m => m.sender === 'ai');
+      
+      // Extract conversation content for analysis
+      const conversationContent = messages.map(m => 
+        `${m.sender === 'user' ? 'User' : 'AI'}: ${m.content}`
+      ).join('\n');
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -668,31 +725,59 @@ export default function EmployeeChatPage() {
           messages,
           endSession: true,
           sessionType: isVoiceMode ? "voice" : "text",
-          sessionDuration:
-            callDuration ||
-            Math.floor(
-              (Date.now() - (callStartTime?.getTime() || Date.now())) / 1000
-            ),
+          sessionDuration,
+          conversationAnalysis: true,
+          conversationMetrics: {
+            totalMessages: messageCount,
+            userMessages: userMessages.length,
+            aiMessages: aiMessages.length,
+            sessionDuration,
+            hasAttachments: messages.some(m => m.content.includes('📎')),
+            voiceMode: isVoiceMode,
+            avatarMode: isAvatarMode
+          },
           userId: user?.id,
           companyId: user?.company_id,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate report from AI.");
+        throw new Error("Failed to generate comprehensive report from AI.");
       }
 
       const result = await response.json();
 
       if (result.type === "report") {
         const report = result.data as WellnessReport;
-        const sessionDuration =
-          callDuration ||
+        const sessionDuration = callDuration ||
           Math.floor(
             (Date.now() - (callStartTime?.getTime() || Date.now())) / 1000
           );
 
-        // Update the chat session
+        // Create comprehensive conversation data
+        const conversationData = {
+          sessionId,
+          employeeId: user.id,
+          companyId: user.company_id || "default",
+          sessionType: isVoiceMode ? "voice" : "text",
+          sessionDuration,
+          messageCount,
+          userMessageCount: userMessages.length,
+          aiMessageCount: aiMessages.length,
+          conversationContent,
+          hasAttachments: messages.some(m => m.content.includes('📎')),
+          avatarMode: isAvatarMode,
+          voiceMode: isVoiceMode,
+          startTime: callStartTime?.toISOString() || new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          messages: messages.map(m => ({
+            sender: m.sender,
+            content: m.content,
+            timestamp: m.timestamp
+          }))
+        };
+
+        // Update the chat session with comprehensive data
         const sessionDocRef = doc(db, "chat_sessions", sessionId);
         await updateDoc(sessionDocRef, {
           report: report,
@@ -700,41 +785,23 @@ export default function EmployeeChatPage() {
           completed_at: serverTimestamp(),
           session_type: isVoiceMode ? "voice" : "text",
           duration: sessionDuration,
+          conversationData: conversationData,
+          messageCount: messageCount,
+          analysisComplete: true
         });
 
-        // Save the report to the mental_health_reports collection
+        // Save comprehensive mental health report
         const mentalHealthReport = {
           employee_id: user.id,
           company_id: user.company_id || "default",
-          stress_level: Math.max(
-            1,
-            Math.min(10, Math.round(report.stress_score))
-          ),
+          stress_level: Math.max(1, Math.min(10, Math.round(report.stress_score))),
           mood_rating: Math.max(1, Math.min(10, Math.round(report.mood))),
-          energy_level: Math.max(
-            1,
-            Math.min(10, Math.round(report.energy_level))
-          ),
-          work_satisfaction: Math.max(
-            1,
-            Math.min(10, Math.round(report.work_satisfaction))
-          ),
-          work_life_balance: Math.max(
-            1,
-            Math.min(10, Math.round(report.work_life_balance))
-          ),
-          anxiety_level: Math.max(
-            1,
-            Math.min(10, Math.round(report.anxious_level))
-          ),
-          confidence_level: Math.max(
-            1,
-            Math.min(10, Math.round(report.confident_level))
-          ),
-          sleep_quality: Math.max(
-            1,
-            Math.min(10, Math.round(report.sleep_quality))
-          ),
+          energy_level: Math.max(1, Math.min(10, Math.round(report.energy_level))),
+          work_satisfaction: Math.max(1, Math.min(10, Math.round(report.work_satisfaction))),
+          work_life_balance: Math.max(1, Math.min(10, Math.round(report.work_life_balance))),
+          anxiety_level: Math.max(1, Math.min(10, Math.round(report.anxious_level))),
+          confidence_level: Math.max(1, Math.min(10, Math.round(report.confident_level))),
+          sleep_quality: Math.max(1, Math.min(10, Math.round(report.sleep_quality))),
           overall_wellness: Math.max(
             1,
             Math.min(
@@ -752,17 +819,21 @@ export default function EmployeeChatPage() {
               )
             )
           ),
-          comments: `AI-generated report from ${isVoiceMode ? "voice" : "text"
-            } session`,
-          ai_analysis:
-            report.complete_report || "Report generated successfully",
+          comments: `Comprehensive AI-generated report from ${isVoiceMode ? "voice" : "text"} conversation session`,
+          ai_analysis: report.complete_report || "Comprehensive conversation analysis completed",
           sentiment_score: Math.max(0, Math.min(1, report.mood / 10)),
-          emotion_tags: Array.isArray(report.key_insights)
-            ? report.key_insights
-            : [],
+          emotion_tags: Array.isArray(report.key_insights) ? report.key_insights : [],
           risk_level: calculateRiskLevel(report),
           session_type: isVoiceMode ? "voice" : "text",
           session_duration: sessionDuration,
+          conversation_metrics: {
+            totalMessages: messageCount,
+            userMessages: userMessages.length,
+            aiMessages: aiMessages.length,
+            hasAttachments: messages.some(m => m.content.includes('📎')),
+            avatarMode: isAvatarMode,
+            voiceMode: isVoiceMode
+          },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -772,24 +843,35 @@ export default function EmployeeChatPage() {
             collection(db, "mental_health_reports"),
             mentalHealthReport
           );
-          console.log("Mental health report saved successfully");
+          console.log("Comprehensive mental health report saved successfully");
         } catch (saveError) {
           console.error("Error saving mental health report:", saveError);
-          // Don't throw here - we still want to show the report to the user
-          toast.error(
-            "Report generated but failed to save. Please contact support."
+          toast.error("Report generated but failed to save. Please contact support.");
+        }
+
+        // Save conversation data separately for detailed analysis
+        try {
+          await addDoc(
+            collection(db, "conversation_analyses"),
+            conversationData
           );
+          console.log("Conversation analysis data saved successfully");
+        } catch (conversationError) {
+          console.error("Error saving conversation analysis:", conversationError);
         }
 
         setGeneratedReport(report);
         setSessionEnded(true);
-        toast.success("Wellness report generated and saved successfully!");
+        toast.success("Comprehensive wellness report generated and saved successfully!");
+
+        // Update gamification streak and points
+        await updateGamificationStreak(sessionDuration, messageCount);
       } else {
         throw new Error("AI did not return a valid report format.");
       }
     } catch (error) {
-      console.error("Error ending session and generating report:", error);
-      toast.error("Could not generate your report. Please try again later.");
+      console.error("Error ending session and generating comprehensive report:", error);
+      toast.error("Could not generate your comprehensive report. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -799,6 +881,50 @@ export default function EmployeeChatPage() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const updateGamificationStreak = async (sessionDuration: number, messageCount: number) => {
+    if (!user) return;
+
+    try {
+      const response = await fetch('/api/gamification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'conversation_complete',
+          employee_id: user.id,
+          company_id: user.company_id,
+          data: {
+            sessionDuration,
+            messageCount,
+            sessionType: isVoiceMode ? 'voice' : 'text',
+            avatarMode: isAvatarMode
+          }
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Show success message with points earned
+        if (result.points_earned > 0) {
+          toast.success(`🎉 ${result.message} (+${result.points_earned} points)`);
+        } else {
+          toast.success(result.message);
+        }
+        
+        // Show new badges if any
+        if (result.new_badges && result.new_badges.length > 0) {
+          setTimeout(() => {
+            toast.success(`🏆 You earned ${result.new_badges.length} new badge(s)!`, {
+              duration: 5000
+            });
+          }, 1000);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating gamification streak:', error);
+      // Don't show error to user as this is a background operation
     }
   };
 
@@ -1191,12 +1317,26 @@ export default function EmployeeChatPage() {
                   )}
                 </div>
 
-                {/* Status Indicators Only */}
+                {/* Status Indicators and End Conversation Button */}
                 <div className="flex items-center space-x-2">
                   {isVoiceMode && (
                     <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <span>Call Duration: {formatCallDuration(callDuration)}</span>
                     </div>
+                  )}
+                  
+                  {/* End Conversation Button */}
+                  {!sessionEnded && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowEndConfirmation(true)}
+                      disabled={loading || messages.length === 0}
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                    >
+                      <PhoneOff className="h-4 w-4 mr-2" />
+                      End Conversation
+                    </Button>
                   )}
                 </div>
               </div>
@@ -1366,11 +1506,17 @@ export default function EmployeeChatPage() {
                     )}
 
                     <div className="mt-2 sm:mt-4 text-xs sm:text-sm text-gray-500 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                      <div className="flex flex-col space-y-1">
                       <span>
                         Session Type: {generatedReport.session_type} • Duration:{" "}
                         {Math.floor(generatedReport.session_duration / 60)}m{" "}
                         {generatedReport.session_duration % 60}s
                       </span>
+                        <div className="flex items-center space-x-2 text-green-600">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-xs">Comprehensive analysis completed</span>
+                        </div>
+                      </div>
                       <Button
                         size="sm"
                         variant="outline"
@@ -1391,24 +1537,122 @@ export default function EmployeeChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Simple Input Area */}
+            {/* Enhanced Input Area with File Upload */}
             <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-              <div className="flex space-x-2">
+              {/* File Attachments Preview */}
+              {attachedFiles.length > 0 && (
+                <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200 flex items-center">
+                      <Paperclip className="h-4 w-4 mr-1" />
+                      {attachedFiles.length} file(s) attached
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setAttachedFiles([])}
+                      className="text-blue-600 hover:text-blue-800 h-6 w-6 p-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {attachedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-2 py-1 rounded border text-xs"
+                      >
+                        <FileText className="h-3 w-3 text-gray-500" />
+                        <span className="text-gray-700 dark:text-gray-300 truncate max-w-32">
+                          {file.name}
+                        </span>
+                        <span className="text-gray-500">
+                          ({formatFileSize(file.size)})
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile(index)}
+                          className="h-4 w-4 p-0 hover:bg-red-100"
+                        >
+                          <X className="h-2 w-2 text-red-500" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Input Area */}
+              <div 
+                className={`relative rounded-xl border-2 transition-colors ${
+                  dragOver 
+                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                {/* Drag and Drop Overlay */}
+                {dragOver && (
+                  <div className="absolute inset-0 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <Upload className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Drop files here to attach
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2 p-2">
+                  {/* File Upload Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={openFileDialog}
+                    disabled={loading || sessionEnded}
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+
+                  {/* Text Input */}
                 <Input
-                  placeholder="Type your message here..."
+                    placeholder={attachedFiles.length > 0 ? "Add a message with your files..." : "Type your message here..."}
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   disabled={loading || sessionEnded}
-                  className="flex-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 rounded-xl text-gray-900 dark:text-gray-100"
+                    className="flex-1 border-0 bg-transparent focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
+
+                  {/* Send Button */}
                 <Button
                   onClick={() => handleSendMessage()}
-                  disabled={loading || sessionEnded || !currentMessage.trim()}
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl px-6"
+                    disabled={loading || sessionEnded || (!currentMessage.trim() && attachedFiles.length === 0)}
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg px-4 h-8"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
+                </div>
+              </div>
+
+              {/* Hidden File Input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.txt,.pdf,.doc,.docx"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {/* File Upload Hint */}
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                <span>Drag & drop files or click 📎 to attach</span>
+                <span>Max 10MB per file • Images, PDFs, Docs supported</span>
               </div>
             </div>
           </motion.div>
@@ -1494,6 +1738,68 @@ export default function EmployeeChatPage() {
           )}
         </div>
       </div>
+
+      {/* End Conversation Confirmation Dialog */}
+      {showEndConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <PhoneOff className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  End Conversation?
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  This will analyze your entire conversation and generate a comprehensive wellness report.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">What happens when you end:</h4>
+              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                <li>• Complete conversation analysis</li>
+                <li>• Comprehensive wellness report generation</li>
+                <li>• All conversation data saved securely</li>
+                <li>• Report added to your wellness history</li>
+              </ul>
+            </div>
+
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowEndConfirmation(false)}
+                className="flex-1"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowEndConfirmation(false);
+                  handleEndSession();
+                }}
+                disabled={loading}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <PhoneOff className="h-4 w-4 mr-2" />
+                    End & Analyze
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
