@@ -145,10 +145,11 @@ export default function LipSyncDemo() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Avatar Display */}
             <div className="space-y-4">
-              <div className="h-96 bg-gradient-to-b from-blue-50 to-gray-50 rounded-lg overflow-hidden">
+              <div className="h-96 bg-gradient-to-b from-blue-50 to-gray-50 rounded-lg overflow-hidden relative" style={{ maxWidth: '100%', maxHeight: '24rem' }}>
                 <AvatarController
                   emotion={currentEmotion}
                   speaking={isSpeaking}
+                  scale={1.2} // Fixed reasonable scale for demo
                 />
               </div>
               

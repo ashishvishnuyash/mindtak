@@ -346,8 +346,8 @@ export class PDFExportService {
     this.doc.setTextColor(128, 128, 128);
     
     // Page number
-    const pageNum = this.doc.internal.getCurrentPageInfo().pageNumber;
-    const totalPages = this.doc.internal.getNumberOfPages();
+    const pageNum = (this.doc as any).internal.getCurrentPageInfo()?.pageNumber || 1;
+    const totalPages = (this.doc as any).internal.getNumberOfPages() || 1;
     this.doc.text(`Page ${pageNum} of ${totalPages}`, this.pageWidth - this.margin - 20, footerY);
     
     // Generated timestamp

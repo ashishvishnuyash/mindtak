@@ -186,7 +186,7 @@ export default function InteractiveAvatarDemo() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-96 bg-gradient-to-b from-blue-50 to-gray-50 rounded-lg overflow-hidden relative">
+              <div className="h-96 bg-gradient-to-b from-blue-50 to-gray-50 rounded-lg overflow-hidden relative" style={{ maxWidth: '100%', maxHeight: '24rem' }}>
                 <AvatarController
                   emotion={currentEmotion}
                   speaking={isSpeaking}
@@ -195,12 +195,12 @@ export default function InteractiveAvatarDemo() {
                   showEnvironment={avatarSettings.config.showEnvironment}
                   enableFloating={avatarSettings.config.enableFloating}
                   quality={avatarSettings.config.quality}
-                  scale={avatarSettings.config.scale}
+                  scale={Math.max(0.8, Math.min(2.0, avatarSettings.config.scale))} // Constrain scale in demo
                 />
 
                 {/* Status Overlay */}
                 {isSpeaking && (
-                  <div className="absolute top-4 right-4 bg-black/80 text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-2">
+                  <div className="absolute top-4 right-4 bg-black/80 text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-2 z-10">
                     {demoMode === 'microphone' ? (
                       <>
                         <Mic className="h-4 w-4 text-red-400" />
