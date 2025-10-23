@@ -243,39 +243,39 @@ export default function EmployeeReportsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Brain className="h-5 w-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Brain className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Employee Portal</p>
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">Wellness Hub</h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Employee Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
                 Engineering
               </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <Calendar className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <Heart className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2">
+                <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-600 border-green-200"
+                className="text-green-600 border-green-200 px-1.5 sm:px-2 lg:px-3"
                 onClick={() => {
                   auth.signOut();
                   router.push('/auth/login');
                 }}
               >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Logout
+                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1 lg:mr-2" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Logout</span>
               </Button>
             </div>
           </div>
@@ -284,51 +284,51 @@ export default function EmployeeReportsPage() {
 
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 mb-3 sm:mb-4 leading-tight">My Wellness Reports</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-yellow-600 mb-2 sm:mb-3 lg:mb-4 leading-tight">My Wellness Reports</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Track your mental health journey and view your progress over time.
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-8">
-          <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
+          <div className="flex space-x-3 sm:space-x-4 md:space-x-6 lg:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-hide">
             <Link href="/employee/dashboard">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 Overview
               </button>
             </Link>
             <Link href="/employee/wellness-hub">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 Wellness Toolkit
               </button>
             </Link>
-            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+            <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
               Analytics
             </button>
             <Link href="/employee/chat">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 AI Friend
               </button>
             </Link>
             <Link href="/employee/support">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 Support
               </button>
             </Link>
             <Link href="/employee/recommendations">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 Recommendations
               </button>
             </Link>
             <Link href="/employee/gamification">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 Gamification
               </button>
             </Link>
             <Link href="/employee/community">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
                 Community
               </button>
             </Link>
@@ -364,19 +364,19 @@ export default function EmployeeReportsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-4 sm:mb-6 lg:mb-8 space-y-3 sm:space-y-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <Button
               onClick={fetchReports}
               variant="outline"
               size="sm"
-              className="border-green-200 text-green-600 hover:bg-green-50"
+              className="border-green-200 text-green-600 hover:bg-green-50 text-xs sm:text-sm px-2 sm:px-3"
               disabled={refreshing}
             >
               {refreshing ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
               ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               )}
               Refresh
             </Button>
@@ -384,15 +384,16 @@ export default function EmployeeReportsPage() {
               onClick={exportMyReports}
               variant="outline"
               size="sm"
-              className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              className="border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Export My Reports
+              <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Export My Reports</span>
+              <span className="sm:hidden">Export</span>
             </Button>
           </div>
           <Link href="/employee/reports/new">
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-3 sm:px-4 w-full sm:w-auto">
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               New Report
             </Button>
           </Link>
@@ -401,16 +402,16 @@ export default function EmployeeReportsPage() {
         {/* Filters and Search - Only show in list view */}
         {viewMode === 'list' && (
           <div>
-            <Card className="mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Card className="mb-4 sm:mb-6 lg:mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="relative sm:col-span-2 lg:col-span-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3 sm:h-4 sm:w-4" />
                     <Input
                       placeholder="Search reports..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100"
+                      className="pl-8 sm:pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100 text-sm h-8 sm:h-10"
                     />
                   </div>
 

@@ -985,29 +985,29 @@ export default function EmployeeChatPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Brain className="h-5 w-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Brain className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900">Wellness Hub</h1>
-                <p className="text-sm text-gray-500">Employee Portal</p>
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate">Wellness Hub</h1>
+                <p className="text-xs sm:text-sm text-gray-500 truncate">Employee Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
                 Engineering
               </Button>
               <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-600 border-green-200"
+                className="text-green-600 border-green-200 px-1.5 sm:px-2 lg:px-3"
                 onClick={async () => {
                   try {
                     await signOut(auth);
@@ -1018,8 +1018,8 @@ export default function EmployeeChatPage() {
                   }
                 }}
               >
-                <PhoneOff className="h-4 w-4 mr-2" />
-                Logout
+                <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1 lg:mr-2" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Logout</span>
               </Button>
             </div>
           </div>
@@ -1027,243 +1027,30 @@ export default function EmployeeChatPage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
-        <div className="flex space-x-4 sm:space-x-6 md:space-x-8 overflow-x-auto">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-2 sm:px-4 lg:px-8 flex-shrink-0">
+        <div className="flex space-x-3 sm:space-x-4 md:space-x-6 lg:space-x-8 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => router.push('/employee/dashboard')}
-            className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+            className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0"
           >
             Overview
           </button>
           <button
             onClick={() => router.push('/employee/reports')}
-            className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+            className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0"
           >
             Analytics
           </button>
-          <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+          <button className="pb-2 sm:pb-3 lg:pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-xs sm:text-sm lg:text-base whitespace-nowrap flex-shrink-0">
             AI Friend
           </button>
         </div>
       </div>
 
       {/* Full Screen Chat Container */}
-      <div className="flex flex-col h-[calc(100vh-8rem)] relative">
-        {/* Options Toggle Button - Floating */}
-        <Button
-          onClick={() => setShowOptionsPanel(!showOptionsPanel)}
-          className="fixed top-20 right-4 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3 shadow-lg"
-          size="sm"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-
-        {/* Collapsible Options Panel - Vertical Dropdown */}
-        {showOptionsPanel && (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 bg-black/20 z-40"
-              onClick={() => setShowOptionsPanel(false)}
-            />
-
-            {/* Vertical Scrollable Options Panel */}
-            <motion.div
-              initial={{ y: -300, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -300, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed top-16 right-4 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl z-50 max-h-96 overflow-hidden"
-            >
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">AI Friend Options</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowOptionsPanel(false)}
-                  className="p-1"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="overflow-y-auto scrollbar-hide max-h-80">
-                <div className="p-4 space-y-3">
-                  {/* Avatar Controls */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Avatar Controls</h4>
-
-                    {/* Enable/Disable Avatar */}
-                    <Button
-                      variant={isAvatarMode ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setIsAvatarMode(!isAvatarMode)}
-                      disabled={loading || sessionEnded}
-                      className="w-full justify-start text-sm"
-                    >
-                      <UserCircle className="h-4 w-4 mr-2" />
-                      {isAvatarMode ? "Disable Avatar" : "Enable Avatar"}
-                    </Button>
-
-                    {/* Avatar Settings */}
-                    {isAvatarMode && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={toggleSettings}
-                        disabled={loading || sessionEnded}
-                        className="w-full justify-start text-sm"
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Avatar Settings
-                      </Button>
-                    )}
-
-                    {/* Lip Sync Testing */}
-                    {isAvatarMode && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (isRecording) {
-                              stopRecording();
-                            } else {
-                              startRecording();
-                            }
-                          }}
-                          disabled={loading || sessionEnded}
-                          className="w-full justify-start text-sm"
-                        >
-                          <Mic className="h-4 w-4 mr-2" />
-                          {isRecording ? "Stop Mic Test" : "Test Microphone"}
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const testText = "Hello! This is a test of the text-to-speech lip sync system. Watch my mouth move as I speak!";
-                            speakText(testText);
-                          }}
-                          disabled={loading || sessionEnded || isSpeaking}
-                          className="w-full justify-start text-sm"
-                        >
-                          <Volume2 className="h-4 w-4 mr-2" />
-                          Test TTS Lip Sync
-                        </Button>
-                      </>
-                    )}
-                  </div>
-
-                  {/* File Controls */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">File Controls</h4>
-
-                    {/* Add Images */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.multiple = true;
-                        input.accept = 'image/*';
-                        input.onchange = (e) => handleFileSelect(e as any);
-                        input.click();
-                      }}
-                      disabled={loading || sessionEnded}
-                      className="w-full justify-start text-sm"
-                    >
-                      <ImageIcon className="h-4 w-4 mr-2" />
-                      Add Images
-                    </Button>
-
-                    {/* Add Files */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.multiple = true;
-                        input.accept = '.txt,.pdf,.doc,.docx';
-                        input.onchange = (e) => handleFileSelect(e as any);
-                        input.click();
-                      }}
-                      disabled={loading || sessionEnded}
-                      className="w-full justify-start text-sm"
-                    >
-                      <Paperclip className="h-4 w-4 mr-2" />
-                      Add Files
-                    </Button>
-                  </div>
-
-                  {/* Chat Features */}
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Chat Features</h4>
-
-                    {/* Deep Conversation */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        toast.info("🚀 Deep Conversation mode is coming soon! This exciting feature will provide enhanced AI analysis with real-time data and advanced reasoning capabilities.", {
-                          duration: 5000,
-                          style: {
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '12px',
-                            fontSize: '14px',
-                            padding: '16px',
-                            boxShadow: '0 10px 25px rgba(102, 126, 234, 0.3)',
-                          },
-                        });
-                      }}
-                      disabled={loading || sessionEnded}
-                      className="w-full justify-start text-sm text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                    >
-                      <Brain className="h-4 w-4 mr-2" />
-                      Deep Conversation
-                      <span className="ml-auto text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">Soon</span>
-                    </Button>
-                  </div>
-
-                  {/* Lip Sync Help */}
-                  {isAvatarMode && (
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Lip Sync Info</h4>
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-xs text-blue-800 dark:text-blue-200">
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                            <span>🎙️ Microphone: Real-time lip sync</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            <span>🎤 TTS: AI speech with lip sync</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                            <span>💬 Text: Phoneme-based animation</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-
-
-
-
-
+      <div className="flex flex-col flex-1 relative">
         {/* Horizontal Split Layout */}
-        <div className="flex flex-1 h-full">
+        <div className="flex flex-1 min-h-0">
           {/* Chat Section */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -1272,17 +1059,17 @@ export default function EmployeeChatPage() {
             className={`flex flex-col bg-white dark:bg-gray-900 ${isAvatarMode ? 'w-1/2' : 'w-full'} transition-all duration-300`}
           >
             {/* Chat Header */}
-            <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-4 sm:px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-2 sm:px-4 lg:px-6 py-3 sm:py-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
-                    className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-lg"
+                    className="bg-gradient-to-br from-blue-500 to-blue-600 p-1.5 sm:p-2 rounded-xl shadow-lg flex-shrink-0"
                   >
-                    <Sparkles className="h-5 w-5 text-white" />
+                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </motion.div>
-                  <span className="text-gray-900 dark:text-gray-100 font-semibold">AI Wellness Assistant</span>
+                  <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm sm:text-base truncate">AI Wellness Assistant</span>
                   <Badge
                     variant={
                       sessionEnded
@@ -1293,35 +1080,37 @@ export default function EmployeeChatPage() {
                             ? "outline"
                             : "secondary"
                     }
+                    className="text-xs flex-shrink-0"
                   >
                     {sessionEnded
                       ? "Session Ended"
                       : isVoiceMode
-                        ? `Voice Mode ${formatCallDuration(callDuration)}`
+                        ? `Voice ${formatCallDuration(callDuration)}`
                         : isAvatarMode
                           ? "Avatar Mode"
                           : "Text Mode"}
                   </Badge>
                   {isVoiceMode && (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
                       {isRecording && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse" />
                       )}
                       {isSpeaking && (
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse" />
                       )}
                       {processingAudio && (
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-500 rounded-full animate-pulse" />
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Status Indicators and End Conversation Button */}
-                <div className="flex items-center space-x-2">
+                {/* Status Indicators and Controls */}
+                <div className="flex items-center space-x-2 w-full sm:w-auto">
                   {isVoiceMode && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      <span>Call Duration: {formatCallDuration(callDuration)}</span>
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                      <span className="hidden sm:inline">Call Duration: {formatCallDuration(callDuration)}</span>
+                      <span className="sm:hidden">{formatCallDuration(callDuration)}</span>
                     </div>
                   )}
                   
@@ -1332,10 +1121,11 @@ export default function EmployeeChatPage() {
                       size="sm"
                       onClick={() => setShowEndConfirmation(true)}
                       disabled={loading || messages.length === 0}
-                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-3"
                     >
-                      <PhoneOff className="h-4 w-4 mr-2" />
-                      End Conversation
+                      <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">End Conversation</span>
+                      <span className="sm:hidden">End</span>
                     </Button>
                   )}
                 </div>
@@ -1343,11 +1133,11 @@ export default function EmployeeChatPage() {
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 dark:from-gray-800/80 dark:to-gray-900/80">
+            <div className="flex-1 overflow-y-auto chat-scrollbar p-4 lg:p-6 space-y-4 bg-gradient-to-br from-gray-50/80 to-blue-50/80 dark:from-gray-800/80 dark:to-gray-900/80 h-full">
               {messages.length === 0 && !loading && (
-                <div className="flex items-center justify-center h-full min-h-[300px]">
+                <div className="flex items-center justify-center h-full min-h-[calc(100vh-16rem)]">
                   <motion.div
-                    className="text-center"
+                    className="text-center px-4"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6 }}
@@ -1355,12 +1145,12 @@ export default function EmployeeChatPage() {
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                      className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg"
                     >
-                      <Bot className="h-8 w-8 text-white" />
+                      <Bot className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     </motion.div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">Welcome to Wellness Chat</h3>
-                    <p className="text-gray-600 text-sm max-w-md leading-relaxed">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Welcome to Wellness Chat</h3>
+                    <p className="text-gray-600 text-xs sm:text-sm max-w-xs sm:max-w-md leading-relaxed">
                       Start a conversation with your AI wellness assistant. Share how you&apos;re feeling,
                       discuss your day, or ask for support. Your conversation is confidential.
                     </p>
@@ -1380,7 +1170,7 @@ export default function EmployeeChatPage() {
         `}
                   >
                     {/* Avatar */}
-                    <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+                    <Avatar className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 flex-shrink-0">
                       <AvatarFallback
                         className={
                           message.sender === "ai" && deepConversation
@@ -1389,9 +1179,9 @@ export default function EmployeeChatPage() {
                         }
                       >
                         {message.sender === "user" ? (
-                          <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
                         ) : (
-                          <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <Bot className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
                         )}
                       </AvatarFallback>
                     </Avatar>
@@ -1401,9 +1191,9 @@ export default function EmployeeChatPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
-                      className={`rounded-2xl shadow-lg px-4 py-3 text-sm leading-relaxed max-w-[85%] sm:max-w-[75%] ${message.sender === "user"
+                      className={`rounded-2xl shadow-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm leading-relaxed max-w-[90%] sm:max-w-[85%] lg:max-w-[75%] ${message.sender === "user"
                         ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                        : "bg-white text-gray-800 border border-gray-200"
+                        : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
                         }`}
                     >
                       {message.sender === "ai" ? (
@@ -1537,7 +1327,7 @@ export default function EmployeeChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Enhanced Input Area with File Upload */}
+            {/* Chat Input Area - Matching the Image Design */}
             <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
               {/* File Attachments Preview */}
               {attachedFiles.length > 0 && (
@@ -1562,7 +1352,7 @@ export default function EmployeeChatPage() {
                         key={index}
                         className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-2 py-1 rounded border text-xs"
                       >
-                        <FileText className="h-3 w-3 text-gray-500" />
+                        <FileText className="h-3 w-3 text-gray-500 flex-shrink-0" />
                         <span className="text-gray-700 dark:text-gray-300 truncate max-w-32">
                           {file.name}
                         </span>
@@ -1573,7 +1363,7 @@ export default function EmployeeChatPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeFile(index)}
-                          className="h-4 w-4 p-0 hover:bg-red-100"
+                          className="h-4 w-4 p-0 hover:bg-red-100 flex-shrink-0"
                         >
                           <X className="h-2 w-2 text-red-500" />
                         </Button>
@@ -1583,61 +1373,290 @@ export default function EmployeeChatPage() {
                 </div>
               )}
 
-              {/* Input Area */}
-              <div 
-                className={`relative rounded-xl border-2 transition-colors ${
-                  dragOver 
-                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' 
-                    : 'border-gray-300 dark:border-gray-600'
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                {/* Drag and Drop Overlay */}
-                {dragOver && (
-                  <div className="absolute inset-0 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center z-10">
-                    <div className="text-center">
-                      <Upload className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                        Drop files here to attach
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center space-x-2 p-2">
-                  {/* File Upload Button */}
+              {/* Main Input Container */}
+              <div className="relative">
+                {/* Plus Button */}
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={openFileDialog}
+                    onClick={() => setShowOptionsPanel(!showOptionsPanel)}
                     disabled={loading || sessionEnded}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
                   >
-                    <Paperclip className="h-4 w-4" />
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
                   </Button>
+                </div>
 
-                  {/* Text Input */}
+                {/* Text Input */}
                 <Input
-                    placeholder={attachedFiles.length > 0 ? "Add a message with your files..." : "Type your message here..."}
+                  placeholder="Ask anything"
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
                   disabled={loading || sessionEnded}
-                    className="flex-1 border-0 bg-transparent focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  className="pl-12 pr-20 py-3 text-base border-gray-300 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                 />
 
-                  {/* Send Button */}
-                <Button
-                  onClick={() => handleSendMessage()}
-                    disabled={loading || sessionEnded || (!currentMessage.trim() && attachedFiles.length === 0)}
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg px-4 h-8"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+                {/* Right Side Controls */}
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                  {/* Microphone Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleRecording}
+                    disabled={loading || sessionEnded}
+                    className={`h-8 w-8 p-0 rounded-full ${
+                      isRecording 
+                        ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {isRecording ? (
+                      <Square className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  {/* Audio Visualizer */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={loading || sessionEnded}
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                    </svg>
+                  </Button>
                 </div>
+
+                {/* Drag and Drop Overlay */}
+                {dragOver && (
+                  <div className="absolute inset-0 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center z-20">
+                    <div className="text-center">
+                      <Upload className="h-6 w-6 text-blue-600 mx-auto mb-1" />
+                      <p className="text-xs font-medium text-blue-800 dark:text-blue-200">
+                        Drop files here
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Options Dropdown Panel */}
+              {showOptionsPanel && (
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 bg-transparent z-30"
+                    onClick={() => setShowOptionsPanel(false)}
+                  />
+
+                  {/* Options Panel */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute bottom-16 left-0 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-40 overflow-hidden"
+                  >
+                    <div className="p-4 space-y-3">
+                      {/* Add Files */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          openFileDialog();
+                          setShowOptionsPanel(false);
+                        }}
+                        disabled={loading || sessionEnded}
+                        className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                            <Paperclip className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Add photos & files</span>
+                        </div>
+                      </Button>
+
+                      {/* Add Images */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.multiple = true;
+                          input.accept = 'image/*';
+                          input.onchange = (e) => handleFileSelect(e as any);
+                          input.click();
+                          setShowOptionsPanel(false);
+                        }}
+                        disabled={loading || sessionEnded}
+                        className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                            <ImageIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Add images</span>
+                        </div>
+                      </Button>
+
+                      {/* Deep Conversation */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          toast.info("🚀 Deep Conversation is coming soon! This exciting feature will provide enhanced AI analysis with real-time data, advanced reasoning capabilities, and deeper contextual understanding for more meaningful conversations.", {
+                            duration: 6000,
+                            style: {
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '16px',
+                              fontSize: '14px',
+                              padding: '20px',
+                              boxShadow: '0 20px 40px rgba(102, 126, 234, 0.4)',
+                              maxWidth: '400px',
+                            },
+                          });
+                          setShowOptionsPanel(false);
+                        }}
+                        disabled={loading || sessionEnded}
+                        className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                            <Search className="h-4 w-4 text-white animate-pulse" />
+                          </div>
+                          <div className="flex-1">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Deep conversation</span>
+                            <div className="text-xs text-purple-600 dark:text-purple-400">Coming Soon</div>
+                          </div>
+                        </div>
+                      </Button>
+
+                      {/* Divider */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+                      {/* Avatar Options */}
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide px-3">
+                          Avatar & Voice
+                        </div>
+
+                        {/* Enable/Disable Avatar */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setIsAvatarMode(!isAvatarMode);
+                            toast.success(isAvatarMode ? "Avatar disabled" : "Avatar enabled");
+                            setShowOptionsPanel(false);
+                          }}
+                          disabled={loading || sessionEnded}
+                          className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                              <UserCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {isAvatarMode ? "Disable avatar" : "Enable avatar"}
+                              </span>
+                              {isAvatarMode && (
+                                <div className="text-xs text-green-600 dark:text-green-400">Active</div>
+                              )}
+                            </div>
+                          </div>
+                        </Button>
+
+                        {/* Avatar Settings */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            toggleSettings();
+                            setShowOptionsPanel(false);
+                          }}
+                          disabled={loading || sessionEnded}
+                          className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                              <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Avatar settings</span>
+                          </div>
+                        </Button>
+
+                        {/* Test Microphone */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (isRecording) {
+                              stopRecording();
+                            } else {
+                              startRecording();
+                            }
+                            setShowOptionsPanel(false);
+                          }}
+                          disabled={loading || sessionEnded}
+                          className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                              <Mic className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Test microphone</span>
+                              {isRecording && (
+                                <div className="text-xs text-red-600 dark:text-red-400">Recording...</div>
+                              )}
+                            </div>
+                          </div>
+                        </Button>
+
+                        {/* Test TTS Settings */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const testText = "Hello! This is a test of the text-to-speech system.";
+                            speakText(testText);
+                            setShowOptionsPanel(false);
+                          }}
+                          disabled={loading || sessionEnded || isSpeaking}
+                          className="w-full justify-start text-left p-3 h-auto hover:bg-gray-50 dark:hover:bg-gray-800"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                              <Volume2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Test TTS settings</span>
+                              {isSpeaking && (
+                                <div className="text-xs text-blue-600 dark:text-blue-400">Speaking...</div>
+                              )}
+                            </div>
+                          </div>
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
 
               {/* Hidden File Input */}
               <input
@@ -1648,26 +1667,20 @@ export default function EmployeeChatPage() {
                 onChange={handleFileSelect}
                 className="hidden"
               />
-
-              {/* File Upload Hint */}
-              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
-                <span>Drag & drop files or click 📎 to attach</span>
-                <span>Max 10MB per file • Images, PDFs, Docs supported</span>
-              </div>
             </div>
           </motion.div>
 
-          {/* Avatar Section */}
+          {/* Avatar Section - Split Screen */}
           {isAvatarMode && (
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 30 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="w-1/2 bg-gradient-to-b from-blue-50 to-gray-50 dark:from-blue-900/20 dark:to-gray-800/20 border-l border-gray-200 dark:border-gray-700 overflow-hidden relative flex flex-col"
+              className="w-1/2 bg-gradient-to-b from-blue-50 to-gray-50 dark:from-blue-900/20 dark:to-gray-800/20 border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col min-h-screen"
             >
               {/* Avatar Header */}
-              <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 px-4 py-3">
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 px-4 py-3 relative z-20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center">
@@ -1689,7 +1702,7 @@ export default function EmployeeChatPage() {
               </div>
 
               {/* 3D Avatar Display */}
-              <div className="flex-1 relative">
+              <div className="flex-1 relative avatar-split-screen">
                 <AvatarController
                   emotion={currentAvatarEmotion || 'IDLE'}
                   speaking={isSpeaking || isRecording}

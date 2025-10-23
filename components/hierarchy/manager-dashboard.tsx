@@ -68,44 +68,44 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ employee, onView, canVi
       transition={{ duration: 0.3 }}
     >
       <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 group">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <CardContent className="p-3 sm:p-4 lg:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 w-full sm:w-auto">
               <motion.div
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
-                <Avatar className="h-12 w-12 ring-2 ring-blue-100 group-hover:ring-blue-300 transition-all duration-300">
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 ring-2 ring-blue-100 group-hover:ring-blue-300 transition-all duration-300 flex-shrink-0">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-xs sm:text-sm lg:text-base">
                     {employee.first_name?.[0]}{employee.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
               </motion.div>
               
-              <div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-sm sm:text-base truncate">
                   {employee.first_name} {employee.last_name}
                 </h3>
-                <p className="text-sm text-gray-600">{employee.position || 'Employee'}</p>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">{employee.position || 'Employee'}</p>
                 {employee.department && (
-                  <Badge variant="outline" className="text-xs mt-1 bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge variant="outline" className="text-xs mt-1 bg-blue-50 text-blue-700 border-blue-200 inline-block">
                     {employee.department}
                   </Badge>
                 )}
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 lg:space-x-4 w-full sm:w-auto">
               {/* Wellness indicator */}
-              <div className="text-center">
+              <div className="text-center sm:text-right">
                 <div className="flex items-center space-x-2">
-                  <div className="text-2xl font-bold text-gray-900">{wellnessScore}/10</div>
-                  <Badge className={`${wellnessStatus.textColor} bg-opacity-20 border-0`}>
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{wellnessScore}/10</div>
+                  <Badge className={`${wellnessStatus.textColor} bg-opacity-20 border-0 text-xs`}>
                     {wellnessStatus.label}
                   </Badge>
                 </div>
                 <div className="text-xs text-gray-500 mt-1">Wellness Score</div>
-                <Progress value={wellnessScore * 10} className="w-20 h-2 mt-2 bg-gray-100" />
+                <Progress value={wellnessScore * 10} className="w-16 sm:w-20 h-1.5 sm:h-2 mt-2 bg-gray-100" />
               </div>
               
               {canViewReports && (
@@ -113,9 +113,9 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({ employee, onView, canVi
                   variant="outline"
                   size="sm"
                   onClick={() => onView?.(employee)}
-                  className="bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-300"
+                  className="bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-300 text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                 >
-                  <Eye className="h-4 w-4 mr-1" />
+                  <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   View
                 </Button>
               )}
@@ -220,20 +220,21 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
+          className="w-full sm:w-auto"
         >
-          <div className="flex items-center space-x-3 mb-4">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
             <motion.div
               animate={{ y: [-5, 5, -5] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg"
+              className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
             >
-              <Crown className="h-6 w-6 text-white" />
+              <Crown className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
             </motion.div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 {manager.first_name}&apos;s Team Dashboard
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
                 Manage and monitor your team&apos;s wellness and performance
               </p>
             </div>
@@ -241,17 +242,17 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
         </motion.div>
         
         <motion.div 
-          className="flex items-center space-x-2"
+          className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 shadow-md">
+          <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 shadow-md text-xs sm:text-sm px-2 py-1">
             {manager.role.toUpperCase()}
           </Badge>
           {manager.is_department_head && (
-            <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-md">
-              <Shield className="h-3 w-3 mr-1" />
+            <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0 shadow-md text-xs sm:text-sm px-2 py-1">
+              <Shield className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
               Dept Head
             </Badge>
           )}
@@ -261,7 +262,7 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
       {/* Team Stats Cards */}
       {teamStats && (
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
@@ -271,20 +272,20 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
             transition={{ duration: 0.3 }}
           >
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
-                    className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg"
+                    className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                   >
-                    <Users className="h-6 w-6 text-white" />
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
                   </motion.div>
-                  <div>
-                    <div className="text-3xl font-bold text-gray-900">
+                  <div className="min-w-0">
+                    <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 leading-tight">
                       {teamStats.direct_reports}
                     </div>
-                    <p className="text-sm text-gray-600">Direct Reports</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">Direct Reports</p>
                   </div>
                 </div>
               </CardContent>
@@ -383,14 +384,14 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {permissions?.can_view_team_reports && (
                 <motion.div whileHover={{ scale: 1.02, y: -2 }} transition={{ duration: 0.2 }}>
                   <Link href="/manager/team-reports">
-                    <Button variant="outline" className="w-full justify-start bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-300 group">
-                      <Eye className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                      View Team Reports
-                      <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                    <Button variant="outline" size="sm" className="w-full justify-start bg-white/60 backdrop-blur-sm hover:bg-blue-50 border-blue-200 text-blue-700 hover:text-blue-800 transition-all duration-300 group text-xs sm:text-sm h-8 sm:h-10">
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform" />
+                      <span className="truncate">View Team Reports</span>
+                      <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" />
                     </Button>
                   </Link>
                 </motion.div>
@@ -399,10 +400,10 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
               {permissions?.can_access_analytics && (
                 <motion.div whileHover={{ scale: 1.02, y: -2 }} transition={{ duration: 0.2 }}>
                   <Link href="/manager/analytics">
-                    <Button variant="outline" className="w-full justify-start bg-white/60 backdrop-blur-sm hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-all duration-300 group">
-                      <BarChart3 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                      Team Analytics
-                      <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                    <Button variant="outline" size="sm" className="w-full justify-start bg-white/60 backdrop-blur-sm hover:bg-green-50 border-green-200 text-green-700 hover:text-green-800 transition-all duration-300 group text-xs sm:text-sm h-8 sm:h-10">
+                      <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform" />
+                      <span className="truncate">Team Analytics</span>
+                      <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" />
                     </Button>
                   </Link>
                 </motion.div>
@@ -410,10 +411,10 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
               
               <motion.div whileHover={{ scale: 1.02, y: -2 }} transition={{ duration: 0.2 }}>
                 <Link href="/manager/org-chart">
-                  <Button variant="outline" className="w-full justify-start bg-white/60 backdrop-blur-sm hover:bg-purple-50 border-purple-200 text-purple-700 hover:text-purple-800 transition-all duration-300 group">
-                    <Users className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-                    Organization Chart
-                    <ArrowRight className="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
+                  <Button variant="outline" size="sm" className="w-full justify-start bg-white/60 backdrop-blur-sm hover:bg-purple-50 border-purple-200 text-purple-700 hover:text-purple-800 transition-all duration-300 group text-xs sm:text-sm h-8 sm:h-10">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 group-hover:scale-110 transition-transform" />
+                    <span className="truncate">Organization Chart</span>
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-auto group-hover:translate-x-1 transition-transform flex-shrink-0" />
                   </Button>
                 </Link>
               </motion.div>
@@ -537,15 +538,15 @@ export const ManagerDashboard: React.FC<ManagerDashboardProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 text-xs sm:text-sm">
                 <motion.div 
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className={`w-3 h-3 rounded-full ${
+                  <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${
                     permissions.can_view_direct_reports ? 'bg-green-500' : 'bg-gray-300'
                   }`}></div>
-                  <span className="font-medium">View Direct Reports</span>
+                  <span className="font-medium truncate">View Direct Reports</span>
                 </motion.div>
                 
                 <motion.div 

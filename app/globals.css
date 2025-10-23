@@ -1,3 +1,5 @@
+/* stylelint-disable at-rule-no-unknown */
+/* Tailwind CSS directives and custom styles */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -44,6 +46,7 @@
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -76,6 +79,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -86,36 +90,39 @@
   .wellness-gradient {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   }
-  
+
   .wellness-card {
     @apply bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl;
   }
-  
+
   .wellness-button {
     @apply bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300;
   }
-  
-  .floating-animation {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite alternate;
-  }
-  
+
   .gradient-text {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600;
   }
-  
+
   .glass-effect {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+
+  .floating-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
   }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-20px);
   }
@@ -125,6 +132,7 @@
   0% {
     box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
   }
+
   100% {
     box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
   }
@@ -135,54 +143,187 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar for webkit browsers */
+/* Modern Custom Scrollbar for webkit browsers */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 4px;
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: rgba(107, 114, 128, 0.6);
+  transform: scale(1.1);
 }
 
-/* Avatar container constraints to prevent blasting */
+::-webkit-scrollbar-thumb:active {
+  background: rgba(75, 85, 99, 0.8);
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.4);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.6);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: rgba(156, 163, 175, 0.8);
+  }
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  * {
+    scrollbar-color: rgba(75, 85, 99, 0.4) transparent;
+  }
+}
+
+/* Avatar container optimized for split-screen display */
 @layer components {
   .avatar-container {
-    @apply relative overflow-hidden;
-    max-width: 100%;
-    max-height: 100%;
+    @apply relative w-full h-full;
+    overflow: hidden;
     contain: layout style paint;
+    min-height: 400px;
   }
-  
+
   .avatar-canvas {
     @apply w-full h-full;
+    min-width: 100% !important;
+    min-height: 100% !important;
     max-width: 100% !important;
     max-height: 100% !important;
   }
-  
+
   .avatar-constrained {
     transform-origin: center center;
-    max-scale: 2.5;
-    min-scale: 0.5;
+    width: 100%;
+    height: 100%;
+    /* Scale constraints handled in JavaScript */
+  }
+
+  /* Split-screen avatar optimization */
+  .avatar-split-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 500px;
+  }
+
+  .avatar-split-screen .avatar-container {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
   }
 }
 
 /* Hide scrollbar utility class */
 @layer utilities {
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari and Opera */
+    display: none;
+    /* Chrome, Safari and Opera */
+  }
+
+  /* Chat-specific scrollbar styling - Modern & Sleek */
+  .chat-scrollbar {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    background: transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 12px;
+    margin: 4px 0;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 20px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.6);
+    transform: scaleX(1.5);
+    transform-origin: center;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb:active {
+    background: rgba(75, 85, 99, 0.8);
+  }
+
+  /* Dark mode chat scrollbar */
+  .dark .chat-scrollbar {
+    scrollbar-color: rgba(75, 85, 99, 0.4) transparent;
+  }
+
+  .dark .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.4);
+  }
+
+  .dark .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.6);
+  }
+
+  .dark .chat-scrollbar::-webkit-scrollbar-thumb:active {
+    background: rgba(156, 163, 175, 0.8);
+  }
+
+  /* Options panel scrollbar */
+  .options-scrollbar::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  .options-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .options-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .options-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.5);
   }
 }
+
+/* stylelint-enable at-rule-no-unknown */

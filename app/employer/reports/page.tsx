@@ -353,27 +353,27 @@ export default function EmployerReportsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
-            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 cursor-pointer group" onClick={() => router.push('/auth/login')}>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-600 to-green-700 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <Shield className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group" onClick={() => router.push('/auth/login')}>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-emerald-600 to-green-700 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <Shield className="h-3 w-3 sm:h-4 sm:w-4 lg:h-6 lg:w-6 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:to-green-700 transition-all duration-300">
+                <h1 className="text-base sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:to-green-700 transition-all duration-300">
                   Wellness Hub
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">Employer Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
-              <Button variant="outline" size="sm" className="hidden md:flex text-emerald-700 border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 font-semibold shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="hidden lg:flex text-emerald-700 border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 font-semibold shadow-sm hover:shadow-md transition-all duration-300 text-xs sm:text-sm">
                 Management
               </Button>
-              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300">
+              <Button variant="outline" size="sm" className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300">
                 <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
               </Button>
-              <Button variant="outline" size="sm" className="p-1.5 sm:p-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300">
+              <Button variant="outline" size="sm" className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300">
                 <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
               </Button>
               <ThemeToggle size="sm" />
@@ -391,37 +391,37 @@ export default function EmployerReportsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8 sm:mb-10 lg:mb-12">
+        <div className="mb-6 sm:mb-8 lg:mb-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-2 sm:mb-3 lg:mb-4 tracking-tight leading-tight">
               Wellness Reports
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
+            <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
               View comprehensive wellness reports from your team members and track their mental health progress with advanced analytics.
             </p>
           </motion.div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-8 sm:mb-10 lg:mb-12">
-          <div className="flex space-x-4 sm:space-x-8 lg:space-x-12 border-b border-gray-200/60 dark:border-gray-700/60 overflow-x-auto">
+        <div className="mb-6 sm:mb-8 lg:mb-10">
+          <div className="flex space-x-4 sm:space-x-6 lg:space-x-8 border-b border-gray-200/60 dark:border-gray-700/60 overflow-x-auto">
             <Link href="/employer/dashboard">
-              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
+              <button className="pb-3 sm:pb-4 px-1 sm:px-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
                 Overview
               </button>
             </Link>
             <Link href="/employer/employees">
-              <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base lg:text-lg transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
+              <button className="pb-3 sm:pb-4 px-1 sm:px-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium sm:font-semibold text-sm sm:text-base transition-all duration-300 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap">
                 Employees
               </button>
             </Link>
-            <button className="pb-3 sm:pb-4 lg:pb-6 px-1 sm:px-2 border-b-2 sm:border-b-3 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold sm:font-bold text-sm sm:text-base lg:text-lg relative whitespace-nowrap">
+            <button className="pb-3 sm:pb-4 px-1 sm:px-2 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold sm:font-bold text-sm sm:text-base relative whitespace-nowrap">
               Reports
               <div className="absolute -bottom-0.5 left-0 right-0 h-0.5 sm:h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
             </button>
@@ -429,9 +429,9 @@ export default function EmployerReportsPage() {
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3 sm:gap-4">
           <div></div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -439,9 +439,9 @@ export default function EmployerReportsPage() {
               <Button
                 variant="outline"
                 onClick={generateReport}
-                className="border-emerald-200 text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base"
+                className="border-emerald-200 text-emerald-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-green-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm"
               >
-                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Generate Report</span>
                 <span className="sm:hidden">Generate</span>
               </Button>
@@ -454,19 +454,19 @@ export default function EmployerReportsPage() {
                 onClick={handleRefresh}
                 variant="outline"
                 disabled={refreshing}
-                className="border-blue-200 text-blue-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3"
+                className="border-blue-200 text-blue-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm"
               >
                 {refreshing ? (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   >
-                    <RefreshCw className="h-5 w-5 mr-2" />
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   </motion.div>
                 ) : (
-                  <RefreshCw className="h-5 w-5 mr-2" />
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 )}
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
             </motion.div>
             <motion.div
@@ -476,10 +476,11 @@ export default function EmployerReportsPage() {
               <Button
                 variant="outline"
                 onClick={exportData}
-                className="border-purple-200 text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3"
+                className="border-purple-200 text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm"
               >
-                <Download className="h-5 w-5 mr-2" />
-                Export Data
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Export Data</span>
+                <span className="sm:hidden">Export</span>
               </Button>
             </motion.div>
           </div>
@@ -487,7 +488,7 @@ export default function EmployerReportsPage() {
 
         {/* Summary Stats */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-6 sm:mb-8"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -495,17 +496,17 @@ export default function EmployerReportsPage() {
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.05, y: -8 }}>
             <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-blue-300/50 dark:hover:border-blue-600/50 group">
-              <CardContent className="p-4 sm:p-6 lg:p-8">
-                <div className="flex items-center space-x-3 sm:space-x-4">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-3 text-center sm:text-left">
                   <motion.div
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.6 }}
-                    className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 mb-2 sm:mb-0"
                   >
-                    <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
+                    <FileText className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 text-white" />
                   </motion.div>
                   <div>
-                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent leading-tight">{reports.length}</div>
+                    <div className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent leading-tight">{reports.length}</div>
                     <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Reports</p>
                   </div>
                 </div>
@@ -594,16 +595,16 @@ export default function EmployerReportsPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Card className="mb-8 bg-white border border-gray-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <Card className="mb-6 sm:mb-8 bg-white border border-gray-200 shadow-sm">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3 sm:h-4 sm:w-4" />
                     <Input
                       placeholder="Search reports..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 border-green-200 text-green-600 border-white/20 focus:border-green-400 focus:ring-green-400"
+                      className="pl-8 sm:pl-10 border-green-200 text-green-600 border-white/20 focus:border-green-400 focus:ring-green-400 text-sm"
                     />
                   </div>
 
@@ -647,7 +648,7 @@ export default function EmployerReportsPage() {
                     </SelectContent>
                   </Select>
 
-                  <div className="text-sm text-gray-600 flex items-center">
+                  <div className="text-xs sm:text-sm text-gray-600 flex items-center">
                     <span>{filteredAndSortedReports.length} of {reports.length} reports</span>
                   </div>
                 </div>

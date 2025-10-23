@@ -1,8 +1,2 @@
 {
-    "kiroAgent.configureMCP": "Disabled",
-    "cSpell.words": [
-        "doesn",
-        "firestore"
-    ],
-    "typescript.autoClosingTags": false
 }

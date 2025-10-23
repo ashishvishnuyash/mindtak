@@ -153,7 +153,7 @@ const WellnessResources = () => {
 
   return (
     <motion.section 
-      className="py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
+      className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
@@ -162,39 +162,39 @@ const WellnessResources = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
           variants={itemVariants as any}
         >
-          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">
             Comprehensive Wellness Resources
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
             Access a complete library of mental health tools, guided sessions, and expert resources 
             designed to support your wellness journey.
           </p>
         </motion.div>
 
         {/* Resources by Category */}
-        <div className="space-y-16">
+        <div className="space-y-12 sm:space-y-16">
           {resources.map((category, categoryIndex) => (
             <motion.div
               key={categoryIndex}
               variants={itemVariants as any}
-              className="space-y-8"
+              className="space-y-6 sm:space-y-8"
             >
               {/* Category Header */}
-              <div className="flex items-center space-x-4 mb-8">
-                <div className={`w-12 h-12 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center`}>
-                  <category.icon className="h-6 w-6 text-white" />
+              <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${category.color} rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <category.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{category.category}</h3>
-                  <p className="text-gray-600 dark:text-gray-400">Expert-curated resources for your wellness</p>
+                <div className="min-w-0">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{category.category}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Expert-curated resources for your wellness</p>
                 </div>
               </div>
 
               {/* Resource Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {category.items.map((item, itemIndex) => (
                   <motion.div
                     key={itemIndex}
@@ -206,42 +206,42 @@ const WellnessResources = () => {
                     className="group"
                   >
                     <Card className="h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-                      <CardHeader className="pb-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className={`w-10 h-10 bg-gradient-to-br ${category.color} rounded-lg flex items-center justify-center`}>
-                            <item.icon className="h-5 w-5 text-white" />
+                      <CardHeader className="pb-3 sm:pb-4">
+                        <div className="flex items-center justify-between mb-3 sm:mb-4">
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br ${category.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                            <item.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                           </div>
                           <div className="flex items-center space-x-1">
                             {renderStars(item.rating)}
-                            <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{item.rating}</span>
+                            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 ml-1">{item.rating}</span>
                           </div>
                         </div>
-                        <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                        <CardTitle className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
                           {item.title}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                      <CardContent className="space-y-3 sm:space-y-4">
+                        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
                           {item.description}
                         </p>
                         
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
                           <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
-                            <Clock className="h-4 w-4" />
-                            <span>{item.duration}</span>
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                            <span className="truncate">{item.duration}</span>
                           </div>
-                          <div className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300">
+                          <div className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">
                             {item.type}
                           </div>
                         </div>
 
-                        <Link href="/demo">
+                        <Link href="/demo" className="block">
                           <Button 
-                            className="w-full bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-700 dark:text-gray-300 border-0 group-hover:from-green-500 group-hover:to-emerald-500 group-hover:text-white transition-all duration-300"
+                            className="w-full bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 text-gray-700 dark:text-gray-300 border-0 group-hover:from-green-500 group-hover:to-emerald-500 group-hover:text-white transition-all duration-300 text-sm sm:text-base py-2 sm:py-3"
                             variant="outline"
                           >
                             Start Now
-                            <ArrowRight className="ml-2 h-4 w-4" />
+                            <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </Link>
                       </CardContent>
@@ -255,18 +255,18 @@ const WellnessResources = () => {
 
         {/* Featured Programs */}
         <motion.div 
-          className="mt-20"
+          className="mt-16 sm:mt-20"
           variants={itemVariants as any}
         >
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl p-8 text-white">
-            <div className="text-center mb-8">
-              <h3 className="text-3xl font-bold mb-4">Featured Wellness Programs</h3>
-              <p className="text-green-100 max-w-2xl mx-auto">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white">
+            <div className="text-center mb-6 sm:mb-8">
+              <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Featured Wellness Programs</h3>
+              <p className="text-green-100 max-w-2xl mx-auto text-sm sm:text-base">
                 Join our most popular programs designed by mental health experts
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
                 {
                   title: "30-Day Mindfulness Challenge",
@@ -286,11 +286,11 @@ const WellnessResources = () => {
               ].map((program, index) => (
                 <motion.div
                   key={index}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/20 transition-all duration-300"
+                  className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:bg-white/20 transition-all duration-300"
                   whileHover={{ scale: 1.02 }}
                 >
-                  <h4 className="text-xl font-bold mb-2">{program.title}</h4>
-                  <p className="text-green-100 mb-4">{program.description}</p>
+                  <h4 className="text-lg sm:text-xl font-bold mb-2">{program.title}</h4>
+                  <p className="text-green-100 mb-3 sm:mb-4 text-sm sm:text-base">{program.description}</p>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-green-200">{program.duration}</span>
                   </div>
@@ -298,14 +298,14 @@ const WellnessResources = () => {
               ))}
             </div>
 
-            <div className="text-center mt-8">
-              <Link href="/demo">
+            <div className="text-center mt-6 sm:mt-8">
+              <Link href="/demo" className="inline-block w-full sm:w-auto">
                 <Button 
                   size="lg"
-                  className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3 font-semibold"
+                  className="w-full sm:w-auto bg-white text-green-600 hover:bg-gray-100 px-6 sm:px-8 py-3 font-semibold text-sm sm:text-base"
                 >
                   Explore All Programs
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </Link>
             </div>

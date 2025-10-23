@@ -47,7 +47,7 @@ const defaultConfig: AvatarSettingsConfig = {
   showEnvironment: true,
   enableFloating: true,
   quality: 'high',
-  scale: 1.5,
+  scale: 1.0,
   enableBlinking: true,
   enableBreathing: true,
   enableGestures: true,

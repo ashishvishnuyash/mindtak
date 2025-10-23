@@ -147,6 +147,31 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
   // Simple speaking animation state
   const [speakingIntensity, setSpeakingIntensity] = useState(0);
 
+  // Cleanup and bounds checking effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Reset any accumulated values every 30 seconds as a safety measure
+      if (avatarRef.current) {
+        // Check for any extreme values and reset them
+        if (Math.abs(avatarRef.current.position.y) > 1.0) {
+          avatarRef.current.position.y = 0;
+        }
+        if (Math.abs(avatarRef.current.rotation.y) > Math.PI) {
+          avatarRef.current.rotation.y = 0;
+        }
+        if (Math.abs(avatarRef.current.rotation.x) > Math.PI) {
+          avatarRef.current.rotation.x = 0;
+        }
+        // Reset scale if it gets extreme
+        if (avatarRef.current.scale.x > 2 || avatarRef.current.scale.x < 0.1) {
+          avatarRef.current.scale.set(1, 1, 1);
+        }
+      }
+    }, 30000); // Every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Enhanced animation loading with smooth transitions
   useEffect(() => {
     if (!mixer) return;
@@ -211,11 +236,14 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
       mixer.update(delta);
     }
 
-    // Breathing animation
-    setBreathingPhase(prev => prev + delta);
+    // Breathing animation - prevent accumulation by using modulo
+    setBreathingPhase(prev => (prev + delta) % (Math.PI * 2));
     if (avatarRef.current && !speaking) {
       const breathScale = 1 + Math.sin(breathingPhase * 2) * 0.02;
-      avatarRef.current.scale.y = breathScale;
+      avatarRef.current.scale.set(1, breathScale, 1); // Reset all scales explicitly
+    } else if (avatarRef.current) {
+      // Reset scale when speaking to prevent accumulation
+      avatarRef.current.scale.set(1, 1, 1);
     }
 
     // Blinking animation - trigger every 3-5 seconds
@@ -223,76 +251,89 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
       triggerBlink();
     }
 
-    // Interactive head tracking
+    // Interactive head tracking - with bounds checking
     if (interactive && isHovered && avatarRef.current) {
-      const targetRotationY = (mousePosition.x - 0.5) * 0.3;
-      const targetRotationX = (mousePosition.y - 0.5) * 0.2;
+      const targetRotationY = Math.max(-0.3, Math.min(0.3, (mousePosition.x - 0.5) * 0.3));
+      const targetRotationX = Math.max(-0.2, Math.min(0.2, (mousePosition.y - 0.5) * 0.2));
 
       avatarRef.current.rotation.y = THREE.MathUtils.lerp(
         avatarRef.current.rotation.y,
         targetRotationY,
-        delta * 2
+        Math.min(delta * 2, 0.1) // Clamp lerp speed
       );
       avatarRef.current.rotation.x = THREE.MathUtils.lerp(
         avatarRef.current.rotation.x,
         targetRotationX,
-        delta * 2
+        Math.min(delta * 2, 0.1) // Clamp lerp speed
       );
+    } else if (avatarRef.current && !speaking) {
+      // Reset rotation when not interacting
+      avatarRef.current.rotation.y = THREE.MathUtils.lerp(avatarRef.current.rotation.y, 0, delta);
+      avatarRef.current.rotation.x = THREE.MathUtils.lerp(avatarRef.current.rotation.x, 0, delta);
     }
 
-    // Speaking animation enhancements
+    // Speaking animation enhancements - with bounds checking
     if (speaking && avatarRef.current) {
-      // Add subtle body movement during speech
-      const bodyMovement = Math.sin(state.clock.elapsedTime * 4) * speakingIntensity * 0.01;
-      avatarRef.current.position.y = bodyMovement;
+      // Add subtle body movement during speech - use modulo to prevent accumulation
+      const normalizedTime = (state.clock.elapsedTime % (Math.PI * 2));
+      const bodyMovement = Math.sin(normalizedTime * 4) * Math.min(speakingIntensity, 1.0) * 0.01;
+      
+      // Clamp position to prevent drift
+      avatarRef.current.position.y = Math.max(-0.05, Math.min(0.05, bodyMovement));
 
-      // Add hand gestures during speech
-      const gestureIntensity = Math.sin(state.clock.elapsedTime * 2) * speakingIntensity;
+      // Add hand gestures during speech - with bounds
+      const gestureIntensity = Math.sin(normalizedTime * 2) * Math.min(speakingIntensity, 1.0);
       if (avatarRef.current.children.length > 0) {
         avatarRef.current.traverse((child) => {
           if (child.name.includes('hand') || child.name.includes('arm')) {
-            child.rotation.z = gestureIntensity * 0.1;
+            // Clamp rotation to prevent accumulation
+            child.rotation.z = Math.max(-0.1, Math.min(0.1, gestureIntensity * 0.1));
           }
         });
       }
+    } else if (avatarRef.current) {
+      // Reset position when not speaking
+      avatarRef.current.position.y = 0;
     }
 
-    // Update speaking intensity
+    // Update speaking intensity - with bounds checking
     if (speaking) {
-      setSpeakingIntensity(prev => THREE.MathUtils.lerp(prev, 0.8, delta * 3));
+      setSpeakingIntensity(prev => Math.min(1.0, THREE.MathUtils.lerp(prev, 0.8, Math.min(delta * 3, 0.1))));
     } else {
-      setSpeakingIntensity(prev => THREE.MathUtils.lerp(prev, 0, delta * 2));
+      setSpeakingIntensity(prev => Math.max(0.0, THREE.MathUtils.lerp(prev, 0, Math.min(delta * 2, 0.1))));
     }
 
-    // Smooth lip sync blendshape transitions
-    if (lipSyncActive && modelScene) {
-      let hasChanges = false;
-      const newCurrentWeights = { ...currentVisemeWeights };
-
-      Object.keys(targetVisemeWeights).forEach(shapeName => {
-        const target = targetVisemeWeights[shapeName] || 0;
-        const current = currentVisemeWeights[shapeName] || 0;
-
-        if (Math.abs(target - current) > 0.001) {
-          const newWeight = THREE.MathUtils.lerp(current, target, delta * 8); // 8 = transition speed
-          newCurrentWeights[shapeName] = newWeight;
-          hasChanges = true;
-
-          // Apply to avatar mesh
-          modelScene.traverse((child) => {
-            if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
-              const index = child.morphTargetDictionary[shapeName];
-              if (index !== undefined) {
-                child.morphTargetInfluences[index] = newWeight;
-              }
-            }
-          });
+    // Simple minimalist lip animation - just basic open/close when speaking
+    if (speaking && modelScene) {
+      // Very simple lip movement - just open and close slightly
+      const time = (state.clock.elapsedTime % (Math.PI * 2));
+      const lipMovement = Math.sin(time * 3) * 0.15 + 0.15; // Gentle oscillation between 0 and 0.3
+      
+      modelScene.traverse((child) => {
+        if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
+          // Simple mouth open animation - just use basic mouth shapes
+          const mouthOpenIndex = child.morphTargetDictionary['viseme_aa'] || 
+                                child.morphTargetDictionary['mouthOpen'] ||
+                                child.morphTargetDictionary['jawOpen'];
+          
+          if (mouthOpenIndex !== undefined) {
+            child.morphTargetInfluences[mouthOpenIndex] = lipMovement;
+          }
         }
       });
-
-      if (hasChanges) {
-        setCurrentVisemeWeights(newCurrentWeights);
-      }
+    } else if (modelScene) {
+      // Reset mouth to closed when not speaking
+      modelScene.traverse((child) => {
+        if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
+          const mouthOpenIndex = child.morphTargetDictionary['viseme_aa'] || 
+                                child.morphTargetDictionary['mouthOpen'] ||
+                                child.morphTargetDictionary['jawOpen'];
+          
+          if (mouthOpenIndex !== undefined) {
+            child.morphTargetInfluences[mouthOpenIndex] = 0;
+          }
+        }
+      });
     }
   });
 
@@ -352,33 +393,8 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
     }
   }, [modelScene]);
 
-  // Lip sync animation state
-  const [targetVisemeWeights, setTargetVisemeWeights] = useState<Record<string, number>>({});
-  const [currentVisemeWeights, setCurrentVisemeWeights] = useState<Record<string, number>>({});
-
-  // Update target weights when viseme changes
-  useEffect(() => {
-    if (lipSyncActive && currentViseme !== 'sil') {
-      const newWeights: Record<string, number> = {};
-
-      // Reset all viseme weights
-      ['sil', 'PP', 'FF', 'TH', 'DD', 'kk', 'CH', 'SS', 'nn', 'RR', 'aa', 'E', 'I', 'O', 'U'].forEach(viseme => {
-        newWeights[`viseme_${viseme}`] = 0;
-      });
-
-      // Set current viseme weight
-      newWeights[`viseme_${currentViseme}`] = 0.8;
-
-      setTargetVisemeWeights(newWeights);
-    } else {
-      // Reset all weights when not active
-      const resetWeights: Record<string, number> = {};
-      ['sil', 'PP', 'FF', 'TH', 'DD', 'kk', 'CH', 'SS', 'nn', 'RR', 'aa', 'E', 'I', 'O', 'U'].forEach(viseme => {
-        resetWeights[`viseme_${viseme}`] = 0;
-      });
-      setTargetVisemeWeights(resetWeights);
-    }
-  }, [lipSyncActive, currentViseme]);
+  // Lip sync animation state - DISABLED
+  // All lip sync functionality has been removed
 
   if (!modelScene) {
     return (
@@ -415,16 +431,16 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
     );
   }
 
-  // Constrain scale to prevent avatar from getting too large
-  const constrainedScale = Math.max(0.5, Math.min(2.5, scale)); // Limit scale between 0.5x and 2.5x
+  // Constrain scale to prevent avatar from getting too large or distorted
+  const constrainedScale = Math.max(0.5, Math.min(1.0, scale)); // Very tight scale limits to prevent distortion
 
   return (
-    <group ref={group} scale={[constrainedScale, constrainedScale, constrainedScale]} position={[0, -0.5, 0]}>
+    <group ref={group} scale={[constrainedScale, constrainedScale, constrainedScale]} position={[0, -1.0, 0]}>
       {enableFloating ? (
         <Float
-          speed={speaking ? 1.5 : 0.8} // Reduced speed to prevent excessive movement
-          rotationIntensity={speaking ? 0.3 : 0.1} // Reduced rotation to keep avatar contained
-          floatIntensity={speaking ? 0.2 : 0.05} // Reduced float intensity to prevent "blasting"
+          speed={speaking ? 0.5 : 0.3} // Much slower, more subtle movement
+          rotationIntensity={speaking ? 0.05 : 0.02} // Minimal rotation to prevent distortion
+          floatIntensity={speaking ? 0.03 : 0.01} // Very subtle floating to prevent "blasting"
         >
           <group
             ref={avatarRef}
@@ -446,14 +462,14 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
         </group>
       )}
 
-      {/* Interactive elements - constrained size */}
+      {/* Interactive elements - minimal sparkles */}
       {speaking && (
         <DreiSparkles
-          count={15} // Reduced particle count
-          scale={[1.5, 1.5, 1.5]} // Reduced sparkle size
-          size={1.5}
-          speed={0.4}
-          opacity={0.5}
+          count={3} // Minimal particle count
+          scale={[0.4, 0.4, 0.4]} // Very small sparkle size
+          size={0.4}
+          speed={0.1}
+          opacity={0.2}
           color="#4F46E5"
         />
       )}
@@ -511,26 +527,26 @@ const AvatarScene = React.forwardRef<THREE.Group, AvatarSceneProps>(({
   // Constrained camera positioning based on emotion - prevents avatar from getting too large
   useEffect(() => {
     const positions = {
-      'IDLE': [0, 1.2, 5],
-      'HAPPY': [0.3, 1.3, 4.8],
-      'ANGRY': [-0.2, 1.1, 4.5],
-      'LAUGHING': [0, 1.4, 5.2],
-      'VICTORY': [0, 1.5, 5.5],
-      'CLAPPING': [0, 1.3, 4.8],
-      'DANCING': [0.5, 1.2, 5.0],
-      'SHAKE_FIST': [-0.3, 1.1, 4.7],
-      'SITTING_ANGRY': [0, 0.9, 4.5]
+      'IDLE': [0, 1.2, 6],
+      'HAPPY': [0.3, 1.3, 6.2],
+      'ANGRY': [-0.2, 1.1, 6.0],
+      'LAUGHING': [0, 1.4, 6.5],
+      'VICTORY': [0, 1.5, 7.0],
+      'CLAPPING': [0, 1.3, 6.2],
+      'DANCING': [0.5, 1.2, 6.3],
+      'SHAKE_FIST': [-0.3, 1.1, 6.1],
+      'SITTING_ANGRY': [0, 0.9, 6.0]
     };
 
     const targetPosition = positions[emotion] || positions['IDLE'];
     
-    // Ensure minimum distance to prevent avatar from getting too large
-    const minDistance = 4.0;
-    const maxDistance = 6.0;
+    // Ensure safe distance to prevent avatar distortion
+    const minDistance = 6.0; // Further increased minimum distance
+    const maxDistance = 8.0; // Further increased maximum distance
     const clampedPosition = [
-      Math.max(-1, Math.min(1, targetPosition[0])), // Limit horizontal movement
-      Math.max(0.8, Math.min(2, targetPosition[1])), // Limit vertical movement
-      Math.max(minDistance, Math.min(maxDistance, targetPosition[2])) // Constrain distance
+      Math.max(-0.3, Math.min(0.3, targetPosition[0])), // Very restrictive horizontal movement
+      Math.max(1.0, Math.min(1.5, targetPosition[1])), // Very restrictive vertical movement
+      Math.max(minDistance, Math.min(maxDistance, targetPosition[2])) // Safe distance constraints
     ];
 
     // Smooth camera transition with bounds checking
@@ -600,19 +616,21 @@ const AvatarScene = React.forwardRef<THREE.Group, AvatarSceneProps>(({
         far={4.5}
       />
 
-      {/* Interactive Controls - constrained to prevent excessive zooming */}
+      {/* Interactive Controls - safe zoom functionality */}
       <OrbitControls
         enableZoom={interactive}
         enablePan={false}
-        minDistance={3.5} // Prevent zooming too close
-        maxDistance={8.0} // Prevent zooming too far
-        minPolarAngle={Math.PI / 6} // Slightly more restrictive
-        maxPolarAngle={Math.PI / 2.2} // Prevent looking too far up/down
-        minAzimuthAngle={-Math.PI / 4} // Slightly more restrictive horizontal rotation
-        maxAzimuthAngle={Math.PI / 4}
+        minDistance={4.0} // Safe minimum distance to prevent distortion
+        maxDistance={10.0} // Increased maximum distance for better zoom range
+        minPolarAngle={Math.PI / 6} // Controlled vertical rotation
+        maxPolarAngle={Math.PI / 2.2} // Controlled vertical rotation
+        minAzimuthAngle={-Math.PI / 3} // Controlled horizontal rotation
+        maxAzimuthAngle={Math.PI / 3} // Controlled horizontal rotation
         enableDamping
-        dampingFactor={0.08} // Slightly more damping for smoother control
-        target={[0, 0.8, 0]}
+        dampingFactor={0.1} // Smooth damping
+        target={[0, 1.0, 0]} // Centered target
+        zoomSpeed={0.6} // Controlled zoom speed
+        rotateSpeed={0.4} // Controlled rotation speed
       />
     </>
   );
@@ -639,7 +657,7 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
     const baseProps = {
       shadows: true,
       gl: { antialias: true, alpha: true },
-      camera: { position: [0, 1.2, 4] as [number, number, number], fov: 60 }
+      camera: { position: [0, 1.2, 6] as [number, number, number], fov: 50 }
     };
 
     switch (quality) {
@@ -670,7 +688,7 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
           ref={ref}
           emotion={emotion}
           speaking={speaking}
-          scale={Math.max(0.5, Math.min(2.5, scale))} // Constrain scale at canvas level too
+          scale={Math.max(0.5, Math.min(1.0, scale))} // Very tight constraints at canvas level
           interactive={interactive}
           showEnvironment={showEnvironment}
           enableFloating={enableFloating}
@@ -696,16 +714,16 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
         </div>
       )}
 
-      {/* Lip sync indicator */}
-      {lipSyncActive && (
-        <div className="absolute top-2 right-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-          🎤 Lip Sync: {currentViseme}
+      {/* Simple lip animation indicator */}
+      {speaking && (
+        <div className="absolute top-2 right-2 bg-green-100 text-green-600 px-2 py-1 rounded text-xs">
+          👄 Simple Lip Animation
         </div>
       )}
 
       {/* Avatar visibility indicator */}
       <div className="absolute top-2 left-2 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-        Avatar: {Math.max(0.5, Math.min(2.5, scale)).toFixed(1)}x scale
+        Avatar: {Math.max(0.5, Math.min(1.0, scale)).toFixed(1)}x scale
       </div>
       
       {/* Size constraint overlay - invisible but ensures bounds */}

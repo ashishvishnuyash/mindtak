@@ -439,46 +439,46 @@ function EmployerDashboardPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <Link href="/employer">
                 <Button variant="ghost" size="sm" className="p-2">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
               </Link>
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Building className="h-5 w-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Building className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Organization Portal</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Company Dashboard</p>
+                <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Organization Portal</h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Company Dashboard</p>
               </div>
               <div className="sm:hidden">
-                <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">Organization Portal</h1>
+                <h1 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Organization Portal</h1>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="hidden md:flex text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Organization View
               </Button>
-              <Link href="/employer/personal">
+              <Link href="/employer/personal" className="hidden lg:block">
                 <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 text-xs sm:text-sm px-2 sm:px-3">
                   <UserIcon className="h-3 w-3 mr-1" />
                   Personal Dashboard
                 </Button>
               </Link>
               <Button variant="outline" size="sm" className="p-2">
-                <Users className="h-4 w-4" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <Button variant="outline" size="sm" className="p-2">
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-600 border-green-200"
+                className="text-green-600 border-green-200 px-2 sm:px-3"
                 onClick={async () => {
                   try {
                     await signOut(auth);
@@ -489,36 +489,36 @@ function EmployerDashboardPage() {
                   }
                 }}
               >
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Logout
+                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-3 sm:mb-4 leading-tight">Organization Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-2 sm:mb-3 lg:mb-4 leading-tight">Organization Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Monitor your organization's wellness metrics and employee mental health insights
           </p>
         </div>
 
         {/* Enhanced Navigation */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+            <button className="pb-3 sm:pb-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-sm sm:text-base whitespace-nowrap">
               Overview
             </button>
             <Link href="/employer/employees">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-3 sm:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-sm sm:text-base whitespace-nowrap">
                 Employees
               </button>
             </Link>
             <Link href="/employer/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-3 sm:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-sm sm:text-base whitespace-nowrap">
                 Reports
               </button>
             </Link>
@@ -526,9 +526,9 @@ function EmployerDashboardPage() {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div></div>
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -536,7 +536,7 @@ function EmployerDashboardPage() {
               <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d')}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -552,19 +552,19 @@ function EmployerDashboardPage() {
                 variant="outline"
                 size="sm"
                 disabled={refreshing}
-                className="border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 bg-white dark:bg-gray-800"
+                className="border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 bg-white dark:bg-gray-800 px-3 py-2 text-xs sm:text-sm"
               >
                 {refreshing ? (
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   </motion.div>
                 ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 )}
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
             </motion.div>
             <motion.div
@@ -575,10 +575,11 @@ function EmployerDashboardPage() {
                 onClick={exportReports}
                 variant="outline"
                 size="sm"
-                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 hover:border-green-300 dark:hover:border-green-600"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 hover:border-green-300 dark:hover:border-green-600 px-3 py-2 text-xs sm:text-sm"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Export Reports
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Export Reports</span>
+                <span className="sm:hidden">Export</span>
               </Button>
             </motion.div>
           </div>
@@ -586,7 +587,7 @@ function EmployerDashboardPage() {
 
         {/* Stats Cards */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -595,17 +596,17 @@ function EmployerDashboardPage() {
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Team</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Total Team</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <Users className="h-5 w-5 text-green-600" />
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{stats?.total_employees || 0}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{stats?.total_employees || 0}</div>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   {stats?.total_managers || 0} managers, {stats?.total_employees || 0} employees
                 </p>
               </CardContent>
@@ -615,17 +616,17 @@ function EmployerDashboardPage() {
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Participation Rate</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Participation Rate</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <Activity className="h-5 w-5 text-blue-600" />
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{stats?.participation_rate || 0}%</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{stats?.participation_rate || 0}%</div>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   {stats?.completed_reports || 0} reports this month
                 </p>
               </CardContent>
@@ -635,20 +636,20 @@ function EmployerDashboardPage() {
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">Average Wellness</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Average Wellness</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <Target className="h-5 w-5 text-purple-600" />
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-2">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{stats?.average_wellness_score || 0}/10</div>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{stats?.average_wellness_score || 0}/10</div>
                   {stats?.wellness_trend && getTrendIcon(stats.wellness_trend)}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   Team wellness score
                 </p>
               </CardContent>
@@ -658,17 +659,17 @@ function EmployerDashboardPage() {
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">High Risk</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">High Risk</CardTitle>
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
                 </motion.div>
               </CardHeader>
               <CardContent>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600 dark:text-red-400 leading-tight">{stats?.high_risk_employees || 0}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-red-600 dark:text-red-400 leading-tight">{stats?.high_risk_employees || 0}</div>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   Require immediate attention
                 </p>
               </CardContent>
@@ -678,7 +679,7 @@ function EmployerDashboardPage() {
 
         {/* Additional Metrics Row */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -805,7 +806,7 @@ function EmployerDashboardPage() {
 
         {/* Main Content Grid */}
         <motion.div
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}

@@ -106,19 +106,19 @@ export default function HomePage() {
     <div className="min-h-screen bg-yellow-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Header */}
       <header className="border-b border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-xs">D</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xs sm:text-sm">D</span>
               </div>
-              <span className="text-base sm:text-lg md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700">Diltak.ai</span>
+              <span className="text-lg sm:text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700">Diltak.ai</span>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
               <Link href="/">
-                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
                   Home
                 </Button>
               </Link>
@@ -127,7 +127,7 @@ export default function HomePage() {
               <div className="relative">
                 <Button
                   variant="ghost"
-                  className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 flex items-center space-x-1"
+                  className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 flex items-center space-x-1 px-3 py-2"
                   onClick={toggleProducts}
                 >
                   <span>Products</span>
@@ -137,43 +137,37 @@ export default function HomePage() {
                 {isProductsOpen && (
                   <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                     <div className="py-2">
-                      <Link href="/auth/login">
+                      <Link href="/wellness-hub">
                         <div className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
                           Wellness Hub
                         </div>
                       </Link>
-                      <div
-                        className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                        onClick={openComingSoonModal}
-                      >
-                        AI Friend
-                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
               <Link href="#wellness">
-                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
                   Solutions
                 </Button>
               </Link>
 
               <Link href="#advantage">
-                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
                   About
                 </Button>
               </Link>
 
               <Link href="#faq">
-                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
                   FAQ
                 </Button>
               </Link>
 
               <Button
                 variant="ghost"
-                className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2"
                 onClick={openContactModal}
               >
                 Contact
@@ -183,7 +177,8 @@ export default function HomePage() {
             </div>
 
             {/* Mobile Navigation - Hamburger Menu */}
-            <div className="md:hidden flex items-center space-x-2">
+            <div className="lg:hidden flex items-center space-x-2">
+              <ThemeToggle size="sm" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -196,16 +191,15 @@ export default function HomePage() {
                   <Menu className="h-5 w-5" />
                 )}
               </Button>
-              <ThemeToggle size="sm" />
             </div>
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
-              <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                  <div className="flex flex-col space-y-3">
+              <div className="lg:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                  <div className="flex flex-col space-y-2">
                     <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
                         Home
                       </Button>
                     </Link>
@@ -214,7 +208,7 @@ export default function HomePage() {
                     <div>
                       <Button
                         variant="ghost"
-                        className="w-full justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        className="w-full justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 py-3"
                         onClick={toggleMobileProducts}
                       >
                         <span>Products</span>
@@ -222,47 +216,37 @@ export default function HomePage() {
                       </Button>
                       
                       {isMobileProductsOpen && (
-                        <div className="ml-4 mt-2 space-y-2">
-                          <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                            <Button variant="ghost" className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <div className="ml-4 mt-2 space-y-1">
+                          <Link href="/wellness-hub" onClick={() => setIsMobileMenuOpen(false)}>
+                            <Button variant="ghost" className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 py-2">
                               Wellness Hub
                             </Button>
                           </Link>
-                          <Button 
-                            variant="ghost" 
-                            className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            onClick={() => {
-                              openComingSoonModal();
-                              setIsMobileMenuOpen(false);
-                            }}
-                          >
-                            AI Friend
-                          </Button>
                         </div>
                       )}
                     </div>
 
                     <Link href="#wellness" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
                         Solutions
                       </Button>
                     </Link>
 
                     <Link href="#advantage" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
                         About
                       </Button>
                     </Link>
 
                     <Link href="#faq" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
                         FAQ
                       </Button>
                     </Link>
 
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                      className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3"
                       onClick={() => {
                         openContactModal();
                         setIsMobileMenuOpen(false);
@@ -271,9 +255,9 @@ export default function HomePage() {
                       Contact
                     </Button>
 
-                    <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                       <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                        <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                        <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3">
                           Login
                         </Button>
                       </Link>
@@ -288,15 +272,15 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <motion.section
-        className="relative overflow-hidden py-20 sm:py-32 bg-white dark:bg-gray-800"
+        className="relative overflow-hidden py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32 bg-white dark:bg-gray-800"
         whileInView={sectionVariants}
         viewport={{ once: true }}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-            <div className="text-left">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
+            <div className="text-left order-2 lg:order-1">
               <motion.h1
-                className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-tight"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-tight"
                 variants={titleVariants}
                 initial="hidden"
                 animate="visible"
@@ -308,32 +292,32 @@ export default function HomePage() {
                   Well-Being Reimagined
                 </motion.span>
               </motion.h1>
-              <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-6 sm:leading-8 text-gray-600 dark:text-gray-400 max-w-full lg:max-w-lg mb-6 sm:mb-8">
+              <p className="mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed text-gray-600 dark:text-gray-400 max-w-full lg:max-w-lg mb-6 sm:mb-8">
                 Advanced AI-powered analytics platform delivering predictive mental health insights for Fortune 500 companies, universities, and healthcare systems.
               </p>
 
               {/* Quote Section */}
-              <div className="border-l-4 border-gray-300 dark:border-gray-600 pl-6 mb-8">
-                <p className="text-gray-700 dark:text-gray-300 italic text-lg">
+              <div className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 sm:pl-6 mb-6 sm:mb-8">
+                <p className="text-gray-700 dark:text-gray-300 italic text-base sm:text-lg">
                   &quot;Emotional support, guidance, and wellness aid&quot;
                 </p>
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex flex-col space-y-3 mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-3 sm:space-y-0 mb-6 sm:mb-8">
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">3K+ Lives Impacted</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base">3K+ Lives Impacted</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">10+ Countries</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base">10+ Countries</span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-start gap-4 mb-6">
-                <Link href="/demo">
-                  <Button size="lg" className="bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 hover:from-amber-700 hover:via-lime-700 hover:to-emerald-800 text-white px-8 py-3 flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Link href="/wellness-hub" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 hover:from-amber-700 hover:via-lime-700 hover:to-emerald-800 text-white px-6 sm:px-8 py-3 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base">
                     <span>EXPLORE PLATFORM</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -341,25 +325,24 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex justify-center items-center">
+            <div className="flex justify-center items-center order-1 lg:order-2">
               {/* Hero Image - Robot */}
               <motion.div
-                className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl h-[250px] sm:h-[350px] lg:h-[450px] xl:h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 shadow-xl mx-auto"
+                className="relative w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl h-[200px] sm:h-[280px] md:h-[350px] lg:h-[400px] xl:h-[500px] rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 shadow-xl mx-auto"
                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
                 whileHover={{
-                  scale: 1.05,
-                  rotateY: 5,
+                  scale: 1.02,
                   transition: { duration: 0.3 }
                 }}
               >
                 <motion.div
                   className="relative w-full h-full"
                   animate={{
-                    y: [-15, 15, -15],
-                    rotate: [0, 3, -3, 0],
-                    scale: [1, 1.02, 1]
+                    y: [-10, 10, -10],
+                    rotate: [0, 2, -2, 0],
+                    scale: [1, 1.01, 1]
                   }}
                   transition={{
                     duration: 6,
@@ -373,6 +356,7 @@ export default function HomePage() {
                     fill
                     className="object-cover"
                     priority
+                    sizes="(max-width: 640px) 280px, (max-width: 768px) 384px, (max-width: 1024px) 448px, (max-width: 1280px) 512px, 576px"
                   />
                 </motion.div>
               </motion.div>
@@ -384,69 +368,70 @@ export default function HomePage() {
       {/* The Diltak AI Advantage Section */}
       <motion.section
         id="advantage"
-        className="py-20 bg-yellow-50 dark:bg-gray-800"
+        className="py-12 sm:py-16 md:py-20 lg:py-24 bg-yellow-50 dark:bg-gray-800"
         whileInView={sectionVariants}
         viewport={{ once: true }}
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
             {/* Left side - AI Brain Image */}
-            <div className="relative">
-              <div className="relative w-full aspect-square max-w-[500px] mx-auto rounded-full overflow-hidden bg-yellow-50 dark:bg-gray-700">
+            <div className="relative order-2 lg:order-1">
+              <div className="relative w-full aspect-square max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] mx-auto rounded-full overflow-hidden bg-yellow-50 dark:bg-gray-700 shadow-2xl">
                 <Image
                   src="/images/tech_robot_with_screen.png"
                   alt="AI Brain with neural networks and digital interface"
                   fill
                   className="object-cover"
+                  sizes="(max-width: 640px) 300px, (max-width: 1024px) 400px, 500px"
                 />
               </div>
             </div>
 
             {/* Right side - Content */}
-            <div className="space-y-6">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-tight">
+            <div className="space-y-6 order-1 lg:order-2">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6 leading-tight">
                 The Diltak AI <span className="text-green-600">Advantage</span>
               </h2>
 
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 leading-relaxed">
                 Unlike traditional wellness solutions, Diltak AI delivers enterprise-grade mental health intelligence through scientifically validated algorithms and predictive analytics, enabling organizations to proactively support workforce resilience at scale. Get the best guidance and talk to someone who understands your Mental Health status. Therapy is like cleaning that messy drawer - you keep what matters and let go of what doesn&apos;t.
               </p>
 
               {/* Advantage List */}
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Reduce mental health-related absences by up to 40%</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Reduce mental health-related absences by up to 40%</span>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Decrease employee turnover through predictive intervention</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Decrease employee turnover through predictive intervention</span>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Enable evidence-based mental health program ROI measurement</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Enable evidence-based mental health program ROI measurement</span>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Deploy organization-wide early warning systems</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Deploy organization-wide early warning systems</span>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Achieve seamless integration with enterprise HR platforms</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Achieve seamless integration with enterprise HR platforms</span>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Expert-led meditations and mindfulness tools for better sleep</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Expert-led meditations and mindfulness tools for better sleep</span>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <Check className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">Completely anonymous support - no stigma, no limits</span>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 mt-1 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">Completely anonymous support - no stigma, no limits</span>
                 </div>
               </div>
             </div>
@@ -471,16 +456,16 @@ export default function HomePage() {
       {/* FAQ Section */}
       <motion.section
         id="faq"
-        className="py-20 bg-yellow-50 dark:bg-gray-800"
+        className="py-12 sm:py-16 md:py-20 lg:py-24 bg-yellow-50 dark:bg-gray-800"
         whileInView={sectionVariants}
         viewport={{ once: true }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-tight">Frequently Asked Questions</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-8">Still have more questions? Don&apos;t hesitate to contact us at <a href="mailto:info@diltak.ai" className="text-green-600 hover:underline">info@diltak.ai</a>!</p>
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-tight">Frequently Asked Questions</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base">Still have more questions? Don&apos;t hesitate to contact us at <a href="mailto:info@diltak.ai" className="text-green-600 hover:underline">info@diltak.ai</a>!</p>
             <Button
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 flex items-center space-x-2"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 flex items-center space-x-2 mx-auto text-sm sm:text-base"
               onClick={openContactModal}
             >
               <span>Contact Us</span>
@@ -488,43 +473,45 @@ export default function HomePage() {
             </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {faqs.map((faq, index) => (
               <Card key={index} className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
                 <CardHeader
-                  className="cursor-pointer p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="cursor-pointer p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleFaq(index)}
                 >
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{faq.question}</h3>
-                    {openFaq === index ? (
-                      <Minus className="h-5 w-5 text-blue-500" />
-                    ) : (
-                      <Plus className="h-5 w-5 text-blue-500" />
-                    )}
+                  <div className="flex justify-between items-start gap-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 text-left">{faq.question}</h3>
+                    <div className="flex-shrink-0">
+                      {openFaq === index ? (
+                        <Minus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                      ) : (
+                        <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 {openFaq === index && (
-                  <CardContent className="p-6 pt-0">
-                    <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+                  <CardContent className="p-4 sm:p-6 pt-0">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">{faq.answer}</p>
                   </CardContent>
                 )}
               </Card>
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Have questions? We&apos;re here to help.</h3>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+          <div className="mt-8 sm:mt-12 text-center">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Have questions? We&apos;re here to help.</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
               <Button
                 variant="outline"
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="w-full sm:w-auto border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-3"
                 onClick={openContactModal}
               >
                 Contact
               </Button>
               <Button
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-3"
                 asChild
               >
                 <a href="mailto:info@diltak.ai">

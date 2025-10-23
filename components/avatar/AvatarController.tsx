@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import AvatarModel from './AvatarModel';
-import { useLipSync } from './LipSyncController';
+
 import { useTTSLipSync } from './TTSLipSync';
 
 interface AvatarControllerProps {
@@ -13,7 +13,7 @@ interface AvatarControllerProps {
   showEnvironment?: boolean;
   enableFloating?: boolean;
   quality?: 'low' | 'medium' | 'high';
-  // Lip sync props
+  // Lip sync props - DISABLED (kept for compatibility)
   lipSyncSource?: 'microphone' | 'playback' | 'text';
   audioElement?: HTMLAudioElement;
   speechText?: string;
@@ -24,7 +24,7 @@ export default function AvatarController({
   message, 
   emotion = 'IDLE', 
   speaking, 
-  scale = 1.5,
+  scale = 1.0,
   interactive = true,
   showEnvironment = true,
   enableFloating = true,
@@ -34,8 +34,8 @@ export default function AvatarController({
   speechText,
   onLipSyncUpdate
 }: AvatarControllerProps) {
-  // Constrain scale to prevent avatar from getting too large
-  const constrainedScale = Math.max(0.8, Math.min(2.0, scale));
+  // Optimize scale for split-screen display - prevent distortion
+  const constrainedScale = Math.max(0.5, Math.min(1.0, scale));
   // Track viseme animation timing for more natural mouth movements
   const [visemeActive, setVisemeActive] = useState(false);
   const [speakingIntensity, setSpeakingIntensity] = useState(0);
@@ -43,78 +43,23 @@ export default function AvatarController({
   // Avatar ref for lip sync
   const avatarRef = useRef<THREE.Group>(null);
   
-  // Simplified lip sync state
-  const [currentViseme, setCurrentViseme] = useState('sil');
-  const [lipSyncActive, setLipSyncActive] = useState(false);
+  // Lip sync disabled - removed due to issues
+  const [currentViseme] = useState('sil'); // Always silent
+  const [lipSyncActive] = useState(false); // Always disabled
   
-  // TTS lip sync for enhanced speech
-  const { speak: speakWithLipSync, stop: stopTTS, isPlaying: isTTSPlaying } = useTTSLipSync();
-  
-  // Simple lip sync logic without useFrame
-  useEffect(() => {
-    if (speaking && lipSyncSource) {
-      setLipSyncActive(true);
-      
-      if (lipSyncSource === 'text' && speechText) {
-        // Simple text-based viseme simulation
-        const words = speechText.toLowerCase().split(' ');
-        let wordIndex = 0;
-        
-        const interval = setInterval(() => {
-          if (wordIndex < words.length) {
-            const word = words[wordIndex];
-            // Simple phoneme mapping
-            if (word.includes('a') || word.includes('e')) {
-              setCurrentViseme('aa');
-            } else if (word.includes('o') || word.includes('u')) {
-              setCurrentViseme('O');
-            } else if (word.includes('i')) {
-              setCurrentViseme('I');
-            } else if (word.includes('p') || word.includes('b') || word.includes('m')) {
-              setCurrentViseme('PP');
-            } else if (word.includes('f') || word.includes('v')) {
-              setCurrentViseme('FF');
-            } else if (word.includes('s') || word.includes('z')) {
-              setCurrentViseme('SS');
-            } else {
-              setCurrentViseme('aa');
-            }
-            wordIndex++;
-          } else {
-            setCurrentViseme('sil');
-            clearInterval(interval);
-          }
-        }, 200); // Change viseme every 200ms
-        
-        return () => clearInterval(interval);
-      } else if (lipSyncSource === 'microphone') {
-        // Simple microphone simulation
-        const interval = setInterval(() => {
-          const visemes = ['aa', 'E', 'I', 'O', 'U', 'PP', 'FF', 'SS'];
-          setCurrentViseme(visemes[Math.floor(Math.random() * visemes.length)]);
-        }, 100);
-        
-        return () => clearInterval(interval);
-      }
-    } else {
-      setLipSyncActive(false);
-      setCurrentViseme('sil');
-    }
-  }, [speaking, lipSyncSource, speechText]);
-  
-  // Function to simulate natural speech patterns with more variation
+  // Function to simulate stable speech patterns
   const simulateSpeechPattern = useCallback(() => {
-    // Create natural pauses in speech
-    const shouldPause = Math.random() < 0.15; // 15% chance of a pause
+    // Create occasional pauses in speech
+    const shouldPause = Math.random() < 0.1; // 10% chance of a pause
     
     if (shouldPause) {
       setVisemeActive(false);
-      // Longer pause (250-500ms)
-      return Math.random() * 250 + 250;
+      // Short pause (200-300ms)
+      return Math.random() * 100 + 200;
     } else {
       setVisemeActive(true);
-      // Normal speaking (80-250ms) - slightly faster for more responsive lip sync
-      return Math.random() * 170 + 80;
+      // Stable speaking intervals (150-250ms)
+      return Math.random() * 100 + 150;
     }
   }, []);
   
@@ -140,8 +85,8 @@ export default function AvatarController({
       const nextInterval = simulateSpeechPattern();
       timeoutId = setTimeout(() => {
         if (!isActive) return;
-        // Vary speaking intensity for more realism
-        setSpeakingIntensity(Math.random() * 0.4 + 0.6); // 0.6-1.0 range
+        // Stable speaking intensity - with bounds checking
+        setSpeakingIntensity(Math.max(0.8, Math.min(0.9, Math.random() * 0.1 + 0.8))); // Clamped 0.8-0.9 range
         updateSpeaking();
       }, nextInterval);
     };
@@ -160,7 +105,7 @@ export default function AvatarController({
   const animationRef = useRef<number>();
   const headPositionRef = useRef({ x: 0, y: 0 });
   
-  // Animate head movement
+  // Very subtle head movement when speaking
   useEffect(() => {
     if (!speaking) {
       if (animationRef.current) {
@@ -171,11 +116,11 @@ export default function AvatarController({
     }
     
     const animate = () => {
-      // More natural head movement with varied frequencies
-      const time = Date.now();
+      // Very subtle head movement - use normalized time to prevent overflow
+      const time = (Date.now() % (Math.PI * 8000)); // Normalize to prevent large numbers
       headPositionRef.current = {
-        x: Math.sin(time / 2000) * 2 + Math.sin(time / 1300) * 0.5,
-        y: Math.sin(time / 1700) * 1 + Math.sin(time / 900) * 0.3
+        x: Math.max(-0.5, Math.min(0.5, Math.sin(time / 4000) * 0.5)), // Clamp values
+        y: Math.max(-0.3, Math.min(0.3, Math.sin(time / 3500) * 0.3))  // Clamp values
       };
       
       animationRef.current = requestAnimationFrame(animate);
@@ -192,28 +137,37 @@ export default function AvatarController({
   
   return (
     <div className="avatar-container">
-      {/* Enhanced subtle head movement when speaking - constrained to prevent overflow */}
+      {/* Subtle head movement when speaking */}
       <div 
         className="avatar-constrained h-full w-full transition-all duration-300 ease-in-out"
         style={{
           transform: speaking ? 
-            `translate(${Math.max(-5, Math.min(5, headPositionRef.current.x))}px, ${Math.max(-3, Math.min(3, headPositionRef.current.y))}px) rotate(${Math.max(-2, Math.min(2, headPositionRef.current.x * 0.1))}deg)` : 
+            `translate(${Math.max(-1, Math.min(1, headPositionRef.current.x))}px, ${Math.max(-0.5, Math.min(0.5, headPositionRef.current.y))}px) rotate(${Math.max(-0.5, Math.min(0.5, headPositionRef.current.x * 0.02))}deg)` : 
             'none'
         }}
       >
         <AvatarModel 
           ref={avatarRef}
           emotion={emotion as any} 
-          speaking={speaking && (visemeActive || lipSyncActive)} 
+          speaking={speaking && visemeActive} 
           scale={constrainedScale}
           interactive={interactive}
           showEnvironment={showEnvironment}
           enableFloating={enableFloating}
           quality={quality}
-          lipSyncActive={lipSyncActive}
-          currentViseme={currentViseme}
+          lipSyncActive={false}
+          currentViseme="sil"
         />
       </div>
+      
+      {/* Debug info - only in development */}
+      {process.env.NODE_ENV === 'development' && speaking && (
+        <div className="absolute bottom-4 left-4 bg-black/80 text-white p-2 rounded text-xs font-mono">
+          <div>Speaking: {speaking ? 'Yes' : 'No'}</div>
+          <div>Viseme Active: {visemeActive ? 'Yes' : 'No'}</div>
+          <div>Lip Sync: Disabled</div>
+        </div>
+      )}
     </div>
   );
 }

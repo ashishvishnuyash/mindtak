@@ -380,7 +380,7 @@ export default function EmployerPersonalChatPage() {
 
                             <CardContent className="flex-1 flex flex-col p-0">
                                 {/* Messages */}
-                                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                <div className="flex-1 overflow-y-auto chat-scrollbar p-4 space-y-4">
                                     <AnimatePresence>
                                         {messages.map((message, index) => (
                                             <motion.div
@@ -440,7 +440,7 @@ export default function EmployerPersonalChatPage() {
                                 <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                                     {/* Scrollable Options Bar */}
                                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                                        <div className="flex space-x-3 overflow-x-auto scrollbar-hide pb-2">
+                                        <div className="flex space-x-3 overflow-x-auto options-scrollbar pb-2">
                                             {/* Voice Recognition Toggle */}
                                             <Button
                                                 variant={isListening ? "default" : "outline"}

@@ -457,32 +457,32 @@ export default function EmployeesPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Building className="h-5 w-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Building className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Employer Portal</p>
+                <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Employer Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="hidden md:flex text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Management
               </Button>
               <Button variant="outline" size="sm" className="p-2">
-                <Users className="h-4 w-4" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <Button variant="outline" size="sm" className="p-2">
-                <User className="h-4 w-4" />
+                <User className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <ThemeToggle size="sm" />
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-600 border-green-200"
+                className="text-green-600 border-green-200 px-2 sm:px-3"
                 onClick={async () => {
                   try {
                     await signOut(auth);
@@ -493,42 +493,42 @@ export default function EmployeesPage() {
                   }
                 }}
               >
-                <ChevronRight className="h-4 w-4 mr-2" />
-                Logout
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-3 sm:mb-4 leading-tight">Team Management</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-600 dark:text-yellow-400 mb-2 sm:mb-3 lg:mb-4 leading-tight">Team Management</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Manage your team members and monitor their wellness status with organizational hierarchy.
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex space-x-4 sm:space-x-6 md:space-x-8 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
             <Link href="/employer/dashboard">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-3 sm:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-sm sm:text-base whitespace-nowrap">
                 Overview
               </button>
             </Link>
-            <button className="pb-4 px-1 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-medium">
+            <button className="pb-3 sm:pb-4 px-1 border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 font-medium text-sm sm:text-base whitespace-nowrap">
               Employees
             </button>
             <Link href="/employer/reports">
-              <button className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors">
+              <button className="pb-3 sm:pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors text-sm sm:text-base whitespace-nowrap">
                 Reports
               </button>
             </Link>
           </div>
         </div>
-        <motion.div className="flex items-center space-x-2 sm:space-x-3 mt-4 sm:mt-0" variants={itemVariants}>
+        <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mt-4 sm:mt-0" variants={itemVariants}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -538,18 +538,19 @@ export default function EmployeesPage() {
                 variant={viewMode === 'hierarchy' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('hierarchy')}
-                className={viewMode === 'hierarchy' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
+                className={viewMode === 'hierarchy' ? 'bg-green-600 hover:bg-green-700 text-xs sm:text-sm' : 'hover:bg-green-50 text-xs sm:text-sm'}
               >
-                <Building className="h-4 w-4 mr-2" />
-                Hierarchy
+                <Building className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Hierarchy</span>
+                <span className="sm:hidden">Tree</span>
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className={viewMode === 'list' ? 'bg-green-600 hover:bg-green-700' : 'hover:bg-green-50'}
+                className={viewMode === 'list' ? 'bg-green-600 hover:bg-green-700 text-xs sm:text-sm' : 'hover:bg-green-50 text-xs sm:text-sm'}
               >
-                <Users className="h-4 w-4 mr-2" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 List
               </Button>
             </div>
@@ -563,19 +564,19 @@ export default function EmployeesPage() {
               variant="outline"
               size="sm"
               disabled={refreshing}
-              className="bg-white/60 backdrop-blur-sm hover:bg-green-50"
+              className="bg-white/60 backdrop-blur-sm hover:bg-green-50 text-xs sm:text-sm px-3 py-2"
             >
               {refreshing ? (
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 </motion.div>
               ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               )}
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
           </motion.div>
           <motion.div
@@ -583,9 +584,10 @@ export default function EmployeesPage() {
             whileTap={{ scale: 0.95 }}
           >
             <Link href="/employer/employees/new">
-              <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Employee
+              <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg text-xs sm:text-sm px-3 py-2">
+                <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Employee</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </Link>
           </motion.div>
@@ -593,7 +595,7 @@ export default function EmployeesPage() {
 
         {/* Stats Cards */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
@@ -601,17 +603,18 @@ export default function EmployeesPage() {
         >
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-3 text-center sm:text-left">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
+                    className="mb-2 sm:mb-0"
                   >
-                    <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                    <Users className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-600 dark:text-blue-400 mx-auto sm:mx-0" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{employees.length}</div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Total Team Members</p>
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">{employees.length}</div>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Team Members</p>
                   </div>
                 </div>
               </CardContent>
@@ -620,19 +623,20 @@ export default function EmployeesPage() {
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-3 text-center sm:text-left">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
+                    className="mb-2 sm:mb-0"
                   >
-                    <CheckCircle className="h-8 w-8 text-green-600" />
+                    <CheckCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-green-600 mx-auto sm:mx-0" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {employees.filter(emp => emp.latest_report?.risk_level === 'low').length}
                     </div>
-                    <p className="text-sm text-gray-600">Low Risk</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Low Risk</p>
                   </div>
                 </div>
               </CardContent>
@@ -641,19 +645,20 @@ export default function EmployeesPage() {
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-3 text-center sm:text-left">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
+                    className="mb-2 sm:mb-0"
                   >
-                    <Clock className="h-8 w-8 text-yellow-600" />
+                    <Clock className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-yellow-600 mx-auto sm:mx-0" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {employees.filter(emp => emp.latest_report?.risk_level === 'medium').length}
                     </div>
-                    <p className="text-sm text-gray-600">Medium Risk</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Medium Risk</p>
                   </div>
                 </div>
               </CardContent>
@@ -662,19 +667,20 @@ export default function EmployeesPage() {
 
           <motion.div variants={itemVariants} whileHover={{ scale: 1.02, y: -5 }}>
             <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row items-center sm:space-x-3 text-center sm:text-left">
                   <motion.div
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.6 }}
+                    className="mb-2 sm:mb-0"
                   >
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                    <AlertTriangle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-red-600 mx-auto sm:mx-0" />
                   </motion.div>
                   <div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">
                       {employees.filter(emp => emp.latest_report?.risk_level === 'high').length}
                     </div>
-                    <p className="text-sm text-gray-600">High Risk</p>
+                    <p className="text-xs sm:text-sm text-gray-600">High Risk</p>
                   </div>
                 </div>
               </CardContent>
@@ -690,16 +696,16 @@ export default function EmployeesPage() {
           variants={containerVariants}
         >
           <motion.div variants={itemVariants}>
-            <Card className="mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <Card className="mb-6 sm:mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3 sm:h-4 sm:w-4" />
                     <Input
                       placeholder="Search team members..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-white/60 backdrop-blur-sm border-white/20 focus:border-green-400 focus:ring-green-400"
+                      className="pl-8 sm:pl-10 bg-white/60 backdrop-blur-sm border-white/20 focus:border-green-400 focus:ring-green-400 text-sm"
                     />
                   </div>
 
@@ -728,7 +734,7 @@ export default function EmployeesPage() {
                     </SelectContent>
                   </Select>
 
-                  <div className="text-sm text-gray-600 flex items-center">
+                  <div className="text-xs sm:text-sm text-gray-600 flex items-center">
                     <span>{filteredEmployees.length} of {employees.length} members</span>
                   </div>
                 </div>

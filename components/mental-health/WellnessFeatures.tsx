@@ -92,7 +92,7 @@ const WellnessFeatures = () => {
 
   return (
     <motion.section 
-      className="py-20 bg-white dark:bg-gray-900 transition-colors duration-300"
+      className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white dark:bg-gray-900 transition-colors duration-300"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
@@ -101,23 +101,23 @@ const WellnessFeatures = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-16"
           variants={itemVariants}
         >
-          <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">
             Comprehensive Mental Health
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
               & Wellness Solutions
             </span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
             From AI-powered support to expert consultations, we provide everything you need 
             for your mental health and wellness journey.
           </p>
         </motion.div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
@@ -129,24 +129,24 @@ const WellnessFeatures = () => {
               className="group"
             >
               <Card className="h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
-                <CardHeader className="pb-4">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className="h-8 w-8 text-white" />
+                <CardHeader className="pb-3 sm:pb-4">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br ${feature.color} rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    <feature.icon className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     {feature.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
                     {feature.description}
                   </p>
                   
                   <div className="space-y-2">
                     {feature.features.map((item, idx) => (
                       <div key={idx} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">{item}</span>
                       </div>
                     ))}
                   </div>
@@ -160,23 +160,23 @@ const WellnessFeatures = () => {
 
         {/* Bottom CTA */}
         <motion.div 
-          className="mt-16 text-center"
+          className="mt-12 sm:mt-16 text-center"
           variants={itemVariants}
         >
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white">
+            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
               Ready to Start Your Wellness Journey?
             </h3>
-            <p className="text-green-100 mb-6 max-w-2xl mx-auto">
+            <p className="text-green-100 mb-4 sm:mb-6 max-w-2xl mx-auto text-sm sm:text-base">
               Join thousands of people who have transformed their mental health with our comprehensive platform.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/demo">
-                <button className="bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Link href="/demo" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 px-6 sm:px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm sm:text-base">
                   Get Started Free
                 </button>
               </Link>
-              <button className="border-2 border-white dark:border-gray-300 text-white dark:text-gray-300 px-8 py-3 rounded-xl font-semibold hover:bg-white/10 dark:hover:bg-gray-700/20 transition-colors">
+              <button className="w-full sm:w-auto border-2 border-white dark:border-gray-300 text-white dark:text-gray-300 px-6 sm:px-8 py-3 rounded-xl font-semibold hover:bg-white/10 dark:hover:bg-gray-700/20 transition-colors text-sm sm:text-base">
                 Learn More
               </button>
             </div>

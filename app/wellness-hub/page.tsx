@@ -1,115 +1,72 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Brain,
   ArrowLeft,
   Mail,
-  Lock,
-  Eye,
-  EyeOff,
+  User,
+  Building,
   Loader2,
   Shield,
   Sparkles,
   Heart,
-  TrendingUp,
-  ArrowRight
+  ArrowRight,
+  CheckCircle,
+  Users,
+  BarChart3,
+  Zap,
+  Globe
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-export default function LoginPage() {
-  const { user, loading: authLoading } = useAuth();
+export default function WellnessHubLandingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
-    password: ''
+    company: ''
   });
   const [focusedField, setFocusedField] = useState<string>('');
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      // Redirect based on user role
-      switch (user.role) {
-        case 'employee':
-          router.push('/employee/dashboard');
-          break;
-        case 'manager':
-          router.push('/manager/dashboard');
-          break;
-        case 'employer':
-          router.push('/employer/dashboard');
-          break;
-        case 'hr':
-        case 'admin':
-          router.push('/employer/analytics');
-          break;
-        default:
-          router.push('/employee/dashboard');
-      }
-    }
-  }, [user, authLoading, router]);
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (error) setError(''); // Clear error when user starts typing
+    if (error) setError('');
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // Use Firebase Auth directly
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      toast.success('Login successful!');
+      console.log('Wellness Hub Interest Form submitted:', formData);
+      toast.success('Thank you for your interest! Redirecting to login...');
 
-      // The auth context will automatically update with the user data
-      // and redirect based on the user's role
-
-    } catch (error: any) {
-      console.error('Login error:', error);
-
-      // Handle specific Firebase Auth errors
-      switch (error.code) {
-        case 'auth/user-not-found':
-          setError('No account found with this email address.');
-          break;
-        case 'auth/wrong-password':
-          setError('Incorrect password.');
-          break;
-        case 'auth/invalid-email':
-          setError('Invalid email address.');
-          break;
-        case 'auth/too-many-requests':
-          setError('Too many failed attempts. Please try again later.');
-          break;
-        default:
-          setError('Login failed. Please check your credentials and try again.');
-      }
-    } finally {
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 1500);
+    } catch (error) {
+      setError('Something went wrong. Please try again.');
+      toast.error('Something went wrong. Please try again.');
       setLoading(false);
     }
   };
-
-
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -143,28 +100,49 @@ export default function LoginPage() {
   const features = [
     {
       icon: Brain,
-      title: 'AI-Powered Support',
-      description: '24/7 mental health assistance',
+      title: 'AI-Powered Analytics',
+      description: 'Advanced mental health insights and predictive analytics',
       color: 'text-green-600'
     },
     {
-      icon: Heart,
-      title: 'Wellness Tracking',
-      description: 'Monitor your mental health journey',
-      color: 'text-red-600'
-    },
-    {
-      icon: Shield,
-      title: 'Privacy First',
-      description: 'Advanced security and privacy protection',
+      icon: Users,
+      title: 'Team Wellness',
+      description: 'Comprehensive workforce mental health monitoring',
       color: 'text-blue-600'
     },
     {
-      icon: TrendingUp,
-      title: 'Real-time Analytics',
-      description: 'Instant insights and reports',
+      icon: BarChart3,
+      title: 'Real-time Reports',
+      description: 'Instant organizational wellness dashboards',
       color: 'text-purple-600'
+    },
+    {
+      icon: Shield,
+      title: 'Enterprise Security',
+      description: 'HIPAA-compliant data protection and privacy',
+      color: 'text-red-600'
+    },
+    {
+      icon: Zap,
+      title: 'Instant Deployment',
+      description: 'Quick integration with existing HR systems',
+      color: 'text-yellow-600'
+    },
+    {
+      icon: Globe,
+      title: 'Global Scale',
+      description: 'Multi-location workforce support and analytics',
+      color: 'text-indigo-600'
     }
+  ];
+
+  const benefits = [
+    'Reduce mental health-related absences by up to 40%',
+    'Decrease employee turnover through predictive intervention',
+    'Enable evidence-based mental health program ROI measurement',
+    'Deploy organization-wide early warning systems',
+    'Achieve seamless integration with enterprise HR platforms',
+    'Access 24/7 AI-powered mental health support'
   ];
 
   return (
@@ -180,6 +158,13 @@ export default function LoginPage() {
           animate={{
             ...floatingAnimation,
             transition: { ...floatingAnimation.transition, delay: 2 }
+          }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-400/10 to-teal-400/10 rounded-full blur-3xl"
+          animate={{
+            ...floatingAnimation,
+            transition: { ...floatingAnimation.transition, delay: 1 }
           }}
         />
       </div>
@@ -200,7 +185,7 @@ export default function LoginPage() {
               >
                 <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </motion.div>
-              <span className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">MindCare</span>
+              <span className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">Diltak.ai</span>
             </Link>
             <div className="flex items-center space-x-2">
               <ThemeToggle size="sm" />
@@ -216,9 +201,9 @@ export default function LoginPage() {
         </div>
       </motion.header>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Left Side - Login Form */}
+          {/* Left Side - Form */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -229,16 +214,16 @@ export default function LoginPage() {
             <motion.div variants={itemVariants} className="text-center lg:text-left mb-6 sm:mb-8">
               <div className="inline-flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full border border-green-200 dark:border-green-700 mb-4 sm:mb-6">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
-                <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Secure Login</span>
+                <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Enterprise Wellness Platform</span>
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
-                Welcome Back to
+                Transform Your
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
-                  MindCare
+                  Workplace Wellness
                 </span>
               </h1>
               <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-                Sign in to access your personalized mental health dashboard and AI-powered wellness tools.
+                Get personalized insights into your organization's mental health landscape with AI-powered analytics and predictive wellness solutions.
               </p>
             </motion.div>
 
@@ -250,26 +235,52 @@ export default function LoginPage() {
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Brain className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
+                    <Heart className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-white" />
                   </motion.div>
-                  <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Sign In</CardTitle>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Enter your credentials to continue</p>
+                  <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Get Started Today</CardTitle>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Tell us about your organization and we'll create a personalized wellness solution</p>
                 </CardHeader>
                 <CardContent className="space-y-4 sm:space-y-6">
-                  <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
-                    <AnimatePresence>
-                      {error && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                        >
-                          <Alert variant="destructive" className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50">
-                            <AlertDescription className="text-red-700 dark:text-red-300 text-sm">{error}</AlertDescription>
-                          </Alert>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  <motion.form
+                    onSubmit={handleSubmit}
+                    className="space-y-4 sm:space-y-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {error && (
+                      <Alert variant="destructive" className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50">
+                        <AlertDescription className="text-red-700 dark:text-red-300 text-sm">{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <motion.div
+                      className="space-y-2"
+                      whileFocus={{ scale: 1.02 }}
+                    >
+                      <Label htmlFor="name" className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Full Name
+                      </Label>
+                      <div className="relative">
+                        <User className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 transition-colors ${focusedField === 'name' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+                          }`} />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="Enter your full name"
+                          value={formData.name}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          onFocus={() => setFocusedField('name')}
+                          onBlur={() => setFocusedField('')}
+                          className={`pl-8 sm:pl-10 text-sm sm:text-base py-2 sm:py-3 transition-all duration-300 ${focusedField === 'name'
+                            ? 'border-green-500 dark:border-green-400 ring-2 ring-green-200 dark:ring-green-800'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                            }`}
+                          disabled={loading}
+                          required
+                        />
+                      </div>
+                    </motion.div>
 
                     <motion.div
                       className="space-y-2"
@@ -284,7 +295,7 @@ export default function LoginPage() {
                         <Input
                           id="email"
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder="Enter your work email"
                           value={formData.email}
                           onChange={(e) => handleInputChange('email', e.target.value)}
                           onFocus={() => setFocusedField('email')}
@@ -303,37 +314,27 @@ export default function LoginPage() {
                       className="space-y-2"
                       whileFocus={{ scale: 1.02 }}
                     >
-                      <Label htmlFor="password" className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        Password
+                      <Label htmlFor="company" className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Company Name
                       </Label>
                       <div className="relative">
-                        <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 transition-colors ${focusedField === 'password' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
+                        <Building className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 transition-colors ${focusedField === 'company' ? 'text-green-500 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'
                           }`} />
                         <Input
-                          id="password"
-                          type={showPassword ? 'text' : 'password'}
-                          placeholder="Enter your password"
-                          value={formData.password}
-                          onChange={(e) => handleInputChange('password', e.target.value)}
-                          onFocus={() => setFocusedField('password')}
+                          id="company"
+                          type="text"
+                          placeholder="Enter your company name"
+                          value={formData.company}
+                          onChange={(e) => handleInputChange('company', e.target.value)}
+                          onFocus={() => setFocusedField('company')}
                           onBlur={() => setFocusedField('')}
-                          className={`pl-8 sm:pl-10 pr-8 sm:pr-10 text-sm sm:text-base py-2 sm:py-3 transition-all duration-300 ${focusedField === 'password'
+                          className={`pl-8 sm:pl-10 text-sm sm:text-base py-2 sm:py-3 transition-all duration-300 ${focusedField === 'company'
                             ? 'border-green-500 dark:border-green-400 ring-2 ring-green-200 dark:ring-green-800'
                             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                             }`}
                           disabled={loading}
                           required
                         />
-                        <motion.button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
-                          disabled={loading}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          {showPassword ? <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" /> : <Eye className="h-3 w-3 sm:h-4 sm:w-4" />}
-                        </motion.button>
                       </div>
                     </motion.div>
 
@@ -353,32 +354,24 @@ export default function LoginPage() {
                             className="flex items-center justify-center"
                           >
                             <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                            <span className="text-sm sm:text-base">Signing In...</span>
+                            <span className="text-sm sm:text-base">Redirecting to Login...</span>
                           </motion.div>
                         ) : (
                           <div className="flex items-center justify-center">
-                            <span>Sign In</span>
+                            <span>Access Wellness Hub</span>
                             <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                           </div>
                         )}
                       </Button>
                     </motion.div>
-                  </form>
 
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="text-center text-xs sm:text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Don&apos;t have an account? </span>
-                      <Link href="/auth/signup" className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline">
-                        Contact your administrator
-                      </Link>
-                    </div>
-
-                    <div className="text-center">
-                      <Link href="/auth/forgot-password" className="text-xs sm:text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline">
-                        Forgot your password?
-                      </Link>
-                    </div>
-                  </div>
+                    <p className="text-xs text-gray-500 text-center">
+                      By submitting this form you agree to our{' '}
+                      <a href="#" className="text-green-600 hover:underline">
+                        Privacy Policy
+                      </a>
+                    </p>
+                  </motion.form>
                 </CardContent>
               </Card>
             </motion.div>
@@ -395,65 +388,49 @@ export default function LoginPage() {
             <motion.div variants={itemVariants} className="space-y-6 sm:space-y-8">
               <div className="text-center lg:text-left">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
-                  Your Mental Health Journey Starts Here
+                  Enterprise-Grade Mental Health Analytics
                 </h2>
                 <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-8">
-                  Access personalized wellness tools, AI-powered support, and comprehensive mental health resources.
+                  Transform your workplace wellness programs with AI-powered insights and comprehensive mental health analytics.
                 </p>
               </div>
 
-              {/* Feature Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+              {/* Feature Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 sm:gap-4">
                 {features.map((feature, index) => (
                   <motion.div
                     key={index}
                     variants={itemVariants}
                     whileHover={{ scale: 1.05, y: -5 }}
-                    className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300"
+                    className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-3 sm:p-4 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300"
                   >
-                    <feature.icon className={`h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 mb-2 sm:mb-3 ${feature.color} dark:brightness-125`} />
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2 text-xs sm:text-sm lg:text-base">{feature.title}</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
+                    <feature.icon className={`h-5 w-5 sm:h-6 sm:w-6 mb-2 ${feature.color} dark:brightness-125`} />
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 text-xs sm:text-sm">{feature.title}</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Stats */}
+              {/* Benefits List */}
               <motion.div
-                className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white"
+                className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 sm:p-6"
                 variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
               >
-                <div className="text-center">
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4">Trusted by Thousands</h3>
-                  <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-                    <div>
-                      <div className="text-lg sm:text-xl lg:text-2xl font-bold">3K+</div>
-                      <div className="text-xs sm:text-sm text-green-100">People Helped</div>
-                    </div>
-                    <div>
-                      <div className="text-lg sm:text-xl lg:text-2xl font-bold">98%</div>
-                      <div className="text-xs sm:text-sm text-green-100">Satisfaction</div>
-                    </div>
-                    <div>
-                      <div className="text-lg sm:text-xl lg:text-2xl font-bold">24/7</div>
-                      <div className="text-xs sm:text-sm text-green-100">AI Support</div>
-                    </div>
-                  </div>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4 text-sm sm:text-base">Key Benefits</h3>
+                <div className="space-y-2 sm:space-y-3">
+                  {benefits.map((benefit, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex items-start space-x-2 sm:space-x-3"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{benefit}</span>
+                    </motion.div>
+                  ))}
                 </div>
-              </motion.div>
-
-              {/* Security Badge */}
-              <motion.div
-                className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 text-center"
-                variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Shield className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 mx-auto mb-3 sm:mb-4 text-green-600 dark:text-green-400" />
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm sm:text-base">Secure & Private</h3>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  Your data is protected with industry-leading security measures
-                </p>
               </motion.div>
             </motion.div>
           </motion.div>

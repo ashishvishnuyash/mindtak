@@ -5,14 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import {
   Dialog,
   DialogContent,
@@ -32,9 +25,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
     firstName: '',
     lastName: '',
     email: '',
-    organizationType: '',
     organization: '',
-    supportRequirements: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -44,9 +35,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, organizationType: value }));
-  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,9 +55,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
           firstName: '',
           lastName: '',
           email: '',
-          organizationType: '',
           organization: '',
-          supportRequirements: '',
         });
         setIsSubmitted(false);
         onClose();
@@ -86,9 +73,7 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
         firstName: '',
         lastName: '',
         email: '',
-        organizationType: '',
         organization: '',
-        supportRequirements: '',
       });
       setIsSubmitted(false);
       onClose();
@@ -171,23 +156,6 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                   </div>
 
                   <div>
-                    <Label htmlFor="organizationType" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Organization Type
-                    </Label>
-                    <Select value={formData.organizationType} onValueChange={handleSelectChange} disabled={isSubmitting}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select organization type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="education">Education</SelectItem>
-                        <SelectItem value="healthcare">Healthcare</SelectItem>
-                        <SelectItem value="enterprise">Enterprise</SelectItem>
-                        <SelectItem value="non-profit">Non-Profit</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
                     <Label htmlFor="organization" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Organization
                     </Label>
@@ -198,23 +166,6 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                       value={formData.organization}
                       onChange={handleInputChange}
                       className="mt-1"
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="supportRequirements" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Support Requirements
-                    </Label>
-                    <Textarea
-                      id="supportRequirements"
-                      name="supportRequirements"
-                      value={formData.supportRequirements}
-                      onChange={handleInputChange}
-                      className="mt-1"
-                      rows={4}
-                      placeholder="Describe your support needs..."
                       required
                       disabled={isSubmitting}
                     />

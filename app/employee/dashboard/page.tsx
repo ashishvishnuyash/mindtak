@@ -209,39 +209,39 @@ function EmployeeDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
       {/* Header */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Brain className="h-5 w-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Brain className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Employee Portal</p>
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">Wellness Hub</h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Employee Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Button variant="outline" size="sm" className="text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
                 Engineering
               </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <Bell className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2">
+                <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <User className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="p-1.5 sm:p-2">
+                <User className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <ThemeToggle size="sm" />
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-green-600 border-green-200"
+                className="text-green-600 border-green-200 px-1.5 sm:px-2 lg:px-3"
                 onClick={() => {
                   auth.signOut();
                   router.push('/auth/login');
                 }}
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                <LogOut className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1 lg:mr-2" />
+                <span className="hidden sm:inline text-xs sm:text-sm">Logout</span>
               </Button>
             </div>
           </div>
@@ -250,108 +250,111 @@ function EmployeeDashboard() {
       
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8 sm:mb-10 lg:mb-12">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-3 sm:mb-4 tracking-tight leading-tight">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-2 sm:mb-3 lg:mb-4 tracking-tight leading-tight">
               Welcome back, {user.first_name || user.email}!
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl lg:max-w-3xl">
               Monitor your mental wellness and track your progress over time with our advanced analytics.
             </p>
           </motion.div>
         </div>
 
         {/* Enhanced Navigation */}
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1">
-            <div className="flex flex-wrap gap-1 sm:gap-2">
+            <div className="flex flex-wrap gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('Overview')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
                 activeTab === 'Overview'
                     ? 'bg-blue-500 text-white shadow-sm'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
-                <div className="flex items-center space-x-2">
-                  <BarChart3 className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>Overview</span>
                 </div>
             </button>
             <button 
               onClick={() => router.push('/employee/wellness-hub')}
-              className="pb-4 px-1 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors"
+              className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
             >
-              Wellness Toolkit
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Wellness Toolkit</span>
+              </div>
             </button>
             <button 
               onClick={() => router.push('/employee/reports')}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+              className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
             >
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>Analytics</span>
                 </div>
             </button>
             <button 
               onClick={() => router.push('/employee/chat')}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+              className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
               >
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>AI Chat</span>
                 </div>
               </button>
               <button 
                 onClick={() => router.push('/employee/support')}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
               >
-                <div className="flex items-center space-x-2">
-                  <AlertTriangle className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>Support</span>
                 </div>
               </button>
               <button 
                 onClick={() => router.push('/employee/recommendations')}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
               >
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>Recommendations</span>
                 </div>
               </button>
               <button 
                 onClick={() => router.push('/employee/gamification')}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+                className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
               >
-                <div className="flex items-center space-x-2">
-                  <Award className="h-4 w-4" />
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Award className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>Gamification</span>
                 </div>
               </button>
           <button
             onClick={() => router.push('/employee/community')}
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 whitespace-nowrap flex-shrink-0"
           >
-            <div className="flex items-center space-x-2">
-              <User className="h-4 w-4" />
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Community</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('Metrics')}
-            className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
               activeTab === 'Metrics'
                 ? 'bg-blue-500 text-white shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-4 w-4" />
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Metrics</span>
             </div>
           </button>
@@ -360,22 +363,22 @@ function EmployeeDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <Link href="/employee/reports/new">
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700 rounded-xl p-3 sm:p-4 lg:p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="bg-blue-500 p-3 rounded-xl shadow-sm">
-                    <Heart className="h-6 w-6 text-white" />
+                <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+                  <div className="bg-blue-500 p-2 sm:p-3 rounded-xl shadow-sm flex-shrink-0">
+                    <Heart className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors">New Wellness Check</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Record your current state</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors text-sm sm:text-base truncate">New Wellness Check</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Record your current state</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0" />
                 </div>
               </motion.div>
           </Link>
@@ -514,22 +517,23 @@ function EmployeeDashboard() {
 
         {/* Interactive Stats Overview */}
         {latestReport ? (
-          <div className="mb-6 sm:mb-8">
+          <div className="mb-4 sm:mb-6 lg:mb-8">
             <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-700 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+                  <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100">
                     Current Wellness Snapshot
                   </h2>
                   <Link href="/employee/reports">
-                    <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50">
-                      View Interactive Analytics
-                      <BarChart3 className="h-4 w-4 ml-2" />
+                    <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3">
+                      <span className="hidden sm:inline">View Interactive Analytics</span>
+                      <span className="sm:hidden">Analytics</span>
+                      <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
                     </Button>
                   </Link>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   {/* Mood */}
                   <motion.div 
                     className="text-center"
@@ -707,12 +711,12 @@ function EmployeeDashboard() {
             </Card>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <CardContent className="p-6 text-center">
-                <Smile className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-                <div className="text-lg font-semibold text-gray-400 dark:text-gray-500">No Data</div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Mood</p>
+              <CardContent className="p-3 sm:p-4 lg:p-6 text-center">
+                <Smile className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                <div className="text-sm sm:text-base lg:text-lg font-semibold text-gray-400 dark:text-gray-500">No Data</div>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Mood</p>
               </CardContent>
             </Card>
             <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">

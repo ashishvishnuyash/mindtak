@@ -164,44 +164,47 @@ export default function ManagerTeamReportsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Shield className="h-5 w-5 text-white" />
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Shield className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Wellness Hub</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Manager Portal</p>
+              <div className="min-w-0">
+                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">Wellness Hub</h1>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Manager Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2">
               <ThemeToggle size="sm" />
             </div>
           </div>
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div>
-            <Link href="/manager/dashboard" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 lg:mb-8">
+          <div className="w-full sm:w-auto">
+            <Link href="/manager/dashboard" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-3 sm:mb-4 text-sm">
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Back to Dashboard
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Team Wellness Reports</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-2">Team Wellness Reports</h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               View and monitor wellness reports from your direct reports and team members.
             </p>
           </div>
-          <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-            <Button variant="outline" onClick={() => window.print()}>
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Generate Summary
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-0 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={() => window.print()} className="text-xs sm:text-sm px-2 sm:px-3">
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Generate Summary</span>
+              <span className="sm:hidden">Summary</span>
             </Button>
             <Button 
               variant="outline"
+              size="sm"
+              className="text-xs sm:text-sm px-2 sm:px-3"
               onClick={() => {
                 const params = new URLSearchParams({
                   type: 'team',
@@ -212,66 +215,67 @@ export default function ManagerTeamReportsPage() {
                 router.push(`/export/report?${params.toString()}`);
               }}
             >
-              <Download className="h-4 w-4 mr-2" />
-              Export Data
+              <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Export Data</span>
+              <span className="sm:hidden">Export</span>
             </Button>
           </div>
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{reports.length}</div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Team Reports</p>
+            <CardContent className="p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">{reports.length}</div>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Team Reports</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="h-8 w-8 text-green-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-green-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {reports.length > 0 
                       ? Math.round(reports.reduce((sum, report) => sum + report.overall_wellness, 0) / reports.length * 10) / 10
                       : 0
                     }/10
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Avg Team Wellness</p>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Avg Team Wellness</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <AlertTriangle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-red-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {reports.filter(r => r.risk_level === 'high').length}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">High Risk</p>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">High Risk</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Users className="h-8 w-8 text-purple-600" />
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <Users className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-purple-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {teamMembers.length}
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Team Members</p>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Team Members</p>
                 </div>
               </div>
             </CardContent>
@@ -279,22 +283,22 @@ export default function ManagerTeamReportsPage() {
         </div>
 
         {/* Filters and Search */}
-        <Card className="mb-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
+        <Card className="mb-4 sm:mb-6 lg:mb-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+              <div className="relative sm:col-span-2 lg:col-span-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-3 w-3 sm:h-4 sm:w-4" />
                 <Input
                   placeholder="Search reports..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                  className="pl-8 sm:pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm h-8 sm:h-10"
                 />
               </div>
               
               <Select value={filterRisk} onValueChange={setFilterRisk}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
+                <SelectTrigger className="h-8 sm:h-10 text-sm">
+                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   <SelectValue placeholder="Filter by risk" />
                 </SelectTrigger>
                 <SelectContent>
@@ -306,7 +310,7 @@ export default function ManagerTeamReportsPage() {
               </Select>
 
               <Select value={filterEmployee} onValueChange={setFilterEmployee}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8 sm:h-10 text-sm">
                   <SelectValue placeholder="Filter by employee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -320,7 +324,7 @@ export default function ManagerTeamReportsPage() {
               </Select>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8 sm:h-10 text-sm">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -334,7 +338,7 @@ export default function ManagerTeamReportsPage() {
                 </SelectContent>
               </Select>
 
-              <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center sm:justify-start lg:col-span-1">
                 <span>{filteredReports.length} of {reports.length} reports</span>
               </div>
             </div>
