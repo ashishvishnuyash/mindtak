@@ -20,6 +20,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Force light mode immediately
+              document.documentElement.classList.remove('dark');
+              try {
+                localStorage.setItem('theme', 'light');
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider>
           <AuthProvider>

@@ -29,6 +29,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { toast } from 'sonner';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import ContactAdministratorModal from '@/components/modals/ContactAdministratorModal';
+import ForgotPasswordModal from '@/components/modals/ForgotPasswordModal';
 
 export default function LoginPage() {
   const { user, loading: authLoading } = useAuth();
@@ -41,6 +43,8 @@ export default function LoginPage() {
     password: ''
   });
   const [focusedField, setFocusedField] = useState<string>('');
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -194,13 +198,10 @@ export default function LoginPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <Link href="/" className="flex items-center space-x-2">
-              <motion.div
-                animate={floatingAnimation}
-                className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center"
-              >
-                <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </motion.div>
-              <span className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100">MindCare</span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-xs sm:text-sm">D</span>
+              </div>
+              <span className="text-lg sm:text-xl lg:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700">Diltak.ai</span>
             </Link>
             <div className="flex items-center space-x-2">
               <ThemeToggle size="sm" />
@@ -232,9 +233,9 @@ export default function LoginPage() {
                 <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Secure Login</span>
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
-                Welcome Back to
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
-                  MindCare
+                Welcome to
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-lime-600 to-emerald-700">
+                  Diltak.ai
                 </span>
               </h1>
               <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -368,15 +369,21 @@ export default function LoginPage() {
                   <div className="space-y-3 sm:space-y-4">
                     <div className="text-center text-xs sm:text-sm">
                       <span className="text-gray-600 dark:text-gray-400">Don&apos;t have an account? </span>
-                      <Link href="/auth/signup" className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline">
+                      <button 
+                        onClick={() => setIsContactModalOpen(true)}
+                        className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline"
+                      >
                         Contact your administrator
-                      </Link>
+                      </button>
                     </div>
 
                     <div className="text-center">
-                      <Link href="/auth/forgot-password" className="text-xs sm:text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline">
+                      <button 
+                        onClick={() => setIsForgotPasswordModalOpen(true)}
+                        className="text-xs sm:text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold hover:underline"
+                      >
                         Forgot your password?
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </CardContent>
@@ -459,6 +466,18 @@ export default function LoginPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Contact Administrator Modal */}
+      <ContactAdministratorModal 
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+      />
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordModalOpen}
+        onClose={() => setIsForgotPasswordModalOpen(false)}
+      />
     </div>
   );
 }

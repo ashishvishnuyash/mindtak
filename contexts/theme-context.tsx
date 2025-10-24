@@ -25,14 +25,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Load theme from localStorage on mount
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem('theme') as Theme;
-      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-        setTheme(savedTheme);
-      } else {
-        // Check system preference
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        setTheme(systemTheme);
-      }
+      // Force light theme as default - ignore any saved dark theme preference
+      setTheme('light');
+      // Clear any existing dark theme preference
+      localStorage.setItem('theme', 'light');
     } catch (error) {
       // Fallback to light theme if localStorage is not available
       setTheme('light');
@@ -44,10 +40,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted) {
       const root = document.documentElement;
+      // Force remove dark class and ensure light mode
+      root.classList.remove('dark');
       if (theme === 'dark') {
         root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
       }
       try {
         localStorage.setItem('theme', theme);
@@ -57,6 +53,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [theme, mounted]);
+
+  // Additional effect to ensure dark mode is cleared on initial load
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('dark');
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');

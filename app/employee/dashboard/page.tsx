@@ -41,6 +41,7 @@ import { useCallback } from 'react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import ComprehensiveMetrics from '@/components/dashboard/ComprehensiveMetrics';
 import { ComprehensiveReportExportService } from '@/lib/comprehensive-report-export-service';
+import EmployeeNavbar from '@/components/shared/EmployeeNavbar';
 // Dashboard component
 
 function EmployeeDashboard() {
@@ -207,46 +208,7 @@ function EmployeeDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
-      {/* Header */}
-      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Brain className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">Wellness Hub</h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">Employee Portal</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
-                Engineering
-              </Button>
-              <Button variant="outline" size="sm" className="p-1.5 sm:p-2">
-                <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="p-1.5 sm:p-2">
-                <User className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <ThemeToggle size="sm" />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-green-600 border-green-200 px-1.5 sm:px-2 lg:px-3"
-                onClick={() => {
-                  auth.signOut();
-                  router.push('/auth/login');
-                }}
-              >
-                <LogOut className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1 lg:mr-2" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Logout</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <EmployeeNavbar user={user} />
       
       <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
         {/* Welcome Section */}

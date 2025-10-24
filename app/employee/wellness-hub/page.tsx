@@ -3,6 +3,7 @@
 import { useUser } from '@/hooks/use-user';
 import { withAuth } from '@/components/auth/with-auth';
 import WellnessHub from '@/components/wellness-hub/WellnessHub';
+import EmployeeNavbar from '@/components/shared/EmployeeNavbar';
 import { motion } from 'framer-motion';
 import { Loader2, Brain } from 'lucide-react';
 
@@ -34,7 +35,12 @@ function EmployeeWellnessHubPage() {
     return null;
   }
 
-  return <WellnessHub userRole="employee" userId={user.id} />;
+  return (
+    <div className="min-h-screen">
+      <EmployeeNavbar user={user} />
+      <WellnessHub userRole="employee" userId={user.id} />
+    </div>
+  );
 }
 
 export default withAuth(EmployeeWellnessHubPage, ['employee']);

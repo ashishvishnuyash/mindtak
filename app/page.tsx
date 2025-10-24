@@ -147,15 +147,15 @@ export default function HomePage() {
                 )}
               </div>
 
-              <Link href="#wellness">
-                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
-                  Solutions
-                </Button>
-              </Link>
-
               <Link href="#advantage">
                 <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
                   About
+                </Button>
+              </Link>
+
+              <Link href="#wellness">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
+                  Solutions
                 </Button>
               </Link>
 
@@ -172,6 +172,12 @@ export default function HomePage() {
               >
                 Contact
               </Button>
+
+              <Link href="/auth/login">
+                <Button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2">
+                  Login
+                </Button>
+              </Link>
 
               <ThemeToggle />
             </div>
@@ -226,15 +232,15 @@ export default function HomePage() {
                       )}
                     </div>
 
-                    <Link href="#wellness" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
-                        Solutions
-                      </Button>
-                    </Link>
-
                     <Link href="#advantage" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
                         About
+                      </Button>
+                    </Link>
+
+                    <Link href="#wellness" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
+                        Solutions
                       </Button>
                     </Link>
 

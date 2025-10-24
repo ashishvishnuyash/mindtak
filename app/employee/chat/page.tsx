@@ -5,7 +5,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Navbar } from "@/components/shared/navbar";
+import EmployeeNavbar from "@/components/shared/EmployeeNavbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -986,45 +986,7 @@ export default function EmployeeChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
-      {/* Header */}
-      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Brain className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate">Wellness Hub</h1>
-                <p className="text-xs sm:text-sm text-gray-500 truncate">Employee Portal</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
-                Engineering
-              </Button>
-              <ThemeToggle size="sm" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-600 border-green-200 px-1.5 sm:px-2 lg:px-3"
-                onClick={async () => {
-                  try {
-                    await signOut(auth);
-                    router.push('/auth/login');
-                  } catch (error) {
-                    console.error('Logout error:', error);
-                    router.push('/auth/login');
-                  }
-                }}
-              >
-                <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1 lg:mr-2" />
-                <span className="hidden sm:inline text-xs sm:text-sm">Logout</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <EmployeeNavbar user={user} />
 
       {/* Tab Navigation */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-2 sm:px-4 lg:px-8 flex-shrink-0">
