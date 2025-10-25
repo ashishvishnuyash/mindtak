@@ -81,14 +81,14 @@ export class LipSyncAnalyzer {
   private isAnalyzing = false;
   private animationFrame: number | null = null;
   
-  // Smoothing and noise reduction - virtually disabled (99.9999% suppressed)
+  // Smoothing and noise reduction - properly configured for real-time lip sync
   private lastViseme = "sil";
   private lastIntensity = 0;
   private visemeStabilityCounter = 0;
   private lastVisemeChangeTime = 0;
-  private readonly VISEME_STABILITY_THRESHOLD = 100; // Virtually impossible threshold
-  private readonly INTENSITY_SMOOTHING = 0.999; // Maximum smoothing - virtually no change allowed
-  private readonly MIN_VISEME_CHANGE_INTERVAL = 10000; // Minimum 10 seconds between viseme changes
+  private readonly VISEME_STABILITY_THRESHOLD = 3; // Allow changes after 3 frames
+  private readonly INTENSITY_SMOOTHING = 0.7; // Moderate smoothing for natural movement
+  private readonly MIN_VISEME_CHANGE_INTERVAL = 50; // Minimum 50ms between viseme changes
 
   constructor() {
     this.initializeAudioContext();
@@ -174,28 +174,10 @@ export class LipSyncAnalyzer {
 
   /**
    * Real-time audio analysis loop with smoothing and noise reduction
-   * VIRTUALLY DISABLED - 99.9999% suppression
+   * ENABLED - Proper real-time lip sync analysis
    */
   private analyzeRealTime(onVisemeUpdate: (viseme: VisemeData) => void) {
     if (!this.isAnalyzing || !this.analyser || !this.dataArray) return;
-
-    // Additional master suppression - 99.99% chance of early return
-    if (Math.random() < 0.9999) {
-      // Force silence 99.99% of the time
-      onVisemeUpdate({
-        viseme: "sil",
-        intensity: 0,
-        timestamp: Date.now(),
-      });
-      
-      // Continue the loop but do nothing
-      setTimeout(() => {
-        this.animationFrame = requestAnimationFrame(() =>
-          this.analyzeRealTime(onVisemeUpdate)
-        );
-      }, 10000);
-      return;
-    }
 
     // Create a properly typed array for Web Audio API
     const frequencyData = new Uint8Array(this.dataArray.length);
@@ -221,12 +203,10 @@ export class LipSyncAnalyzer {
       }
     }
 
-    // Reduce frame rate to 0.1fps for virtually no activity
-    setTimeout(() => {
-      this.animationFrame = requestAnimationFrame(() =>
-        this.analyzeRealTime(onVisemeUpdate)
-      );
-    }, 10000); // ~0.1fps for virtually disabled lip sync
+    // Continue analysis at 60fps for real-time lip sync
+    this.animationFrame = requestAnimationFrame(() =>
+      this.analyzeRealTime(onVisemeUpdate)
+    );
   }
 
   /**
@@ -246,20 +226,15 @@ export class LipSyncAnalyzer {
       this.visemeStabilityCounter = 0;
     }
 
-    // Only change viseme if it's been stable for enough frames AND enough time has passed
-    // Additional 99% suppression - only 1% chance of activation
+    // Allow viseme changes with proper stability checking
     let finalViseme = this.lastViseme;
     const currentTime = Date.now();
     const timeSinceLastChange = currentTime - this.lastVisemeChangeTime;
     
-    // Add random suppression - only 0.0001% chance of allowing change
-    const suppressionRoll = Math.random();
-    const allowChange = suppressionRoll < 0.000001; // Only 0.0001% chance (virtually never)
-    
+    // Allow changes if viseme is stable or if it's silence
     if ((this.visemeStabilityCounter >= this.VISEME_STABILITY_THRESHOLD || 
          rawViseme.viseme === "sil") && 
-        timeSinceLastChange >= this.MIN_VISEME_CHANGE_INTERVAL &&
-        allowChange) {
+        timeSinceLastChange >= this.MIN_VISEME_CHANGE_INTERVAL) {
       finalViseme = rawViseme.viseme;
       this.lastViseme = finalViseme;
       this.lastVisemeChangeTime = currentTime;
@@ -267,8 +242,8 @@ export class LipSyncAnalyzer {
 
     this.lastIntensity = smoothedIntensity;
 
-    // Only return if intensity is virtually maximum - suppress 99.9999% of activity
-    if (smoothedIntensity < 0.95) {
+    // Return viseme data for natural lip sync
+    if (smoothedIntensity < 0.1) {
       return { viseme: "sil", intensity: 0 };
     }
 
@@ -310,15 +285,15 @@ export class LipSyncAnalyzer {
 
   /**
    * Map audio characteristics to visemes using frequency analysis
-   * Enhanced with noise gate and sensitivity controls
+   * Enhanced with proper thresholds for natural lip sync
    */
   private mapAudioToViseme(
     energy: number,
     frequency: number
   ): { viseme: string; intensity: number } | null {
-    // Virtually impossible thresholds to suppress 99.9999% of lip sync activity
-    const NOISE_GATE_THRESHOLD = 0.98; // Virtually impossible threshold - only maximum volume
-    const MIN_SPEECH_ENERGY = 0.99; // Virtually impossible minimum energy - only absolute maximum
+    // Proper thresholds for natural speech detection
+    const NOISE_GATE_THRESHOLD = 0.15; // Detect speech above background noise
+    const MIN_SPEECH_ENERGY = 0.2; // Minimum energy for speech detection
     
     if (energy < NOISE_GATE_THRESHOLD) {
       return { viseme: "sil", intensity: 0 };
@@ -329,30 +304,30 @@ export class LipSyncAnalyzer {
       return { viseme: "sil", intensity: 0 };
     }
 
-    // Frequency-based viseme mapping with virtually impossible thresholds (99.9999% suppression)
-    let viseme = "aa"; // Default vowel - will almost never change
+    // Frequency-based viseme mapping with natural thresholds
+    let viseme = "aa"; // Default vowel
 
     if (frequency < 500) {
-      // Low frequencies - virtually impossible to trigger
-      viseme = energy > 0.995 ? "O" : "aa"; // Virtually impossible threshold
+      // Low frequencies - O sounds
+      viseme = energy > 0.3 ? "O" : "aa";
     } else if (frequency < 1000) {
-      // Mid-low frequencies - virtually impossible to trigger
-      viseme = energy > 0.996 ? "aa" : "aa"; // Virtually impossible threshold
+      // Mid-low frequencies - A sounds
+      viseme = energy > 0.25 ? "aa" : "aa";
     } else if (frequency < 2000) {
-      // Mid frequencies - virtually impossible to trigger
-      viseme = energy > 0.997 ? "I" : "aa"; // Virtually impossible threshold
+      // Mid frequencies - I sounds
+      viseme = energy > 0.3 ? "I" : "aa";
     } else if (frequency < 4000) {
-      // High frequencies - virtually impossible to trigger
-      viseme = energy > 0.998 ? "SS" : "aa"; // Virtually impossible threshold
+      // High frequencies - S sounds
+      viseme = energy > 0.35 ? "SS" : "aa";
     } else {
-      // Very high frequencies - virtually impossible to trigger
-      viseme = energy > 0.999 ? "SS" : "aa"; // Virtually impossible threshold
+      // Very high frequencies - S sounds
+      viseme = energy > 0.4 ? "SS" : "aa";
     }
 
-    // Virtually disabled intensity calculation - suppress 99.9999%
+    // Natural intensity calculation
     const normalizedEnergy = Math.max(0, (energy - MIN_SPEECH_ENERGY) / (1 - MIN_SPEECH_ENERGY));
-    const compressedIntensity = Math.pow(normalizedEnergy, 10.0); // Extreme compression curve
-    const finalIntensity = Math.min(compressedIntensity * 0.01, 0.01); // Virtually invisible max intensity (1%)
+    const compressedIntensity = Math.pow(normalizedEnergy, 2.0); // Natural compression curve
+    const finalIntensity = Math.min(compressedIntensity, 1.0); // Natural max intensity
 
     return {
       viseme,

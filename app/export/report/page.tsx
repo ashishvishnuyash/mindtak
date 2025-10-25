@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -81,18 +81,7 @@ export default function ExportReportPage() {
   const [data, setData] = useState<ExportReportData | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!userLoading && !user) {
-      router.push('/auth/login');
-      return;
-    }
-
-    if (user) {
-      loadReportData();
-    }
-  }, [user, userLoading, router]);
-
-  const loadReportData = async () => {
+  const loadReportData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -187,7 +176,18 @@ export default function ExportReportPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, searchParams]);
+
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (user) {
+      loadReportData();
+    }
+  }, [user, userLoading, router, loadReportData]);
 
   const handleExportPDF = async () => {
     if (!data || !reportRef.current) return;
@@ -521,6 +521,207 @@ export default function ExportReportPage() {
             </CardContent>
           </Card>
 
+          {/* Comprehensive Metrics Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Comprehensive Wellness Metrics Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Basic Metrics */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Basic Wellness Metrics</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Mood</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.mood_rating || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Stress</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.stress_level || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Energy</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.energy_level || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Work Satisfaction</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.work_satisfaction || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Metrics */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Additional Wellness Metrics</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Anxiety</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.anxiety_level || r.anxious_level || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Work-Life Balance</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.work_life_balance || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Confidence</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.confidence_level || r.confident_level || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Sleep Quality</span>
+                      <span className="font-medium">
+                        {data.reports.length > 0 
+                          ? (data.reports.reduce((sum, r) => sum + (r.sleep_quality || 0), 0) / data.reports.length).toFixed(1)
+                          : 'N/A'
+                        }/10
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI-Generated Metrics */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">AI-Generated Metrics</h3>
+                  <div className="space-y-3">
+                    {data.reports.filter(r => r.metrics).length > 0 ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Emotional Tone</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.emotional_tone !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.emotional_tone || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.emotional_tone !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Stress & Anxiety</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.stress_anxiety !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.stress_anxiety || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.stress_anxiety !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Motivation</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.motivation_engagement !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.motivation_engagement || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.motivation_engagement !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Social Connection</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.social_connectedness !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.social_connectedness || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.social_connectedness !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Self-Esteem</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.self_esteem !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.self_esteem || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.self_esteem !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Assertiveness</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.assertiveness !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.assertiveness || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.assertiveness !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Work-Life Balance AI</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.work_life_balance_metric !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.work_life_balance_metric || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.work_life_balance_metric !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Cognitive Function</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.cognitive_functioning !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.cognitive_functioning || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.cognitive_functioning !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Emotional Regulation</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.emotional_regulation !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.emotional_regulation || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.emotional_regulation !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Avg Substance Use</span>
+                          <span className="font-medium">
+                            {(data.reports
+                              .filter(r => r.metrics?.substance_use !== undefined)
+                              .reduce((sum, r) => sum + (r.metrics?.substance_use || 0), 0) / 
+                              data.reports.filter(r => r.metrics?.substance_use !== undefined).length || 0).toFixed(1)}/3
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        No AI-generated metrics available
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Recent Reports Table */}
           <Card>
             <CardHeader>
@@ -536,8 +737,23 @@ export default function ExportReportPage() {
                       <th className="text-left py-2">Mood</th>
                       <th className="text-left py-2">Stress</th>
                       <th className="text-left py-2">Energy</th>
+                      <th className="text-left py-2">Anxiety</th>
+                      <th className="text-left py-2">Work Satisfaction</th>
+                      <th className="text-left py-2">Work-Life Balance</th>
+                      <th className="text-left py-2">Confidence</th>
+                      <th className="text-left py-2">Sleep Quality</th>
                       <th className="text-left py-2">Wellness</th>
                       <th className="text-left py-2">Risk</th>
+                      <th className="text-left py-2">Emotional Tone</th>
+                      <th className="text-left py-2">Stress & Anxiety</th>
+                      <th className="text-left py-2">Motivation</th>
+                      <th className="text-left py-2">Social Connection</th>
+                      <th className="text-left py-2">Self-Esteem</th>
+                      <th className="text-left py-2">Assertiveness</th>
+                      <th className="text-left py-2">Work-Life Balance AI</th>
+                      <th className="text-left py-2">Cognitive Function</th>
+                      <th className="text-left py-2">Emotional Regulation</th>
+                      <th className="text-left py-2">Substance Use</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -552,6 +768,11 @@ export default function ExportReportPage() {
                           <td className="py-2">{report.mood_rating}</td>
                           <td className="py-2">{report.stress_level}</td>
                           <td className="py-2">{report.energy_level}</td>
+                          <td className="py-2">{report.anxiety_level || report.anxious_level || 'N/A'}</td>
+                          <td className="py-2">{report.work_satisfaction}</td>
+                          <td className="py-2">{report.work_life_balance || 'N/A'}</td>
+                          <td className="py-2">{report.confidence_level || report.confident_level || 'N/A'}</td>
+                          <td className="py-2">{report.sleep_quality || 'N/A'}</td>
                           <td className="py-2">{report.overall_wellness}</td>
                           <td className="py-2">
                             <Badge variant={
@@ -562,6 +783,16 @@ export default function ExportReportPage() {
                               {report.risk_level}
                             </Badge>
                           </td>
+                          <td className="py-2">{report.metrics?.emotional_tone !== undefined ? report.metrics.emotional_tone : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.stress_anxiety !== undefined ? report.metrics.stress_anxiety : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.motivation_engagement !== undefined ? report.metrics.motivation_engagement : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.social_connectedness !== undefined ? report.metrics.social_connectedness : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.self_esteem !== undefined ? report.metrics.self_esteem : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.assertiveness !== undefined ? report.metrics.assertiveness : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.work_life_balance_metric !== undefined ? report.metrics.work_life_balance_metric : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.cognitive_functioning !== undefined ? report.metrics.cognitive_functioning : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.emotional_regulation !== undefined ? report.metrics.emotional_regulation : 'N/A'}</td>
+                          <td className="py-2">{report.metrics?.substance_use !== undefined ? report.metrics.substance_use : 'N/A'}</td>
                         </tr>
                       );
                     })}

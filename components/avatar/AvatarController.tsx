@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import AvatarModel from './AvatarModel';
-
+import { useLipSync } from './LipSyncController';
 import { useTTSLipSync } from './TTSLipSync';
 
 interface AvatarControllerProps {
@@ -43,9 +43,25 @@ export default function AvatarController({
   // Avatar ref for lip sync
   const avatarRef = useRef<THREE.Group>(null);
   
-  // Lip sync disabled - removed due to issues
-  const [currentViseme] = useState('sil'); // Always silent
-  const [lipSyncActive] = useState(false); // Always disabled
+  // Lip sync enabled with proper integration
+  const [currentViseme, setCurrentViseme] = useState('sil');
+  const [lipSyncActive, setLipSyncActive] = useState(false);
+  
+  // Enhanced TTS with lip sync
+  const { speak: speakWithLipSync, stop: stopTTS, isPlaying: isTTSPlaying } = useTTSLipSync();
+  
+  // Lip sync controller for real-time analysis
+  const lipSyncState = useLipSync({
+    avatarRef,
+    audioSource: lipSyncSource,
+    audioElement,
+    text: speechText,
+    speaking,
+    onLipSyncUpdate: (state) => {
+      setCurrentViseme(state.currentViseme);
+      setLipSyncActive(state.isActive);
+    }
+  });
   
   // Function to simulate stable speech patterns
   const simulateSpeechPattern = useCallback(() => {
@@ -155,8 +171,8 @@ export default function AvatarController({
           showEnvironment={showEnvironment}
           enableFloating={enableFloating}
           quality={quality}
-          lipSyncActive={false}
-          currentViseme="sil"
+          lipSyncActive={lipSyncActive}
+          currentViseme={currentViseme}
         />
       </div>
       
@@ -165,7 +181,9 @@ export default function AvatarController({
         <div className="absolute bottom-4 left-4 bg-black/80 text-white p-2 rounded text-xs font-mono">
           <div>Speaking: {speaking ? 'Yes' : 'No'}</div>
           <div>Viseme Active: {visemeActive ? 'Yes' : 'No'}</div>
-          <div>Lip Sync: Disabled</div>
+          <div>Lip Sync: {lipSyncActive ? 'Active' : 'Inactive'}</div>
+          <div>Current Viseme: {currentViseme}</div>
+          <div>Source: {lipSyncSource}</div>
         </div>
       )}
     </div>

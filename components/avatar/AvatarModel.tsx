@@ -272,28 +272,55 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
       avatarRef.current.rotation.x = THREE.MathUtils.lerp(avatarRef.current.rotation.x, 0, delta);
     }
 
-    // Speaking animation enhancements - with bounds checking
+    // Enhanced speaking animation with more visible gestures
     if (speaking && avatarRef.current) {
-      // Add subtle body movement during speech - use modulo to prevent accumulation
+      // Add natural body movement during speech
       const normalizedTime = (state.clock.elapsedTime % (Math.PI * 2));
-      const bodyMovement = Math.sin(normalizedTime * 4) * Math.min(speakingIntensity, 1.0) * 0.01;
+      const bodyMovement = Math.sin(normalizedTime * 3) * Math.min(speakingIntensity, 1.0) * 0.02;
       
-      // Clamp position to prevent drift
-      avatarRef.current.position.y = Math.max(-0.05, Math.min(0.05, bodyMovement));
+      // Natural vertical movement
+      avatarRef.current.position.y = Math.max(-0.1, Math.min(0.1, bodyMovement));
 
-      // Add hand gestures during speech - with bounds
-      const gestureIntensity = Math.sin(normalizedTime * 2) * Math.min(speakingIntensity, 1.0);
-      if (avatarRef.current.children.length > 0) {
-        avatarRef.current.traverse((child) => {
-          if (child.name.includes('hand') || child.name.includes('arm')) {
-            // Clamp rotation to prevent accumulation
-            child.rotation.z = Math.max(-0.1, Math.min(0.1, gestureIntensity * 0.1));
+      // Enhanced hand gestures during speech
+      const gestureIntensity = Math.sin(normalizedTime * 2.5) * Math.min(speakingIntensity, 1.0);
+      const gestureIntensity2 = Math.sin(normalizedTime * 1.8) * Math.min(speakingIntensity, 1.0);
+      
+      avatarRef.current.traverse((child) => {
+        if (child instanceof THREE.SkinnedMesh) {
+          // Apply gesture animations to bones/joints
+          if (child.name.includes('hand') || child.name.includes('arm') || child.name.includes('finger')) {
+            // More pronounced hand movements
+            child.rotation.z = Math.max(-0.3, Math.min(0.3, gestureIntensity * 0.2));
+            child.rotation.x = Math.max(-0.2, Math.min(0.2, gestureIntensity2 * 0.15));
           }
-        });
-      }
+          
+          // Add subtle head nods during speech
+          if (child.name.includes('head') || child.name.includes('neck')) {
+            child.rotation.x = Math.max(-0.1, Math.min(0.1, gestureIntensity * 0.1));
+          }
+        }
+      });
+
+      // Add breathing animation that's more pronounced when speaking
+      const breathScale = 1 + Math.sin(normalizedTime * 4) * 0.03;
+      avatarRef.current.scale.y = breathScale;
     } else if (avatarRef.current) {
-      // Reset position when not speaking
+      // Reset position and scale when not speaking
       avatarRef.current.position.y = 0;
+      avatarRef.current.scale.y = 1;
+      
+      // Reset gesture rotations
+      avatarRef.current.traverse((child) => {
+        if (child instanceof THREE.SkinnedMesh) {
+          if (child.name.includes('hand') || child.name.includes('arm') || child.name.includes('finger')) {
+            child.rotation.z = THREE.MathUtils.lerp(child.rotation.z, 0, delta * 2);
+            child.rotation.x = THREE.MathUtils.lerp(child.rotation.x, 0, delta * 2);
+          }
+          if (child.name.includes('head') || child.name.includes('neck')) {
+            child.rotation.x = THREE.MathUtils.lerp(child.rotation.x, 0, delta * 2);
+          }
+        }
+      });
     }
 
     // Update speaking intensity - with bounds checking
@@ -303,34 +330,61 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
       setSpeakingIntensity(prev => Math.max(0.0, THREE.MathUtils.lerp(prev, 0, Math.min(delta * 2, 0.1))));
     }
 
-    // Simple minimalist lip animation - just basic open/close when speaking
-    if (speaking && modelScene) {
-      // Very simple lip movement - just open and close slightly
-      const time = (state.clock.elapsedTime % (Math.PI * 2));
-      const lipMovement = Math.sin(time * 3) * 0.15 + 0.15; // Gentle oscillation between 0 and 0.3
-      
+    // Enhanced lip sync animation with proper viseme mapping
+    if (modelScene) {
       modelScene.traverse((child) => {
         if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
-          // Simple mouth open animation - just use basic mouth shapes
-          const mouthOpenIndex = child.morphTargetDictionary['viseme_aa'] || 
-                                child.morphTargetDictionary['mouthOpen'] ||
-                                child.morphTargetDictionary['jawOpen'];
-          
-          if (mouthOpenIndex !== undefined) {
-            child.morphTargetInfluences[mouthOpenIndex] = lipMovement;
+          // Reset all viseme influences first
+          if (child.morphTargetDictionary && child.morphTargetInfluences) {
+            Object.keys(child.morphTargetDictionary).forEach(key => {
+              if (key.startsWith('viseme_') || key.includes('mouth') || key.includes('jaw')) {
+                const index = child.morphTargetDictionary?.[key];
+                if (index !== undefined && child.morphTargetInfluences) {
+                  child.morphTargetInfluences[index] = 0;
+                }
+              }
+            });
           }
-        }
-      });
-    } else if (modelScene) {
-      // Reset mouth to closed when not speaking
-      modelScene.traverse((child) => {
-        if (child instanceof THREE.SkinnedMesh && child.morphTargetDictionary && child.morphTargetInfluences) {
-          const mouthOpenIndex = child.morphTargetDictionary['viseme_aa'] || 
-                                child.morphTargetDictionary['mouthOpen'] ||
-                                child.morphTargetDictionary['jawOpen'];
-          
-          if (mouthOpenIndex !== undefined) {
-            child.morphTargetInfluences[mouthOpenIndex] = 0;
+
+          // Apply current viseme if lip sync is active
+          if (lipSyncActive && currentViseme !== 'sil') {
+            const visemeMap: Record<string, string[]> = {
+              'PP': ['viseme_PP', 'mouthClose'],
+              'FF': ['viseme_FF', 'mouthFunnel'],
+              'TH': ['viseme_TH', 'mouthTight'],
+              'DD': ['viseme_DD', 'mouthSmile'],
+              'kk': ['viseme_kk', 'mouthOpen'],
+              'CH': ['viseme_CH', 'mouthSmile'],
+              'SS': ['viseme_SS', 'mouthSmile'],
+              'nn': ['viseme_nn', 'mouthSmile'],
+              'RR': ['viseme_RR', 'mouthSmile'],
+              'aa': ['viseme_aa', 'mouthOpen'],
+              'E': ['viseme_E', 'mouthSmile'],
+              'I': ['viseme_I', 'mouthSmile'],
+              'O': ['viseme_O', 'mouthFunnel'],
+              'U': ['viseme_U', 'mouthFunnel']
+            };
+
+            const possibleNames = visemeMap[currentViseme] || ['viseme_aa', 'mouthOpen'];
+            for (const name of possibleNames) {
+              const index = child.morphTargetDictionary?.[name];
+              if (index !== undefined && child.morphTargetInfluences) {
+                child.morphTargetInfluences[index] = 0.8; // Strong viseme influence
+                break;
+              }
+            }
+          } else if (speaking) {
+            // Fallback to basic mouth movement when speaking but no lip sync
+            const time = (state.clock.elapsedTime % (Math.PI * 2));
+            const lipMovement = Math.sin(time * 4) * 0.3 + 0.3; // More pronounced movement
+            
+            const mouthOpenIndex = child.morphTargetDictionary?.['viseme_aa'] || 
+                                  child.morphTargetDictionary?.['mouthOpen'] ||
+                                  child.morphTargetDictionary?.['jawOpen'];
+            
+            if (mouthOpenIndex !== undefined && child.morphTargetInfluences) {
+              child.morphTargetInfluences[mouthOpenIndex] = lipMovement;
+            }
           }
         }
       });
@@ -714,10 +768,10 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
         </div>
       )}
 
-      {/* Simple lip animation indicator */}
+      {/* Enhanced lip sync indicator */}
       {speaking && (
         <div className="absolute top-2 right-2 bg-green-100 text-green-600 px-2 py-1 rounded text-xs">
-          👄 Simple Lip Animation
+          {lipSyncActive ? '🎤 Real-time Lip Sync' : '👄 Basic Lip Animation'}
         </div>
       )}
 
