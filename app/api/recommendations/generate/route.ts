@@ -36,8 +36,20 @@ interface AIRecommendation {
   created_at: string;
 }
 
+interface ChatSession {
+  id: string;
+  created_at?: any; // Firestore timestamp
+  messages?: Array<{
+    content: string;
+    role?: string;
+    timestamp?: any;
+  }>;
+  user_id?: string;
+  company_id?: string;
+}
+
 // Get user's recent chat history for context
-async function getUserChatHistory(userId: string, companyId: string, days: number = 7) {
+async function getUserChatHistory(userId: string, companyId: string, days: number = 7): Promise<ChatSession[]> {
   try {
     const chatRef = collection(db, 'chat_sessions');
     const sevenDaysAgo = new Date();
@@ -53,10 +65,10 @@ async function getUserChatHistory(userId: string, companyId: string, days: numbe
     );
     
     const querySnapshot = await getDocs(q);
-    const sessions = querySnapshot.docs.map(doc => ({
+    const sessions: ChatSession[] = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    } as ChatSession));
     
     return sessions;
   } catch (error) {
@@ -80,9 +92,11 @@ async function generateAIRecommendations(
     
     // Format chat history for AI context
     const chatContext = chatHistory.length > 0 
-      ? chatHistory.map(session => 
-          `Session ${session.created_at?.toDate?.()?.toLocaleDateString() || 'Unknown'}: ${session.messages?.map((msg: any) => msg.content).join(' ') || 'No messages'}`
-        ).join('\n')
+      ? chatHistory.map(session => {
+          const sessionDate = session.created_at?.toDate?.()?.toLocaleDateString() || 'Unknown';
+          const messages = session.messages?.map((msg: any) => msg.content).join(' ') || 'No messages';
+          return `Session ${sessionDate}: ${messages}`;
+        }).join('\n')
       : 'No recent chat history available.';
 
     const openai = getOpenAIClient();
