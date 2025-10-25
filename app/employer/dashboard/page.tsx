@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
 import { useUser } from '@/hooks/use-user';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '@/components/shared/navbar';
@@ -32,7 +33,7 @@ import {
   Star,
   Eye,
   RefreshCw,
-  User as UserIcon,
+
   FileText
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -442,11 +443,22 @@ function EmployerDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <Link href="/employer">
-                <Button variant="ghost" size="sm" className="p-2">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2"
+                onClick={async () => {
+                  try {
+                    await signOut(auth);
+                    router.push('/auth/login');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    router.push('/auth/login');
+                  }
+                }}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <Building className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
@@ -462,12 +474,6 @@ function EmployerDashboardPage() {
               <Button variant="outline" size="sm" className="hidden md:flex text-green-600 border-green-200 bg-green-50 text-xs sm:text-sm px-2 sm:px-3">
                 Organization View
               </Button>
-              <Link href="/employer/personal" className="hidden lg:block">
-                <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 text-xs sm:text-sm px-2 sm:px-3">
-                  <UserIcon className="h-3 w-3 mr-1" />
-                  Personal Dashboard
-                </Button>
-              </Link>
               <Button variant="outline" size="sm" className="p-2">
                 <Users className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>

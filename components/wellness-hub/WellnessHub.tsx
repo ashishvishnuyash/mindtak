@@ -38,7 +38,7 @@ const WellnessHub = ({ userRole, userId }: WellnessHubProps) => {
     const getDashboardPath = () => {
         switch (userRole) {
             case 'employee': return '/employee/dashboard';
-            case 'manager': return '/manager/dashboard';
+            case 'manager': return '/manager';
             case 'employer': return '/employer/dashboard';
             default: return '/';
         }

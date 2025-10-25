@@ -38,10 +38,10 @@ export default function LoginPage() {
         router.push('/employee/chat');
         break;
       case 'manager':
-        router.push('/manager/dashboard');
+        router.push('/manager');
         break;
       case 'employer':
-        router.push('/employer');
+        router.push('/employer/dashboard');
         break;
       case 'hr':
         router.push('/employer/analytics');

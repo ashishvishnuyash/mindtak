@@ -5,16 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { useModal } from '@/contexts/modal-context';
+
 import { auth } from '@/lib/firebase';
 import {
-  ChevronDown,
   Menu,
   X,
-  Bell,
-  User,
-  LogOut,
-  Brain
+  LogOut
 } from 'lucide-react';
 
 interface EmployeeNavbarProps {
@@ -29,18 +25,8 @@ interface EmployeeNavbarProps {
 
 export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
   const router = useRouter();
-  const { openContactModal } = useModal();
-  const [isProductsOpen, setIsProductsOpen] = useState(false);
-  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleProducts = () => {
-    setIsProductsOpen(!isProductsOpen);
-  };
-
-  const toggleMobileProducts = () => {
-    setIsMobileProductsOpen(!isMobileProductsOpen);
-  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -82,70 +68,14 @@ export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
               </Button>
             </Link>
 
-            {/* Wellness Dropdown */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 flex items-center space-x-1 px-3 py-2"
-                onClick={toggleProducts}
-              >
-                <span>Wellness</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isProductsOpen ? 'rotate-180' : ''}`} />
-              </Button>
-
-              {isProductsOpen && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                  <div className="py-2">
-                    <Link href="/employee/wellness-hub">
-                      <div className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                        Wellness Hub
-                      </div>
-                    </Link>
-                    <Link href="/employee/support">
-                      <div className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                        Support
-                      </div>
-                    </Link>
-                    <Link href="/employee/recommendations">
-                      <div className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                        Recommendations
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <Link href="/employee/community">
+            <Link href="/employee/wellness-hub">
               <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
-                Community
+                Wellness
               </Button>
             </Link>
-
-            <Link href="/employee/gamification">
-              <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2">
-                Rewards
-              </Button>
-            </Link>
-
-            <Button
-              variant="ghost"
-              className="text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 px-3 py-2"
-              onClick={openContactModal}
-            >
-              Contact
-            </Button>
 
             {/* User Actions */}
             <div className="flex items-center space-x-2 border-l border-gray-200 dark:border-gray-700 pl-4">
-              <Button variant="outline" size="sm" className="p-2">
-                <Bell className="h-4 w-4" />
-              </Button>
-              
-              <Button variant="outline" size="sm" className="p-2">
-                <User className="h-4 w-4" />
-              </Button>
-
               <ThemeToggle size="sm" />
 
               <Button 
@@ -200,60 +130,11 @@ export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
                     </Button>
                   </Link>
 
-                  {/* Mobile Wellness Section */}
-                  <div>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 py-3"
-                      onClick={toggleMobileProducts}
-                    >
-                      <span>Wellness</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${isMobileProductsOpen ? 'rotate-180' : ''}`} />
-                    </Button>
-                    
-                    {isMobileProductsOpen && (
-                      <div className="ml-4 mt-2 space-y-1">
-                        <Link href="/employee/wellness-hub" onClick={() => setIsMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 py-2">
-                            Wellness Hub
-                          </Button>
-                        </Link>
-                        <Link href="/employee/support" onClick={() => setIsMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 py-2">
-                            Support
-                          </Button>
-                        </Link>
-                        <Link href="/employee/recommendations" onClick={() => setIsMobileMenuOpen(false)}>
-                          <Button variant="ghost" className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 py-2">
-                            Recommendations
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  <Link href="/employee/community" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/employee/wellness-hub" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
-                      Community
+                      Wellness
                     </Button>
                   </Link>
-
-                  <Link href="/employee/gamification" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3">
-                      Rewards
-                    </Button>
-                  </Link>
-
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 py-3"
-                    onClick={() => {
-                      openContactModal();
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Contact
-                  </Button>
 
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
                     {user && (
@@ -261,17 +142,6 @@ export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
                         Welcome, {user.first_name || user.email}
                       </div>
                     )}
-                    
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Bell className="h-4 w-4 mr-2" />
-                        Notifications
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <User className="h-4 w-4 mr-2" />
-                        Profile
-                      </Button>
-                    </div>
 
                     <Button 
                       variant="outline" 
