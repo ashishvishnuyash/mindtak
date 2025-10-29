@@ -44,11 +44,11 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       console.log('Form submitted:', formData);
       setIsSubmitted(true);
       toast.success('Thank you for your submission! We will get back to you soon.');
-      
+
       // Reset form after 2 seconds
       setTimeout(() => {
         setFormData({
@@ -171,8 +171,8 @@ export function ContactFormModal({ isOpen, onClose }: ContactFormModalProps) {
                     />
                   </div>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-3"
                     disabled={isSubmitting}
                   >
