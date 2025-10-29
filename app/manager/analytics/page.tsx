@@ -489,6 +489,20 @@ export default function ManagerAnalyticsPage() {
                         </div>
 
                         <div className="text-center">
+                          <div className="text-lg font-semibold text-gray-900">
+                            {memberReport?.mood_rating ? `${memberReport.mood_rating}/10` : 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-600">Mood</div>
+                        </div>
+
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-gray-900">
+                            {memberReport?.energy_level ? `${memberReport.energy_level}/10` : 'N/A'}
+                          </div>
+                          <div className="text-xs text-gray-600">Energy</div>
+                        </div>
+
+                        <div className="text-center">
                           <div className={`px-2 py-1 rounded-full text-xs font-medium ${memberReport?.risk_level === 'high' ? 'bg-red-100 text-red-700' :
                             memberReport?.risk_level === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                               memberReport?.risk_level === 'low' ? 'bg-green-100 text-green-700' :

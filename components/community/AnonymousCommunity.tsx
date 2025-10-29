@@ -467,8 +467,10 @@ export default function AnonymousCommunity() {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setSelectedPost(selectedPost === post.id ? null : post.id);
-                          if (selectedPost !== post.id) {
+                          if (selectedPost === post.id) {
+                            setSelectedPost(null);
+                          } else {
+                            setSelectedPost(post.id);
                             fetchReplies(post.id);
                           }
                         }}

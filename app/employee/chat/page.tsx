@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import EmployeeNavbar from "@/components/shared/EmployeeNavbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

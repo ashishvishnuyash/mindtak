@@ -393,7 +393,7 @@ export default function ManagerTeamReportsPage() {
                     </div>
                   </div>
 
-                  {/* Metrics Grid */}
+                  {/* Basic Metrics Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="text-center p-3 bg-blue-50 rounded-lg">
                       <div className="text-lg font-semibold text-blue-700">
@@ -423,6 +423,115 @@ export default function ManagerTeamReportsPage() {
                       <div className="text-xs text-purple-600">Work Satisfaction</div>
                     </div>
                   </div>
+
+                  {/* Additional Metrics */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center p-3 bg-orange-50 rounded-lg">
+                      <div className="text-lg font-semibold text-orange-700">
+                        {report.anxiety_level || report.anxious_level || 'N/A'}/10
+                      </div>
+                      <div className="text-xs text-orange-600">Anxiety</div>
+                    </div>
+
+                    <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                      <div className="text-lg font-semibold text-indigo-700">
+                        {report.work_life_balance || 'N/A'}/10
+                      </div>
+                      <div className="text-xs text-indigo-600">Work-Life Balance</div>
+                    </div>
+
+                    <div className="text-center p-3 bg-pink-50 rounded-lg">
+                      <div className="text-lg font-semibold text-pink-700">
+                        {report.confidence_level || report.confident_level || 'N/A'}/10
+                      </div>
+                      <div className="text-xs text-pink-600">Confidence</div>
+                    </div>
+
+                    <div className="text-center p-3 bg-teal-50 rounded-lg">
+                      <div className="text-lg font-semibold text-teal-700">
+                        {report.sleep_quality || 'N/A'}/10
+                      </div>
+                      <div className="text-xs text-teal-600">Sleep Quality</div>
+                    </div>
+                  </div>
+
+                  {/* Comprehensive AI Metrics */}
+                  {report.metrics && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">AI-Generated Comprehensive Metrics</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.emotional_tone !== undefined ? report.metrics.emotional_tone : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Emotional Tone</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.stress_anxiety !== undefined ? report.metrics.stress_anxiety : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Stress & Anxiety</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.motivation_engagement !== undefined ? report.metrics.motivation_engagement : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Motivation</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.social_connectedness !== undefined ? report.metrics.social_connectedness : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Social Connection</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.self_esteem !== undefined ? report.metrics.self_esteem : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Self-Esteem</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.assertiveness !== undefined ? report.metrics.assertiveness : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Assertiveness</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.work_life_balance_metric !== undefined ? report.metrics.work_life_balance_metric : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Work-Life Balance</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.cognitive_functioning !== undefined ? report.metrics.cognitive_functioning : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Cognitive Function</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.emotional_regulation !== undefined ? report.metrics.emotional_regulation : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Emotional Regulation</div>
+                        </div>
+
+                        <div className="text-center p-2 bg-gray-50 rounded-lg">
+                          <div className="text-sm font-semibold text-gray-700">
+                            {report.metrics.substance_use !== undefined ? report.metrics.substance_use : 'N/A'}/3
+                          </div>
+                          <div className="text-xs text-gray-600">Substance Use</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* AI Analysis */}
                   {report.ai_analysis && (

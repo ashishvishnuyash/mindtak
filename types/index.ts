@@ -85,6 +85,34 @@ export interface MentalHealthReport {
   session_duration?: number;
   created_at: string;
   updated_at: string;
+  // Additional fields for backward compatibility
+  anxious_level?: number;
+  confident_level?: number;
+  // AI-generated comprehensive metrics
+  metrics?: {
+    emotional_tone: number;
+    stress_anxiety: number;
+    motivation_engagement: number;
+    social_connectedness: number;
+    self_esteem: number;
+    assertiveness: number;
+    work_life_balance_metric: number;
+    cognitive_functioning: number;
+    emotional_regulation: number;
+    substance_use: number;
+  };
+  metrics_explanation?: {
+    emotional_tone: string;
+    stress_anxiety: string;
+    motivation_engagement: string;
+    social_connectedness: string;
+    self_esteem: string;
+    assertiveness: string;
+    work_life_balance_metric: string;
+    cognitive_functioning: string;
+    emotional_regulation: string;
+    substance_use: string;
+  };
 }
 
 export interface ChatSession {
