@@ -1045,19 +1045,8 @@ export default function EmployeeChatPage() {
         {/* Responsive Layout - Split on desktop, overlay on mobile */}
         <div className="flex flex-1 min-h-0 relative">
           {/* Chat Section */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className={`flex flex-col ${
-              isAvatarMode 
-                ? 'w-full lg:w-1/2 relative z-10' // Full width on mobile, half on desktop, z-10 for layering above avatar
-                : 'w-full'
-            } transition-all duration-300 ${
-              isAvatarMode 
-                ? 'mobile-chat-overlay lg:bg-white lg:dark:bg-gray-900 pointer-events-auto' // Mobile overlay with avatar background, ensure interactivity
-                : 'bg-white dark:bg-gray-900'
-            }`}
+          <div
+            className="flex flex-col w-full bg-white dark:bg-gray-900"
           >
             {/* Chat Header - Modern Clean Design */}
             <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 backdrop-blur-sm">
@@ -1844,7 +1833,7 @@ export default function EmployeeChatPage() {
               className="hidden"
             />
           </div>
-        </motion.div>
+        </div>
 
         {/* Avatar Section - Background on mobile, Split Screen on desktop */}
         {isAvatarMode && (
@@ -2083,10 +2072,9 @@ export default function EmployeeChatPage() {
           </div>
         </motion.div>
       )}
-    </div>
 
-    {/* End Conversation Confirmation Dialog */}
-    {showEndConfirmation && (
+      {/* End Conversation Confirmation Dialog */}
+      {showEndConfirmation && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full p-6">
           <div className="flex items-center space-x-3 mb-4">
@@ -2146,6 +2134,6 @@ export default function EmployeeChatPage() {
         </div>
       </div>
     )}
-  </div>
+    </div>
   );
 }
