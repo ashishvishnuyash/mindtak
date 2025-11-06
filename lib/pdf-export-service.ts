@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import type { MentalHealthReport, User } from '@/types';
 
@@ -55,6 +55,16 @@ export class PDFExportService {
     this.pageHeight = this.doc.internal.pageSize.getHeight();
     this.margin = 20;
     this.currentY = this.margin;
+    
+    // Ensure autoTable is available
+    if (typeof autoTable === 'function') {
+      console.log('autoTable imported successfully');
+    } else {
+      console.error('autoTable import failed');
+    }
+    
+    // Check if autoTable method exists on doc
+    console.log('autoTable on doc?', typeof (this.doc as any).autoTable);
   }
 
   async generateReportPDF(
@@ -392,82 +402,234 @@ export class PDFExportService {
   }
 
   private addRawDataTable(reports: MentalHealthReport[], employees: User[]) {
-    // Section header
-    this.doc.setFillColor(99, 102, 241); // Indigo background
-    this.doc.rect(this.margin, this.currentY - 2, this.pageWidth - 2 * this.margin, 8, 'F');
+    // Check if there are any reports to display
+    if (!reports || reports.length === 0) {
+      console.log('No reports to display in raw data table');
+      
+      // Add a message indicating no data
+      if (this.currentY > this.pageHeight - 50) {
+        this.doc.addPage();
+        this.currentY = this.margin;
+      }
+      
+      this.doc.setFillColor(99, 102, 241);
+      this.doc.rect(this.margin, this.currentY - 2, this.pageWidth - 2 * this.margin, 8, 'F');
+      
+      this.doc.setTextColor(255, 255, 255);
+      this.doc.setFontSize(14);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('Recent Reports - Raw Data', this.margin + 3, this.currentY + 3);
+      this.currentY += 15;
+      
+      this.doc.setTextColor(107, 114, 128);
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'italic');
+      this.doc.text('No report data available for the selected period.', this.margin, this.currentY);
+      this.currentY += 20;
+      return;
+    }
     
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.setFontSize(14);
-    this.doc.setFont('helvetica', 'bold');
-    this.doc.text('Detailed Report Data', this.margin + 3, this.currentY + 3);
-    this.currentY += 15;
+    console.log(`Processing ${reports.length} reports for raw data table`);
+    
+    // Check if we need a new page
+    if (this.currentY > this.pageHeight - 100) {
+      this.doc.addPage();
+      this.currentY = this.margin;
+    }
     
     // Create employee lookup map
     const employeeMap = new Map(employees.map(emp => [emp.id, emp]));
     
-    // Enhanced table with better styling
-    const tableData = reports.slice(0, 25).map((report, index) => {
+    // Prepare comprehensive table data with all fields
+    const tableData = reports.map((report, index) => {
       const employee = employeeMap.get(report.employee_id);
       const employeeName = employee ? `${employee.first_name} ${employee.last_name}` : 'Unknown';
       const reportDate = new Date(report.created_at).toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric',
-        year: '2-digit'
+        year: 'numeric'
       });
+      
+      // Helper function to format values
+      const formatValue = (val: number | undefined) => val !== undefined ? val.toFixed(1) : 'N/A';
       
       return [
         reportDate,
         employeeName,
-        `${report.mood_rating}/10`,
-        `${report.stress_level}/10`,
-        `${report.energy_level}/10`,
-        `${report.overall_wellness}/10`,
-        report.risk_level.toUpperCase()
+        formatValue(report.mood_rating),
+        formatValue(report.stress_level),
+        formatValue(report.energy_level),
+        formatValue(report.anxiety_level),
+        formatValue(report.work_satisfaction),
+        formatValue(report.work_life_balance),
+        formatValue(report.confidence_level),
+        formatValue(report.sleep_quality),
+        formatValue(report.overall_wellness),
+        report.risk_level.toUpperCase(),
+        formatValue(report.metrics?.emotional_tone),
+        formatValue(report.metrics?.stress_anxiety),
+        formatValue(report.metrics?.motivation_engagement),
+        formatValue(report.metrics?.social_connectedness),
+        formatValue(report.metrics?.self_esteem),
+        formatValue(report.metrics?.assertiveness),
+        formatValue(report.metrics?.work_life_balance_metric),
+        formatValue(report.metrics?.cognitive_functioning),
+        formatValue(report.metrics?.emotional_regulation),
+        formatValue(report.metrics?.substance_use)
       ];
     });
     
-    // Use autoTable for better formatting (if available)
-    if ((this.doc as any).autoTable) {
-      (this.doc as any).autoTable({
-        head: [['Date', 'Employee', 'Mood', 'Stress', 'Energy', 'Wellness', 'Risk Level']],
+    // Define all column headers with shorter abbreviations
+    const headers = [
+      'Date',
+      'Employee',
+      'Mood',
+      'Stress',
+      'Energy',
+      'Anxiety',
+      'Work Sat',
+      'W-L Bal',
+      'Confid.',
+      'Sleep',
+      'Wellnes',
+      'Risk',
+      'Emo Ton',
+      'Str&Anx',
+      'Motivat',
+      'Social',
+      'SelfEst',
+      'Assert',
+      'WL-AI',
+      'Cognit',
+      'EmoReg',
+      'Subst'
+    ];
+    
+    console.log('Preparing to render table with autoTable...');
+    
+    // Add landscape page for better table display
+    this.doc.addPage('l'); // landscape orientation
+    this.currentY = this.margin;
+    
+    // Update page dimensions for landscape
+    const landscapeWidth = this.doc.internal.pageSize.getWidth();
+    const landscapeHeight = this.doc.internal.pageSize.getHeight();
+    
+    console.log(`Landscape dimensions: ${landscapeWidth} x ${landscapeHeight}`);
+    
+    // Add section header on landscape page
+    this.doc.setFillColor(99, 102, 241);
+    this.doc.rect(this.margin, this.currentY - 2, landscapeWidth - 2 * this.margin, 8, 'F');
+    
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(14);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('Recent Reports - Complete Raw Data', this.margin + 3, this.currentY + 3);
+    this.currentY += 12;
+    
+    console.log(`Rendering table with ${tableData.length} rows and ${headers.length} columns`);
+    
+    try {
+      // Use jspdf-autotable v5 API with highly optimized column widths
+      autoTable(this.doc, {
+        head: [headers],
         body: tableData,
         startY: this.currentY,
+        theme: 'striped',
         styles: { 
-          fontSize: 8,
-          cellPadding: 2,
+          fontSize: 5,
+          cellPadding: 0.0,
           lineColor: [226, 232, 240],
-          lineWidth: 0.1
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          cellWidth: 'wrap',
+          minCellHeight: 4
         },
         headStyles: { 
           fillColor: [99, 102, 241],
           textColor: [255, 255, 255],
-          fontStyle: 'bold'
+          fontStyle: 'bold',
+          fontSize: 5,
+          halign: 'center',
+          cellPadding: 0.0
         },
         alternateRowStyles: {
           fillColor: [248, 250, 252]
         },
         columnStyles: {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 20, halign: 'center' },
-          3: { cellWidth: 20, halign: 'center' },
-          4: { cellWidth: 20, halign: 'center' },
-          5: { cellWidth: 20, halign: 'center' },
-          6: { cellWidth: 25, halign: 'center' }
-        }
+          0: { cellWidth: 15, halign: 'left' },    // Date
+          1: { cellWidth: 18, halign: 'left' },    // Employee
+          2: { cellWidth: 9, halign: 'center' },   // Mood
+          3: { cellWidth: 9, halign: 'center' },   // Stress
+          4: { cellWidth: 9, halign: 'center' },   // Energy
+          5: { cellWidth: 9, halign: 'center' },   // Anxiety
+          6: { cellWidth: 10, halign: 'center' },  // Work Sat
+          7: { cellWidth: 10, halign: 'center' },  // W-L Balance
+          8: { cellWidth: 10, halign: 'center' },  // Confidence
+          9: { cellWidth: 9, halign: 'center' },   // Sleep
+          10: { cellWidth: 10, halign: 'center' }, // Wellness
+          11: { cellWidth: 9, halign: 'center' },  // Risk
+          12: { cellWidth: 9, halign: 'center' },  // Emo Tone
+          13: { cellWidth: 10, halign: 'center' }, // Stress & Anx
+          14: { cellWidth: 10, halign: 'center' }, // Motivation
+          15: { cellWidth: 9, halign: 'center' },  // Social Conn
+          16: { cellWidth: 9, halign: 'center' },  // Self-Esteem
+          17: { cellWidth: 9, halign: 'center' },  // Assertive
+          18: { cellWidth: 9, halign: 'center' },  // W-L Bal AI
+          19: { cellWidth: 9, halign: 'center' },  // Cognitive
+          20: { cellWidth: 9, halign: 'center' },  // Emo Reg
+          21: { cellWidth: 9, halign: 'center' }   // Substance
+        },
+        margin: { left: 0, right: 0 },
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto'
       });
       
+      console.log('Table rendered successfully');
+      
       this.currentY = (this.doc as any).lastAutoTable.finalY + 10;
-    }
-    
-    if (reports.length > 25) {
-      this.doc.setFontSize(9);
+      
+      // Add data legend/notes
+      if (this.currentY > landscapeHeight - 30) {
+        this.doc.addPage('l');
+        this.currentY = this.margin;
+      }
+      
+      this.doc.setFontSize(8);
       this.doc.setFont('helvetica', 'italic');
       this.doc.setTextColor(107, 114, 128);
-      this.doc.text(`Showing 25 of ${reports.length} total reports. Full data available in system.`, this.margin, this.currentY + 5);
+      this.doc.text(`Total reports shown: ${reports.length}`, this.margin, this.currentY);
+      this.doc.text('Note: All ratings are on a scale of 0-10. N/A indicates data not available.', this.margin, this.currentY + 5);
+      
+      this.currentY += 15;
+      
+      console.log('Raw data table section complete');
+      
+      // Add a final portrait page for clean ending
+      this.doc.addPage('p');
+      this.currentY = this.margin;
+      
+      // Update page dimensions back to portrait
+      this.pageWidth = this.doc.internal.pageSize.getWidth();
+      this.pageHeight = this.doc.internal.pageSize.getHeight();
+      
+      console.log('Returned to portrait mode');
+      
+    } catch (error) {
+      console.error('Error rendering autoTable:', error);
+      
+      // Add error message
+      this.doc.setTextColor(239, 68, 68);
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.text('Error rendering raw data table. Please check console for details.', this.margin, this.currentY);
+      this.currentY += 20;
+      
+      // Still need to reset dimensions
+      this.pageWidth = 210;
+      this.pageHeight = 297;
     }
-    
-    this.currentY += 15;
   }
 
   private addFooter() {

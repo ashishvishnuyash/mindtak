@@ -197,9 +197,12 @@ export default function EmployeeChatPage() {
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [showVoiceInstructions, setShowVoiceInstructions] = useState(false);
 
   // Avatar state
   const [currentAvatarEmotion, setCurrentAvatarEmotion] = useState<string>("");
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [avatarLoadError, setAvatarLoadError] = useState(false);
 
   // Avatar Settings
   const { config: avatarConfig, updateConfig: updateAvatarConfig, isOpen: isSettingsOpen, toggleSettings } = useAvatarSettings();
@@ -250,6 +253,20 @@ export default function EmployeeChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Avatar loading timeout to prevent infinite loading
+  useEffect(() => {
+    if (isAvatarMode && !avatarLoaded && !avatarLoadError) {
+      const timeout = setTimeout(() => {
+        if (!avatarLoaded) {
+          console.warn('Avatar loading timeout - this may indicate a loading issue');
+          setAvatarLoaded(true); // Set as loaded to prevent continuous attempts
+        }
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isAvatarMode, avatarLoaded, avatarLoadError]);
 
   // Call timer
   useEffect(() => {
@@ -349,11 +366,35 @@ export default function EmployeeChatPage() {
   };
 
   // Call controls
-  const startCall = () => {
+  const startCall = async () => {
     setIsVoiceMode(true);
     setCallStartTime(new Date());
     setCallDuration(0);
-    toast.success("Voice call started - Click microphone to record");
+    setAudioEnabled(true);
+    setShowVoiceInstructions(true);
+    
+    // Auto-hide instructions after 10 seconds
+    setTimeout(() => {
+      setShowVoiceInstructions(false);
+    }, 10000);
+    
+    // Show a welcome message from AI in voice mode
+    if (sessionId) {
+      const voiceWelcome = "I'm here to listen. Click the microphone button whenever you'd like to speak. Take your time, and share whatever is on your mind.";
+      await addMessageToDb(voiceWelcome, "ai", sessionId);
+      
+      // Speak the welcome message
+      if (audioEnabled) {
+        setTimeout(() => {
+          speakText(voiceWelcome);
+        }, 500);
+      }
+    }
+    
+    toast.success("🎙️ Voice call started! Click the microphone button to speak.", {
+      duration: 4000,
+      icon: '🎙️',
+    });
   };
 
   const endCall = async () => {
@@ -937,15 +978,23 @@ export default function EmployeeChatPage() {
     }
   };
 
-  // Enhanced recording functionality with lip sync feedback
+  // Enhanced recording functionality with lip sync feedback and interrupt
   const startRecording = async () => {
+    // TALK TO INTERRUPT: Stop any ongoing AI speech when user starts speaking
+    if (isSpeaking || isTTSPlaying) {
+      window.speechSynthesis.cancel();
+      stopTTS();
+      setIsSpeaking(false);
+      console.log('🔇 AI speech interrupted by user');
+    }
+    
     const success = await audioRecorderRef.current.startRecording();
     if (success) {
       setIsRecording(true);
       if (isAvatarMode && !isVoiceMode) {
         toast.success("Microphone test started - speak to see lip sync");
       } else {
-        toast.success("Recording started");
+        toast.info("🎤 Listening...", { duration: 1500 });
       }
     } else {
       toast.error(
@@ -1002,160 +1051,241 @@ export default function EmployeeChatPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className={`flex flex-col ${
               isAvatarMode 
-                ? 'w-full lg:w-1/2 relative z-20' // Full width on mobile, half on desktop, z-20 for layering above avatar
+                ? 'w-full lg:w-1/2 relative z-10' // Full width on mobile, half on desktop, z-10 for layering above avatar
                 : 'w-full'
             } transition-all duration-300 ${
               isAvatarMode 
-                ? 'mobile-chat-overlay lg:bg-white lg:dark:bg-gray-900' // Mobile overlay with avatar background
+                ? 'mobile-chat-overlay lg:bg-white lg:dark:bg-gray-900 pointer-events-auto' // Mobile overlay with avatar background, ensure interactivity
                 : 'bg-white dark:bg-gray-900'
             }`}
           >
-            {/* Chat Header */}
-            <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-2 sm:px-4 lg:px-6 py-3 sm:py-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="bg-gradient-to-br from-blue-500 to-blue-600 p-1.5 sm:p-2 rounded-xl shadow-lg flex-shrink-0"
-                  >
-                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </motion.div>
-                  <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm sm:text-base truncate">AI Wellness Assistant</span>
-                  <Badge
-                    variant={
-                      sessionEnded
-                        ? "destructive"
-                        : isVoiceMode
-                          ? "default"
-                          : isAvatarMode
-                            ? "outline"
-                            : "secondary"
-                    }
-                    className="text-xs flex-shrink-0"
-                  >
-                    {sessionEnded
-                      ? "Session Ended"
-                      : isVoiceMode
-                        ? `Voice ${formatCallDuration(callDuration)}`
-                        : isAvatarMode
-                          ? (
-                            <>
-                              <span className="hidden lg:inline">Avatar Mode</span>
-                              <span className="lg:hidden">🎭 Avatar BG</span>
-                            </>
-                          )
-                          : "Text Mode"}
-                  </Badge>
-                  {isVoiceMode && (
-                    <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-                      {isRecording && (
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse" />
-                      )}
-                      {isSpeaking && (
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse" />
-                      )}
-                      {processingAudio && (
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-500 rounded-full animate-pulse" />
-                      )}
-                    </div>
-                  )}
+            {/* Chat Header - Modern Clean Design */}
+            <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-gray-900 dark:text-gray-100 font-medium text-base truncate">Wellness Assistant</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Always here to listen</p>
+                  </div>
                 </div>
 
                 {/* Status Indicators and Controls */}
-                <div className="flex items-center space-x-2 w-full sm:w-auto">
+                <div className="flex items-center space-x-2">
                   {isVoiceMode && (
-                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                      <span className="hidden sm:inline">Call Duration: {formatCallDuration(callDuration)}</span>
-                      <span className="sm:hidden">{formatCallDuration(callDuration)}</span>
+                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                      {isRecording && (
+                        <div className="flex items-center space-x-1 text-red-600 dark:text-red-400">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <span className="hidden sm:inline font-medium">Recording</span>
+                        </div>
+                      )}
+                      {isSpeaking && !isRecording && (
+                        <div className="flex items-center space-x-1 text-blue-600 dark:text-blue-400">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                          <span className="hidden sm:inline font-medium">Speaking</span>
+                        </div>
+                      )}
+                      {!isRecording && !isSpeaking && (
+                        <span className="font-mono font-medium">{formatCallDuration(callDuration)}</span>
+                      )}
                     </div>
                   )}
                   
-                  {/* End Conversation Button */}
+                  {/* Voice Call Toggle Button - Clean Icon Style */}
+                  {!sessionEnded && !isVoiceMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={startCall}
+                      disabled={loading}
+                      className="h-8 w-8 p-0 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                      title="Start voice call"
+                    >
+                      <Phone className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    </Button>
+                  )}
+                  
+                  {/* End Call Button - Clean Icon Style */}
+                  {!sessionEnded && isVoiceMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={endCall}
+                      disabled={loading}
+                      className="h-8 w-8 p-0 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="End voice call"
+                    >
+                      <PhoneOff className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    </Button>
+                  )}
+
+                  {/* Settings Menu */}
                   {!sessionEnded && (
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      onClick={() => setShowEndConfirmation(true)}
-                      disabled={loading || messages.length === 0}
-                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-3"
+                      onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+                      className="h-8 w-8 p-0 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                      title="More options"
                     >
-                      <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">End Conversation</span>
-                      <span className="sm:hidden">End</span>
+                      <Menu className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </Button>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Chat Messages */}
-            <div className={`flex-1 overflow-y-auto chat-scrollbar p-4 lg:p-6 space-y-4 h-full ${
+            {/* Chat Messages - Clean Modern Layout */}
+            <div className={`flex-1 overflow-y-auto chat-scrollbar px-4 sm:px-6 py-6 h-full ${
               isAvatarMode 
-                ? 'bg-transparent lg:bg-gradient-to-br lg:from-gray-50/80 lg:to-blue-50/80 lg:dark:from-gray-800/80 lg:dark:to-gray-900/80' // Transparent on mobile
-                : 'bg-gradient-to-br from-gray-50/80 to-blue-50/80 dark:from-gray-800/80 dark:to-gray-900/80'
+                ? 'bg-transparent lg:bg-white lg:dark:bg-gray-900' 
+                : 'bg-white dark:bg-gray-900'
             }`}>
               {messages.length === 0 && !loading && (
-                <div className="flex items-center justify-center h-full min-h-[calc(100vh-16rem)]">
+                <div className="flex items-center justify-center h-full min-h-[calc(100vh-16rem)] px-4">
                   <motion.div
-                    className="text-center px-4"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6 }}
+                    className="text-center max-w-2xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg"
-                    >
-                      <Bot className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                    </motion.div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Welcome to Wellness Chat</h3>
-                    <p className="text-gray-600 text-xs sm:text-sm max-w-xs sm:max-w-md leading-relaxed">
-                      Start a conversation with your AI wellness assistant. Share how you&apos;re feeling,
-                      discuss your day, or ask for support. Your conversation is confidential.
+                    {/* Logo */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <Sparkles className="h-8 w-8 text-white" />
+                    </div>
+                    
+                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                      How can I help you today?
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400 text-base mb-8">
+                      I'm your AI wellness assistant. Share your thoughts, feelings, or anything on your mind.
+                    </p>
+                    
+                    {/* Suggestion Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+                      {[
+                        { icon: "💬", text: "I'd like to talk about my day" },
+                        { icon: "🎯", text: "Help me with stress management" },
+                        { icon: "😊", text: "I want to improve my wellbeing" },
+                        { icon: "🎙️", text: "Start a voice conversation" },
+                      ].map((suggestion, i) => (
+                        <motion.button
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 * i }}
+                          onClick={() => {
+                            if (i === 3) {
+                              startCall();
+                            } else {
+                              setCurrentMessage(suggestion.text);
+                            }
+                          }}
+                          className="p-4 text-left bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{suggestion.icon}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{suggestion.text}</span>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                      Your conversations are confidential and designed to support your mental wellbeing
                     </p>
                   </motion.div>
                 </div>
               )}
 
+              {/* Voice Mode Instructions Card */}
+              {isVoiceMode && showVoiceInstructions && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="mb-4"
+                >
+                  <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+                    <CardContent className="p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                          <Mic className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center">
+                            Voice Call Guide
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setShowVoiceInstructions(false)}
+                              className="ml-auto h-6 w-6 p-0 text-green-600 hover:text-green-800"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </h4>
+                          <ul className="text-sm text-green-800 dark:text-green-200 space-y-2">
+                            <li className="flex items-start">
+                              <span className="mr-2">1️⃣</span>
+                              <span>Click the <strong>green microphone button</strong> to start recording</span>
+                            </li>
+                            <li className="flex items-start">
+                              <span className="mr-2">2️⃣</span>
+                              <span>Speak naturally - the AI will transcribe and respond</span>
+                            </li>
+                            <li className="flex items-start">
+                              <span className="mr-2">3️⃣</span>
+                              <span>Click the <strong>red square button</strong> to stop recording</span>
+                            </li>
+                            <li className="flex items-start">
+                              <span className="mr-2">💡</span>
+                              <span>The AI will speak responses - use the speaker icon to mute/unmute</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                  className={`flex mb-6 ${message.sender === "user" ? "justify-end" : "justify-start"
                     }`}
                 >
                   <div
-                    className={`flex items-start space-x-2 sm:space-x-3 
-          ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}
-        `}
+                    className={`flex items-start space-x-3 max-w-[85%] sm:max-w-[75%] ${
+                      message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""
+                    }`}
                   >
-                    {/* Avatar */}
-                    <Avatar className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 flex-shrink-0">
-                      <AvatarFallback
-                        className={
-                          message.sender === "ai" && deepConversation
-                            ? "bg-blue-100"
-                            : ""
-                        }
-                      >
-                        {message.sender === "user" ? (
-                          <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-                        ) : (
-                          <Bot className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
+                    {/* Avatar - Minimal */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.sender === "user" 
+                        ? "bg-blue-600" 
+                        : "bg-gradient-to-br from-purple-500 to-blue-500"
+                    }`}>
+                      {message.sender === "user" ? (
+                        <User className="h-4 w-4 text-white" />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-white" />
+                      )}
+                    </div>
 
-                    {/* Message Bubble */}
+                    {/* Message Bubble - Clean ChatGPT Style */}
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={`rounded-2xl shadow-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm leading-relaxed max-w-[90%] sm:max-w-[85%] lg:max-w-[75%] ${message.sender === "user"
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                        : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
-                        }`}
+                      transition={{ duration: 0.2 }}
+                      className={`rounded-2xl px-4 py-3 ${
+                        message.sender === "user"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      }`}
                     >
                       {message.sender === "ai" ? (
                         <div>
@@ -1288,10 +1418,75 @@ export default function EmployeeChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Chat Input Area - Matching the Image Design */}
-            <div className={`border-t border-gray-200/50 dark:border-gray-700/50 p-4 ${
+            {/* Voice Mode Active Banner - Modern Design */}
+            {isVoiceMode && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 shadow-md"
+                >
+                  <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                    <div className="relative flex-shrink-0">
+                      <Phone className="h-4 w-4 sm:h-5 sm:w-5 animate-pulse" />
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-ping"></div>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-xs sm:text-sm">Voice Call Active</p>
+                      <p className="text-xs text-green-100 hidden sm:block">Click the microphone to speak</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                    {/* Audio Toggle */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setAudioEnabled(!audioEnabled);
+                        if (!audioEnabled) {
+                          toast.success("🔊 AI voice responses enabled");
+                        } else {
+                          toast.info("🔇 AI voice responses muted");
+                          window.speechSynthesis.cancel();
+                        }
+                      }}
+                      className="text-white hover:bg-white/20 h-7 w-7 sm:h-8 sm:w-8 p-0"
+                      title={audioEnabled ? "Mute AI voice" : "Unmute AI voice"}
+                    >
+                      {audioEnabled ? (
+                        <Volume2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      ) : (
+                        <VolumeX className="h-3 w-3 sm:h-4 sm:w-4" />
+                      )}
+                    </Button>
+                    
+                    {/* Call Duration */}
+                    <div className="text-right hidden sm:block">
+                      <p className="text-xs text-green-100">Duration</p>
+                      <p className="font-mono font-bold text-sm">{formatCallDuration(callDuration)}</p>
+                    </div>
+                    <div className="text-right sm:hidden">
+                      <p className="font-mono font-bold text-xs">{formatCallDuration(callDuration)}</p>
+                    </div>
+                    
+                    {/* End Call */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={endCall}
+                      className="text-white hover:bg-white/20 h-7 w-7 sm:h-8 sm:w-8 p-0"
+                      title="End voice call"
+                    >
+                      <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </Button>
+                  </div>
+                </motion.div>
+            )}
+
+            {/* Chat Input Area - Clean Modern Design */}
+            <div className={`border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6 ${
               isAvatarMode 
-                ? 'bg-white/70 lg:bg-white dark:bg-gray-900/70 lg:dark:bg-gray-900 backdrop-blur-sm' // More transparent on mobile
+                ? 'bg-white/95 lg:bg-white dark:bg-gray-900/95 lg:dark:bg-gray-900 backdrop-blur-sm' 
                 : 'bg-white dark:bg-gray-900'
             }`}>
               {/* File Attachments Preview */}
@@ -1350,68 +1545,71 @@ export default function EmployeeChatPage() {
                   </div>
                 )}
 
-                {/* Input Container */}
-                <div className="relative">
-                {/* Plus Button */}
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowOptionsPanel(!showOptionsPanel)}
-                    disabled={loading || sessionEnded}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-                  >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </Button>
-                </div>
+                {/* Input Container - Modern ChatGPT Style */}
+                <div className="relative max-w-4xl mx-auto">
+                  <div className="relative flex items-center bg-gray-100 dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus-within:border-blue-500 dark:focus-within:border-blue-500 transition-colors">
+                    {/* Attachment Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+                      disabled={loading || sessionEnded}
+                      className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-transparent flex-shrink-0 ml-2"
+                    >
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
 
-                {/* Text Input */}
-                <Input
-                  placeholder="Ask anything"
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  disabled={loading || sessionEnded}
-                  className="pl-12 pr-20 py-3 text-base border-gray-300 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                />
+                    {/* Text Input */}
+                    <input
+                      type="text"
+                      placeholder={isVoiceMode ? "Speak or type your message..." : "Message Wellness Assistant..."}
+                      value={currentMessage}
+                      onChange={(e) => setCurrentMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      disabled={loading || sessionEnded}
+                      className="flex-1 bg-transparent border-none outline-none px-3 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    />
 
-                {/* Right Side Controls */}
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                  {/* Microphone Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleRecording}
-                    disabled={loading || sessionEnded}
-                    className={`h-8 w-8 p-0 rounded-full ${
-                      isRecording 
-                        ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    {isRecording ? (
-                      <Square className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
+                    {/* Right Side Controls */}
+                    <div className="flex items-center space-x-1 mr-2 flex-shrink-0">
+                      {/* Microphone Button - Voice Mode */}
+                      {(isVoiceMode || currentMessage.length === 0) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={toggleRecording}
+                          disabled={loading || sessionEnded}
+                          className={`h-9 w-9 p-0 rounded-full transition-all ${
+                            isRecording 
+                              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg' 
+                              : isVoiceMode
+                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
+                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          {isRecording ? (
+                            <Square className="h-4 w-4" />
+                          ) : (
+                            <Mic className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
 
-                  {/* Audio Visualizer */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={loading || sessionEnded}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                    </svg>
-                  </Button>
+                      {/* Send Button - Only when there's text */}
+                      {currentMessage.length > 0 && (
+                        <Button
+                          onClick={() => handleSendMessage()}
+                          disabled={loading || sessionEnded}
+                          className="h-9 w-9 p-0 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Drag and Drop Overlay */}
@@ -1425,11 +1623,11 @@ export default function EmployeeChatPage() {
                     </div>
                   </div>
                 )}
-                </div>
               </div>
+            </div>
 
-              {/* Options Dropdown Panel */}
-              {showOptionsPanel && (
+            {/* Options Dropdown Panel */}
+            {showOptionsPanel && (
                 <>
                   {/* Backdrop */}
                   <div
@@ -1634,31 +1832,31 @@ export default function EmployeeChatPage() {
                     </div>
                   </motion.div>
                 </>
-              )}
+            )}
 
-              {/* Hidden File Input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*,.txt,.pdf,.doc,.docx"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </div>
-          </motion.div>
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.txt,.pdf,.doc,.docx"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+        </motion.div>
 
-          {/* Avatar Section - Background on mobile, Split Screen on desktop */}
-          {isAvatarMode && (
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 30 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="fixed inset-0 lg:relative lg:w-1/2 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 lg:bg-gradient-to-b lg:from-blue-50 lg:to-gray-50 lg:dark:from-blue-900/20 lg:dark:to-gray-800/20 lg:border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col min-h-screen z-10 lg:z-auto"
-            >
+        {/* Avatar Section - Background on mobile, Split Screen on desktop */}
+        {isAvatarMode && (
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 30 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="fixed inset-0 lg:relative lg:w-1/2 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 lg:bg-gradient-to-b lg:from-blue-50 lg:to-gray-50 lg:dark:from-blue-900/20 lg:dark:to-gray-800/20 lg:border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col min-h-screen z-0 lg:z-auto pointer-events-none lg:pointer-events-auto"
+          >
               {/* Mobile Avatar Background Indicator */}
-              <div className="lg:hidden absolute top-0 left-0 right-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border-b border-white/20 px-4 py-2 z-30">
+              <div className="lg:hidden absolute top-0 left-0 right-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border-b border-white/20 px-4 py-2 z-30 pointer-events-none">
                 <div className="flex items-center justify-center space-x-2 text-white/90">
                   <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
                   <span className="text-xs font-medium">3D Avatar Background</span>
@@ -1693,25 +1891,64 @@ export default function EmployeeChatPage() {
                    style={{
                      backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
                    }}>
-                <AvatarController
-                  emotion={currentAvatarEmotion || 'IDLE'}
-                  speaking={isSpeaking || isRecording}
-                  scale={avatarConfig.scale}
-                  interactive={avatarConfig.interactive}
-                  showEnvironment={avatarConfig.showEnvironment}
-                  enableFloating={avatarConfig.enableFloating}
-                  quality={avatarConfig.quality}
-                  lipSyncSource={
-                    isRecording ? 'microphone' : 
-                    isTTSPlaying ? 'text' : 
-                    isVoiceMode ? 'microphone' : 'text'
-                  }
-                  speechText={currentTTSText || lastAIMessage}
-                />
+                {!avatarLoadError ? (
+                  <AvatarController
+                    emotion={currentAvatarEmotion || 'IDLE'}
+                    speaking={isSpeaking || isRecording}
+                    scale={avatarConfig.scale}
+                    interactive={avatarConfig.interactive}
+                    showEnvironment={avatarConfig.showEnvironment}
+                    enableFloating={avatarConfig.enableFloating}
+                    quality={avatarConfig.quality}
+                    lipSyncSource={
+                      isRecording ? 'microphone' : 
+                      isTTSPlaying ? 'text' : 
+                      isVoiceMode ? 'microphone' : 'text'
+                    }
+                    speechText={currentTTSText || lastAIMessage}
+                    onLoad={() => {
+                      setAvatarLoaded(true);
+                      console.log('Avatar loaded successfully');
+                    }}
+                    onError={(error) => {
+                      setAvatarLoadError(true);
+                      console.error('Avatar loading error:', error);
+                      toast.error('Failed to load 3D avatar');
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center p-4">
+                      <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <X className="h-8 w-8 text-red-600 dark:text-red-400" />
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Avatar failed to load</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAvatarLoadError(false);
+                          setAvatarLoaded(false);
+                        }}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Avatar Loading Indicator */}
+                {!avatarLoaded && !avatarLoadError && (
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl p-6 text-center pointer-events-none">
+                    <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-3" />
+                    <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">Loading 3D Avatar...</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">This may take a few moments</p>
+                  </div>
+                )}
 
                 {/* Avatar Status Indicator - Repositioned for mobile */}
                 {(isSpeaking || isRecording) && (
-                  <div className="absolute top-4 right-4 lg:top-4 lg:right-4 bg-black/80 text-white px-2 py-1 lg:px-3 lg:py-2 rounded-lg text-xs lg:text-sm flex items-center space-x-1 lg:space-x-2 backdrop-blur-sm z-10">
+                  <div className="absolute top-4 right-4 lg:top-4 lg:right-4 bg-black/80 text-white px-2 py-1 lg:px-3 lg:py-2 rounded-lg text-xs lg:text-sm flex items-center space-x-1 lg:space-x-2 backdrop-blur-sm z-10 pointer-events-none">
                     {isRecording && (
                       <>
                         <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -1740,7 +1977,7 @@ export default function EmployeeChatPage() {
                 </div>
 
                 {/* Mobile Avatar Indicator - Only visible on mobile */}
-                <div className="lg:hidden absolute bottom-4 left-4 bg-purple-600/80 text-white px-3 py-2 rounded-xl text-xs backdrop-blur-sm z-10 shadow-lg">
+                <div className="lg:hidden absolute bottom-4 left-4 bg-purple-600/80 text-white px-3 py-2 rounded-xl text-xs backdrop-blur-sm z-10 shadow-lg pointer-events-none">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <UserCircle className="h-4 w-4" />
@@ -1748,72 +1985,167 @@ export default function EmployeeChatPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </div>
+          </motion.div>
+        )}
       </div>
 
-      {/* End Conversation Confirmation Dialog */}
-      {showEndConfirmation && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-                <PhoneOff className="h-5 w-5 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  End Conversation?
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  This will analyze your entire conversation and generate a comprehensive wellness report.
-                </p>
-              </div>
-            </div>
+      {/* Floating Voice Call Action Button - Only show when not in voice mode */}
+      {!sessionEnded && !isVoiceMode && messages.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0 }}
+          className="fixed bottom-24 right-6 z-50"
+        >
+          <Button
+            onClick={startCall}
+            disabled={loading}
+            className="h-14 w-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-2xl hover:shadow-green-500/50 transition-all duration-300 hover:scale-110"
+          >
+            <Phone className="h-6 w-6 text-white" />
+          </Button>
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
+        </motion.div>
+      )}
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
-              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">What happens when you end:</h4>
-              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                <li>• Complete conversation analysis</li>
-                <li>• Comprehensive wellness report generation</li>
-                <li>• All conversation data saved securely</li>
-                <li>• Report added to your wellness history</li>
-              </ul>
+      {/* Recording Indicator Overlay - Modern Minimal Design */}
+      {isRecording && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+        >
+          <div className="bg-red-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center space-x-3">
+            <div className="relative">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
             </div>
-
-            <div className="flex space-x-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowEndConfirmation(false)}
-                className="flex-1"
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowEndConfirmation(false);
-                  handleEndSession();
-                }}
-                disabled={loading}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <PhoneOff className="h-4 w-4 mr-2" />
-                    End & Analyze
-                  </>
-                )}
-              </Button>
+            <div className="flex items-center space-x-2">
+              <span className="font-medium">Listening</span>
+              {/* Audio Waveform Animation */}
+              <div className="flex items-center space-x-0.5">
+                {[...Array(4)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-0.5 bg-white rounded-full"
+                    animate={{
+                      height: [8, 16, 8],
+                    }}
+                    transition={{
+                      duration: 0.6,
+                      repeat: Infinity,
+                      delay: i * 0.1,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
+      )}
+
+      {/* AI Speaking Indicator */}
+      {(isSpeaking || isTTSPlaying) && !isRecording && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-40 pointer-events-none"
+        >
+          <div className="bg-blue-500 text-white px-5 py-2.5 rounded-full shadow-lg flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="w-1 bg-white rounded-full"
+                  animate={{
+                    height: [6, 12, 6],
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    repeat: Infinity,
+                    delay: i * 0.15,
+                  }}
+                />
+              ))}
+            </div>
+            <span className="text-sm font-medium">AI is speaking...</span>
+            <button
+              onClick={() => {
+                window.speechSynthesis.cancel();
+                stopTTS();
+                setIsSpeaking(false);
+              }}
+              className="ml-2 hover:bg-white/20 rounded-full p-1 transition-colors pointer-events-auto"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        </motion.div>
       )}
     </div>
+
+    {/* End Conversation Confirmation Dialog */}
+    {showEndConfirmation && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+              <PhoneOff className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                End Conversation?
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This will analyze your entire conversation and generate a comprehensive wellness report.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+            <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">What happens when you end:</h4>
+            <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+              <li>• Complete conversation analysis</li>
+              <li>• Comprehensive wellness report generation</li>
+              <li>• All conversation data saved securely</li>
+              <li>• Report added to your wellness history</li>
+            </ul>
+          </div>
+
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowEndConfirmation(false)}
+              className="flex-1"
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setShowEndConfirmation(false);
+                handleEndSession();
+              }}
+              disabled={loading}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <PhoneOff className="h-4 w-4 mr-2" />
+                  End & Analyze
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
   );
 }

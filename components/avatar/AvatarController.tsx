@@ -18,6 +18,8 @@ interface AvatarControllerProps {
   audioElement?: HTMLAudioElement;
   speechText?: string;
   onLipSyncUpdate?: (state: any) => void;
+  onLoad?: () => void;
+  onError?: (error: Error) => void;
 }
 
 export default function AvatarController({ 
@@ -32,7 +34,9 @@ export default function AvatarController({
   lipSyncSource = 'microphone',
   audioElement,
   speechText,
-  onLipSyncUpdate
+  onLipSyncUpdate,
+  onLoad,
+  onError
 }: AvatarControllerProps) {
   // Optimize scale for split-screen display - prevent distortion
   const constrainedScale = Math.max(0.5, Math.min(1.0, scale));
@@ -173,6 +177,8 @@ export default function AvatarController({
           quality={quality}
           lipSyncActive={lipSyncActive}
           currentViseme={currentViseme}
+          onLoad={onLoad}
+          onError={onError}
         />
       </div>
       

@@ -40,6 +40,8 @@ interface AvatarProps {
   modelUrl?: string;
   lipSyncActive?: boolean;
   currentViseme?: string;
+  onLoad?: () => void;
+  onError?: (error: Error) => void;
 }
 
 // Enhanced Interactive Avatar Component
@@ -52,7 +54,9 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
   modelType = 'gltf',
   modelUrl,
   lipSyncActive = false,
-  currentViseme = 'sil'
+  currentViseme = 'sil',
+  onLoad,
+  onError
 }, ref) => {
   const group = useRef<THREE.Group>(null);
   const avatarRef = useRef<THREE.Group>(null);
@@ -101,6 +105,7 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
           setModelScene(gltfData.scene);
         }
         setLoadingProgress(100);
+        onLoad?.(); // Signal successful load
       } catch (error) {
         console.error('Failed to load model:', error);
         // Fallback to default GLTF
@@ -119,14 +124,16 @@ const InteractiveAvatar = React.forwardRef<THREE.Group, AvatarProps>(({
           });
           setModelScene(gltfData.scene);
           setLoadingProgress(100);
+          onLoad?.(); // Signal successful fallback load
         } catch (fallbackError) {
           console.error('Fallback model loading failed:', fallbackError);
+          onError?.(fallbackError as Error); // Signal error
         }
       }
     };
 
     loadModel();
-  }, [modelType, modelUrl]);
+  }, [modelType, modelUrl, onLoad, onError]);
 
   // Animation system - initialize after model is loaded
   const [mixer, setMixer] = useState<THREE.AnimationMixer | null>(null);
@@ -558,6 +565,8 @@ interface AvatarModelProps {
   modelUrl?: string;
   lipSyncActive?: boolean;
   currentViseme?: string;
+  onLoad?: () => void;
+  onError?: (error: Error) => void;
 }
 
 interface AvatarSceneProps extends AvatarModelProps { }
@@ -574,7 +583,9 @@ const AvatarScene = React.forwardRef<THREE.Group, AvatarSceneProps>(({
   modelType = 'gltf',
   modelUrl,
   lipSyncActive = false,
-  currentViseme = 'sil'
+  currentViseme = 'sil',
+  onLoad,
+  onError
 }, ref) => {
   const { camera } = useThree();
 
@@ -659,6 +670,8 @@ const AvatarScene = React.forwardRef<THREE.Group, AvatarSceneProps>(({
         modelUrl={modelUrl}
         lipSyncActive={lipSyncActive}
         currentViseme={currentViseme}
+        onLoad={onLoad}
+        onError={onError}
       />
 
       {/* Ground and Shadows */}
@@ -704,7 +717,9 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
   modelType = 'gltf',
   modelUrl,
   lipSyncActive = false,
-  currentViseme = 'sil'
+  currentViseme = 'sil',
+  onLoad,
+  onError
 }, ref) => {
   // Performance optimization based on quality setting
   const canvasProps = useMemo(() => {
@@ -751,6 +766,8 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
           modelUrl={modelUrl}
           lipSyncActive={lipSyncActive}
           currentViseme={currentViseme}
+          onLoad={onLoad}
+          onError={onError}
         />
       </Canvas>
 
