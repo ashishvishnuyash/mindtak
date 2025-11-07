@@ -1047,7 +1047,7 @@ export default function EmployeeChatPage() {
           {/* Chat Section */}
           <div
             className="flex flex-col w-full bg-white dark:bg-gray-900"
-          />
+          >
             {/* Chat Header - Modern Clean Design */}
             <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
@@ -1150,7 +1150,7 @@ export default function EmployeeChatPage() {
                       How can I help you today?
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 text-base mb-8">
-                      I'm your AI wellness assistant. Share your thoughts, feelings, or anything on your mind.
+                      I&apos;m your AI wellness assistant. Share your thoughts, feelings, or anything on your mind.
                     </p>
                     
                     {/* Suggestion Cards */}
