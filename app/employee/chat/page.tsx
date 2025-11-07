@@ -1058,7 +1058,7 @@ export default function EmployeeChatPage() {
                 ? 'mobile-chat-overlay lg:bg-white lg:dark:bg-gray-900 pointer-events-auto' // Mobile overlay with avatar background, ensure interactivity
                 : 'bg-white dark:bg-gray-900'
             }`}
-          >
+          />
             {/* Chat Header - Modern Clean Design */}
             <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
