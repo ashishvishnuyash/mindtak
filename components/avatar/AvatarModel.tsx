@@ -726,7 +726,7 @@ const AvatarModel = React.forwardRef<THREE.Group, AvatarModelProps>(({
     const baseProps = {
       shadows: true,
       gl: { antialias: true, alpha: true },
-      camera: { position: [0, 1.2, 6] as [number, number, number], fov: 50 }
+      camera: { position: [0, 1.2, 4.5] as [number, number, number], fov: 45 }
     };
 
     switch (quality) {

@@ -1043,10 +1043,10 @@ export default function EmployeeChatPage() {
       {/* Full Screen Chat Container */}
       <div className="flex flex-col flex-1 relative">
         {/* Responsive Layout - Split on desktop, overlay on mobile */}
-        <div className="flex flex-1 min-h-0 relative">
-          {/* Chat Section */}
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0 relative">
+          {/* Chat Section - Equal 50% width on desktop */}
           <div
-            className="flex flex-col w-full bg-white dark:bg-gray-900"
+            className="flex flex-col w-full lg:w-1/2 bg-white dark:bg-gray-900"
           >
             {/* Chat Header - Modern Clean Design */}
             <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 backdrop-blur-sm">
@@ -1833,16 +1833,15 @@ export default function EmployeeChatPage() {
               className="hidden"
             />
           </div>
-        </div>
 
-        {/* Avatar Section - Background on mobile, Split Screen on desktop */}
-        {isAvatarMode && (
+          {/* Avatar Section - Background on mobile, Equal 50% Split on desktop */}
+          {isAvatarMode && (
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 30 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="fixed inset-0 lg:relative lg:w-1/2 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 lg:bg-gradient-to-b lg:from-blue-50 lg:to-gray-50 lg:dark:from-blue-900/20 lg:dark:to-gray-800/20 lg:border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col min-h-screen z-0 lg:z-auto pointer-events-none lg:pointer-events-auto"
+            className="fixed inset-0 lg:relative lg:w-1/2 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 lg:bg-gradient-to-b lg:from-blue-50 lg:to-gray-50 lg:dark:from-blue-900/20 lg:dark:to-gray-800/20 lg:border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full z-0 lg:z-auto pointer-events-none lg:pointer-events-auto"
           >
               {/* Mobile Avatar Background Indicator */}
               <div className="lg:hidden absolute top-0 left-0 right-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border-b border-white/20 px-4 py-2 z-30 pointer-events-none">
@@ -1976,6 +1975,7 @@ export default function EmployeeChatPage() {
               </div>
           </motion.div>
         )}
+        </div>
       </div>
 
       {/* Floating Voice Call Action Button - Only show when not in voice mode */}
@@ -2134,6 +2134,16 @@ export default function EmployeeChatPage() {
         </div>
       </div>
     )}
+
+      {/* Avatar Settings Panel */}
+      {isAvatarMode && (
+        <AvatarSettings
+          config={avatarConfig}
+          onConfigChange={updateAvatarConfig}
+          isOpen={isSettingsOpen}
+          onToggle={toggleSettings}
+        />
+      )}
     </div>
   );
 }

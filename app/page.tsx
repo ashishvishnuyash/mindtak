@@ -459,6 +459,25 @@ export default function HomePage() {
       {/* Trust & Statistics */}
       <WellnessStats />
 
+      {/* Diltak.Ai Image Section */}
+      <motion.section
+        className="py-12 sm:py-16 bg-white dark:bg-gray-900"
+        whileInView={sectionVariants}
+        viewport={{ once: true }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-lg overflow-hidden shadow-2xl">
+            <Image
+              src="/Diltak. Ai.png"
+              alt="Diltak.Ai Platform Overview"
+              fill
+              className="object-contain"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
+            />
+          </div>
+        </div>
+      </motion.section>
+
       {/* FAQ Section */}
       <motion.section
         id="faq"
