@@ -1078,109 +1078,142 @@ function ManagerPersonalChatPage() {
                 : 'bg-white dark:bg-gray-900'
             }`}
           >
-            {/* Chat Header */}
-            <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-2 sm:px-4 lg:px-6 py-3 sm:py-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="bg-gradient-to-br from-blue-500 to-blue-600 p-1.5 sm:p-2 rounded-xl shadow-lg flex-shrink-0"
-                  >
-                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </motion.div>
-                  <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm sm:text-base truncate">AI Wellness Assistant</span>
-                  <Badge
-                    variant={
-                      sessionEnded
-                        ? "destructive"
-                        : isVoiceMode
-                          ? "default"
-                          : isAvatarMode
-                            ? "outline"
-                            : "secondary"
-                    }
-                    className="text-xs flex-shrink-0"
-                  >
-                    {sessionEnded
-                      ? "Session Ended"
-                      : isVoiceMode
-                        ? `Voice ${formatCallDuration(callDuration)}`
-                        : isAvatarMode
-                          ? (
-                            <>
-                              <span className="hidden lg:inline">Avatar Mode</span>
-                              <span className="lg:hidden">🎭 Avatar BG</span>
-                            </>
-                          )
-                          : "Text Mode"}
-                  </Badge>
-                  {isVoiceMode && (
-                    <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
-                      {isRecording && (
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse" />
-                      )}
-                      {isSpeaking && (
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse" />
-                      )}
-                      {processingAudio && (
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-500 rounded-full animate-pulse" />
-                      )}
-                    </div>
-                  )}
+            {/* Chat Header - Modern Clean Design */}
+            <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-gray-900 dark:text-gray-100 font-medium text-base truncate">Wellness Assistant</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Always here to listen</p>
+                  </div>
                 </div>
 
                 {/* Status Indicators and Controls */}
-                <div className="flex items-center space-x-2 w-full sm:w-auto">
+                <div className="flex items-center space-x-2">
                   {isVoiceMode && (
-                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                      <span className="hidden sm:inline">Call Duration: {formatCallDuration(callDuration)}</span>
-                      <span className="sm:hidden">{formatCallDuration(callDuration)}</span>
+                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                      {isRecording && (
+                        <div className="flex items-center space-x-1 text-red-600 dark:text-red-400">
+                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                          <span className="hidden sm:inline font-medium">Recording</span>
+                        </div>
+                      )}
+                      {isSpeaking && !isRecording && (
+                        <div className="flex items-center space-x-1 text-blue-600 dark:text-blue-400">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                          <span className="hidden sm:inline font-medium">Speaking</span>
+                        </div>
+                      )}
+                      {!isRecording && !isSpeaking && (
+                        <span className="font-mono font-medium">{formatCallDuration(callDuration)}</span>
+                      )}
                     </div>
                   )}
                   
-                  {/* End Conversation Button */}
+                  {/* Voice Call Toggle Button - Clean Icon Style */}
+                  {!sessionEnded && !isVoiceMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={startCall}
+                      disabled={loading}
+                      className="h-8 w-8 p-0 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                      title="Start voice call"
+                    >
+                      <Phone className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    </Button>
+                  )}
+                  
+                  {/* End Call Button - Clean Icon Style */}
+                  {!sessionEnded && isVoiceMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={endCall}
+                      disabled={loading}
+                      className="h-8 w-8 p-0 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                      title="End voice call"
+                    >
+                      <PhoneOff className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    </Button>
+                  )}
+
+                  {/* Settings Menu */}
                   {!sessionEnded && (
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      onClick={() => setShowEndConfirmation(true)}
-                      disabled={loading || messages.length === 0}
-                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-3"
+                      onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+                      className="h-8 w-8 p-0 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                      title="More options"
                     >
-                      <PhoneOff className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">End Conversation</span>
-                      <span className="sm:hidden">End</span>
+                      <Menu className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </Button>
                   )}
                 </div>
               </div>
             </div>    
-        {/* Chat Messages */}
-            <div className={`flex-1 overflow-y-auto chat-scrollbar p-4 lg:p-6 space-y-4 h-full ${
+        {/* Chat Messages - Clean Modern Layout */}
+            <div className={`flex-1 overflow-y-auto chat-scrollbar px-4 sm:px-6 py-6 h-full ${
               isAvatarMode 
-                ? 'bg-transparent lg:bg-gradient-to-br lg:from-gray-50/80 lg:to-blue-50/80 lg:dark:from-gray-800/80 lg:dark:to-gray-900/80' // Transparent on mobile
-                : 'bg-gradient-to-br from-gray-50/80 to-blue-50/80 dark:from-gray-800/80 dark:to-gray-900/80'
+                ? 'bg-transparent lg:bg-white lg:dark:bg-gray-900' 
+                : 'bg-white dark:bg-gray-900'
             }`}>
               {messages.length === 0 && !loading && (
-                <div className="flex items-center justify-center h-full min-h-[calc(100vh-16rem)]">
+                <div className="flex items-center justify-center h-full min-h-[calc(100vh-16rem)] px-4">
                   <motion.div
-                    className="text-center px-4"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6 }}
+                    className="text-center max-w-2xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg"
-                    >
-                      <Bot className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                    </motion.div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Welcome to Leadership Wellness Chat</h3>
-                    <p className="text-gray-600 text-xs sm:text-sm max-w-xs sm:max-w-md leading-relaxed">
-                      Start a conversation with your AI wellness assistant designed for managers. Share leadership challenges,
-                      discuss your day, or ask for support. Your conversation is confidential.
+                    {/* Logo */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <Sparkles className="h-8 w-8 text-white" />
+                    </div>
+                    
+                    <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                      How can I help you today?
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400 text-base mb-8">
+                      I&apos;m your AI wellness assistant for leaders. Share your thoughts, challenges, or anything on your mind.
+                    </p>
+                    
+                    {/* Suggestion Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+                      {[
+                        { icon: "💬", text: "I'd like to talk about my day" },
+                        { icon: "🎯", text: "Help me with leadership stress" },
+                        { icon: "😊", text: "I want to improve my wellbeing" },
+                        { icon: "🎙️", text: "Start a voice conversation" },
+                      ].map((suggestion, i) => (
+                        <motion.button
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 * i }}
+                          onClick={() => {
+                            if (i === 3) {
+                              startCall();
+                            } else {
+                              setCurrentMessage(suggestion.text);
+                            }
+                          }}
+                          className="p-4 text-left bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{suggestion.icon}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{suggestion.text}</span>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                      Your conversations are confidential and designed to support your mental wellbeing
                     </p>
                   </motion.div>
                 </div>
@@ -1189,40 +1222,37 @@ function ManagerPersonalChatPage() {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                  className={`flex mb-6 ${message.sender === "user" ? "justify-end" : "justify-start"
                     }`}
                 >
                   <div
-                    className={`flex items-start space-x-2 sm:space-x-3 
-          ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}
-        `}
+                    className={`flex items-start space-x-3 max-w-[85%] sm:max-w-[75%] ${
+                      message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""
+                    }`}
                   >
-                    {/* Avatar */}
-                    <Avatar className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 flex-shrink-0">
-                      <AvatarFallback
-                        className={
-                          message.sender === "ai" && deepConversation
-                            ? "bg-blue-100"
-                            : ""
-                        }
-                      >
-                        {message.sender === "user" ? (
-                          <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-                        ) : (
-                          <Bot className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-4 lg:w-4" />
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
+                    {/* Avatar - Minimal */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.sender === "user" 
+                        ? "bg-blue-600" 
+                        : "bg-gradient-to-br from-purple-500 to-blue-500"
+                    }`}>
+                      {message.sender === "user" ? (
+                        <User className="h-4 w-4 text-white" />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-white" />
+                      )}
+                    </div>
 
-                    {/* Message Bubble */}
+                    {/* Message Bubble - Clean ChatGPT Style */}
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={`rounded-2xl shadow-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm leading-relaxed max-w-[90%] sm:max-w-[85%] lg:max-w-[75%] ${message.sender === "user"
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                        : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
-                        }`}
+                      transition={{ duration: 0.2 }}
+                      className={`rounded-2xl px-4 py-3 ${
+                        message.sender === "user"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      }`}
                     >
                       {message.sender === "ai" ? (
                         <div>
@@ -1354,10 +1384,10 @@ function ManagerPersonalChatPage() {
 
               <div ref={messagesEndRef} />
             </div>   
-         {/* Chat Input Area */}
-            <div className={`border-t border-gray-200/50 dark:border-gray-700/50 p-4 ${
+         {/* Chat Input Area - Clean Modern Design */}
+            <div className={`border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6 ${
               isAvatarMode 
-                ? 'bg-white/70 lg:bg-white dark:bg-gray-900/70 lg:dark:bg-gray-900 backdrop-blur-sm' // More transparent on mobile
+                ? 'bg-white/95 lg:bg-white dark:bg-gray-900/95 lg:dark:bg-gray-900 backdrop-blur-sm' 
                 : 'bg-white dark:bg-gray-900'
             }`}>
               {/* File Attachments Preview */}
@@ -1416,67 +1446,71 @@ function ManagerPersonalChatPage() {
                   </div>
                 )}
 
-                {/* Input Container */}
-                <div className="relative">
-                {/* Plus Button */}
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowOptionsPanel(!showOptionsPanel)}
-                    disabled={loading || sessionEnded}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-                  >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </Button>
-                </div>
+                {/* Input Container - Modern ChatGPT Style */}
+                <div className="relative max-w-4xl mx-auto">
+                  <div className="relative flex items-center bg-gray-100 dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus-within:border-blue-500 dark:focus-within:border-blue-500 transition-colors">
+                    {/* Attachment Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowOptionsPanel(!showOptionsPanel)}
+                      disabled={loading || sessionEnded}
+                      className="h-10 w-10 p-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-transparent flex-shrink-0 ml-2"
+                    >
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
 
-                {/* Text Input */}
-                <Input
-                  placeholder="Share your leadership challenges..."
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  disabled={loading || sessionEnded}
-                  className="pl-12 pr-20 py-3 text-base border-gray-300 dark:border-gray-600 rounded-full bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                />
+                    {/* Text Input */}
+                    <input
+                      type="text"
+                      placeholder={isVoiceMode ? "Speak or type your message..." : "Message Wellness Assistant..."}
+                      value={currentMessage}
+                      onChange={(e) => setCurrentMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      disabled={loading || sessionEnded}
+                      className="flex-1 bg-transparent border-none outline-none px-3 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    />
 
-                {/* Right Side Controls */}
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                  {/* Microphone Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleRecording}
-                    disabled={loading || sessionEnded}
-                    className={`h-8 w-8 p-0 rounded-full ${
-                      isRecording 
-                        ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
-                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    {isRecording ? (
-                      <Square className="h-4 w-4" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
-                  </Button>
+                    {/* Right Side Controls */}
+                    <div className="flex items-center space-x-1 mr-2 flex-shrink-0">
+                      {/* Microphone Button - Voice Mode */}
+                      {(isVoiceMode || currentMessage.length === 0) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={toggleRecording}
+                          disabled={loading || sessionEnded}
+                          className={`h-9 w-9 p-0 rounded-full transition-all ${
+                            isRecording 
+                              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg' 
+                              : isVoiceMode
+                                ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
+                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          {isRecording ? (
+                            <Square className="h-4 w-4" />
+                          ) : (
+                            <Mic className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
 
-                  {/* Send Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleSendMessage()}
-                    disabled={loading || sessionEnded || (!currentMessage.trim() && attachedFiles.length === 0)}
-                    className="h-8 w-8 p-0 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                      {/* Send Button - Only when there's text */}
+                      {currentMessage.length > 0 && (
+                        <Button
+                          onClick={() => handleSendMessage()}
+                          disabled={loading || sessionEnded}
+                          className="h-9 w-9 p-0 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Drag and Drop Overlay */}
@@ -1490,7 +1524,6 @@ function ManagerPersonalChatPage() {
                     </div>
                   </div>
                 )}
-                </div>
               </div>        
       {/* Options Dropdown Panel */}
               {showOptionsPanel && (

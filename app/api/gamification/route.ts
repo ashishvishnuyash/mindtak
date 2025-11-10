@@ -131,9 +131,9 @@ async function handleCheckIn(employeeId: string, companyId: string) {
     const userStats = await getOrCreateUserStats(employeeId, companyId);
     
     const now = new Date();
-    const lastCheckIn = userStats.last_check_in?.toDate ? userStats.last_check_in.toDate() : null;
+    const lastCheckIn = (userStats as any).last_check_in?.toDate ? (userStats as any).last_check_in.toDate() : null;
     
-    let newStreak = userStats.current_streak;
+    let newStreak = (userStats as any).current_streak || 0;
     let pointsToAdd = 10;
     
     // Check if it's been more than 24 hours since last check-in
@@ -151,7 +151,7 @@ async function handleCheckIn(employeeId: string, companyId: string) {
         };
       } else {
         // Continuing streak
-        newStreak = userStats.current_streak + 1;
+        newStreak = (userStats as any).current_streak + 1;
       }
     } else {
       // First check-in
@@ -160,10 +160,10 @@ async function handleCheckIn(employeeId: string, companyId: string) {
     }
     
     // Update longest streak if needed
-    const longestStreak = Math.max(newStreak, userStats.longest_streak || 0);
+    const longestStreak = Math.max(newStreak, (userStats as any).longest_streak || 0);
     
     // Calculate new level
-    const newPoints = userStats.total_points + pointsToAdd;
+    const newPoints = (userStats as any).total_points + pointsToAdd;
     const newLevel = calculateLevel(newPoints);
     
     // Update user stats
@@ -184,16 +184,16 @@ async function handleCheckIn(employeeId: string, companyId: string) {
       total_points: newPoints,
       level: newLevel,
       last_check_in: Timestamp.now()
-    };
+    } as any;
     
     // Check for new badges
     const newBadges = checkBadgeEligibility(updatedStats);
     
     if (newBadges.length > 0) {
       await updateDoc(statsRef, {
-        badges: [...userStats.badges, ...newBadges]
+        badges: [...(userStats as any).badges, ...newBadges]
       });
-      updatedStats.badges = [...userStats.badges, ...newBadges];
+      updatedStats.badges = [...(userStats as any).badges, ...newBadges];
     }
     
     return {
@@ -218,7 +218,7 @@ async function handleConversationComplete(employeeId: string, companyId: string,
     const userStats = await getOrCreateUserStats(employeeId, companyId);
     
     const pointsToAdd = calculatePoints('conversation_complete', data);
-    const newPoints = userStats.total_points + pointsToAdd;
+    const newPoints = (userStats as any).total_points + pointsToAdd;
     const newLevel = calculateLevel(newPoints);
     
     const statsRef = doc(db, 'user_gamification', userStats.id);
@@ -232,16 +232,16 @@ async function handleConversationComplete(employeeId: string, companyId: string,
       ...userStats,
       total_points: newPoints,
       level: newLevel
-    };
+    } as any;
     
     // Check for new badges
     const newBadges = checkBadgeEligibility(updatedStats);
     
     if (newBadges.length > 0) {
       await updateDoc(statsRef, {
-        badges: [...userStats.badges, ...newBadges]
+        badges: [...(userStats as any).badges, ...newBadges]
       });
-      updatedStats.badges = [...userStats.badges, ...newBadges];
+      updatedStats.badges = [...(userStats as any).badges, ...newBadges];
     }
     
     return {

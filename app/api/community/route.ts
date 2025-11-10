@@ -91,19 +91,22 @@ async function fetchPosts(companyId: string, category?: string, limitCount: numb
     );
     
     const querySnapshot = await getDocs(q);
-    let posts = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      created_at: doc.data().created_at?.toDate?.()?.toISOString() || doc.data().created_at || new Date().toISOString()
-    }));
+    let posts = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at || new Date().toISOString()
+      };
+    });
     
     // Filter by category if needed
     if (category && category !== 'all') {
-      posts = posts.filter(post => post.category === category);
+      posts = posts.filter(post => (post as any).category === category);
     }
     
     // Sort by pinned status first, then by created_at
-    posts.sort((a, b) => {
+    posts.sort((a: any, b: any) => {
       // Pinned posts first
       if (a.is_pinned && !b.is_pinned) return -1;
       if (!a.is_pinned && b.is_pinned) return 1;
