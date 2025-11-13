@@ -91,11 +91,11 @@ async function fetchPosts(companyId: string, category?: string, limitCount: numb
     );
     
     const querySnapshot = await getDocs(q);
-    let posts = querySnapshot.docs.map(doc => ({
+    let posts: CommunityPost[] = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       created_at: doc.data().created_at?.toDate?.()?.toISOString() || doc.data().created_at || new Date().toISOString()
-    }));
+    })) as CommunityPost[];
     
     // Filter by category if needed
     if (category && category !== 'all') {
