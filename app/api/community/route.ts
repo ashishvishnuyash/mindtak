@@ -99,11 +99,11 @@ async function fetchPosts(companyId: string, category?: string, limitCount: numb
     
     // Filter by category if needed
     if (category && category !== 'all') {
-      posts = posts.filter(post => post.category === category);
+      posts = posts.filter(post => (post as any).category === category);
     }
     
     // Sort by pinned status first, then by created_at
-    posts.sort((a, b) => {
+    posts.sort((a: any, b: any) => {
       // Pinned posts first
       if (a.is_pinned && !b.is_pinned) return -1;
       if (!a.is_pinned && b.is_pinned) return 1;
