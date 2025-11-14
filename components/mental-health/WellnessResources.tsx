@@ -47,8 +47,8 @@ const WellnessResources = () => {
     {
       category: "Mindfulness & Meditation",
       icon: Brain,
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "from-blue-50 to-cyan-50",
+      color: "from-green-500 to-emerald-500",
+      bgColor: "from-green-50 to-emerald-50",
       items: [
         {
           title: "Guided Meditation Sessions",
@@ -111,8 +111,8 @@ const WellnessResources = () => {
     {
       category: "Wellness & Lifestyle",
       icon: TrendingUp,
-      color: "from-purple-500 to-pink-500",
-      bgColor: "from-purple-50 to-pink-50",
+      color: "from-teal-500 to-cyan-500",
+      bgColor: "from-teal-50 to-cyan-50",
       items: [
         {
           title: "Mood Tracking",

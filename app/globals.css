@@ -138,6 +138,25 @@
   }
 }
 
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
 /* Smooth scrolling for better UX */
 html {
   scroll-behavior: smooth;
@@ -347,3 +366,36 @@ html {
 }
 
 /* stylelint-enable at-rule-no-unknown */
+/* Consistent Design Tokens */
+@layer utilities {
+  .rounded-card {
+    border-radius: 1rem; /* 16px */
+  }
+  
+  .rounded-card-lg {
+    border-radius: 1.5rem; /* 24px */
+  }
+  
+  .rounded-card-xl {
+    border-radius: 2rem; /* 32px */
+  }
+  
+  .section-spacing {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  
+  @media (min-width: 640px) {
+    .section-spacing {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .section-spacing {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+  }
+}

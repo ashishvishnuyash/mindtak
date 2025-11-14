@@ -56,11 +56,11 @@ const WellnessHero = () => {
         {/* Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <motion.div 
-            className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-32 h-32 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"
+            className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-32 h-32 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl"
             animate={floatingAnimation}
           />
           <motion.div 
-            className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-32 h-32 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"
+            className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-32 h-32 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl"
             animate={{
               ...floatingAnimation,
               transition: { ...floatingAnimation.transition, delay: 2 }
@@ -74,13 +74,13 @@ const WellnessHero = () => {
             <motion.div variants={fadeInUp} className="space-y-6 sm:space-y-8 order-2 lg:order-1">
               <div className="space-y-4 sm:space-y-6">
                 <motion.div 
-                  className="inline-flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full border border-blue-200 dark:border-blue-700"
+                  className="inline-flex items-center space-x-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-full border border-green-200 dark:border-green-700"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                  <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Trusted by 3k+ People</span>
+                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                  <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Trusted by 3k+ People</span>
                 </motion.div>
 
                 <motion.h1 
@@ -115,7 +115,7 @@ const WellnessHero = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-3 sm:p-4 rounded-lg">
-                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">Expert Panel</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">MBBS, MD, PhD Certified</p>

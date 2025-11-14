@@ -116,7 +116,7 @@ const WellnessStats = () => {
 
   return (
     <motion.section 
-      className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-br from-slate-900 via-green-900 to-emerald-900 text-white"
+      className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 text-white"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true }}
