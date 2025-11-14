@@ -233,6 +233,7 @@ function ManagerPersonalChatPage() {
 
   const audioRecorderRef = useRef<AudioRecorder>(new AudioRecorder());
   const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -281,7 +282,7 @@ function ManagerPersonalChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Enhanced TTS with lip sync
+  // Enhanced TTS with ElevenLabs API (male teen voice)
   const speakText = async (text: string) => {
     if (!audioEnabled) return;
     
@@ -289,30 +290,66 @@ function ManagerPersonalChatPage() {
     stopTTS();
     window.speechSynthesis.cancel();
     
+    // Stop any playing audio
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current.currentTime = 0;
+      audioPlayerRef.current = null;
+    }
+    
     setCurrentTTSText(text);
     setIsSpeaking(true);
     
-    if (isAvatarMode) {
-      // Use enhanced TTS with lip sync
-      try {
-        await speakWithLipSync(text, {
-          rate: 0.9,
-          pitch: 1.0,
-          volume: 1.0
-        });
-      } catch (error) {
-        console.error('Enhanced TTS Error:', error);
-        // Fallback to regular TTS
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
-        window.speechSynthesis.speak(utterance);
+    try {
+      // Call ElevenLabs API for text-to-speech
+      const response = await fetch('/api/text-to-speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate speech' }));
+        throw new Error(errorData.error || 'Failed to generate speech');
       }
-    } else {
-      // Regular TTS for non-avatar mode
+
+      // Get audio blob from response
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      // Create audio element and play
+      const audio = new Audio(audioUrl);
+      audioPlayerRef.current = audio;
+
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioPlayerRef.current = null;
+      };
+
+      audio.onerror = (error) => {
+        console.error('Audio playback error:', error);
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioPlayerRef.current = null;
+        toast.error('Failed to play audio');
+      };
+
+      // Play audio
+      await audio.play();
+
+      // If in avatar mode, also trigger lip sync (optional - you may want to sync with audio timing)
+      if (isAvatarMode) {
+        // Note: Lip sync timing may need adjustment for ElevenLabs audio
+        // For now, we'll just use the text for visual feedback
+      }
+    } catch (error) {
+      console.error('ElevenLabs TTS Error:', error);
+      setIsSpeaking(false);
+      
+      // Fallback to browser TTS if ElevenLabs fails
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
@@ -321,21 +358,35 @@ function ManagerPersonalChatPage() {
       utterance.onerror = () => setIsSpeaking(false);
       synthesisRef.current = utterance;
       window.speechSynthesis.speak(utterance);
+      
+      toast.error('Using fallback voice (ElevenLabs unavailable)');
     }
   };
 
   const processAudioMessage = async (audioBlob: Blob) => {
     try {
+      // Ensure the blob has the correct MIME type for webm
+      const blobWithType = audioBlob.type 
+        ? audioBlob 
+        : new Blob([audioBlob], { type: 'audio/webm;codecs=opus' });
+      
       // Convert audio to text using Whisper API
       const formData = new FormData();
-      formData.append("audio", audioBlob, "recording.webm");
+      // Create a File object with proper name and type for OpenAI Whisper
+      const audioFile = new File(
+        [blobWithType],
+        'recording.webm',
+        { type: 'audio/webm' }
+      );
+      formData.append("audio", audioFile, "recording.webm");
 
       const transcriptionResponse = await fetch("/api/transcribe", {
         method: "POST",
         body: formData,
       });
       if (!transcriptionResponse.ok) {
-        throw new Error("Failed to transcribe audio");
+        const errorData = await transcriptionResponse.json().catch(() => ({ error: 'Failed to transcribe audio' }));
+        throw new Error(errorData.error || "Failed to transcribe audio");
       }
       const { text } = await transcriptionResponse.json();
       if (text.trim()) {
@@ -371,6 +422,15 @@ function ManagerPersonalChatPage() {
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
+    stopTTS();
+    
+    // Stop any playing audio
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current.currentTime = 0;
+      audioPlayerRef.current = null;
+    }
+    
     toast.info("Call ended - generating report...");
     await handleEndSession();
   };
@@ -972,6 +1032,13 @@ function ManagerPersonalChatPage() {
   const toggleSpeaking = () => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
+      stopTTS();
+      // Stop any playing audio
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current.currentTime = 0;
+        audioPlayerRef.current = null;
+      }
       setIsSpeaking(false);
     }
   };

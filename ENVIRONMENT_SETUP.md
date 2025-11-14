@@ -35,6 +35,12 @@ GEMINI_API_KEY=your_gemini_api_key
 
 # Perplexity API Key (for deep search)
 PERPLEXITY_API_KEY=your_perplexity_api_key
+
+# ElevenLabs API Key (for voice call feature with male teen voice)
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+
+# ElevenLabs Voice ID (optional - defaults to male teen voice "pNInz6obpgDQGcFmaJgB")
+ELEVENLABS_VOICE_ID=your_custom_voice_id_here
 ```
 
 ## Getting API Keys
@@ -49,6 +55,13 @@ PERPLEXITY_API_KEY=your_perplexity_api_key
 ### Other Keys
 - **Gemini**: [Google AI Studio](https://makersuite.google.com/app/apikey)
 - **Perplexity**: [Perplexity Settings](https://www.perplexity.ai/settings/api)
+- **ElevenLabs**: [ElevenLabs Dashboard](https://elevenlabs.io/app/settings/api-keys)
+  1. Sign up or log in to ElevenLabs
+  2. Navigate to Settings > API Keys
+  3. Create a new API key
+  4. Copy the key to your `.env.local` file
+  5. The default voice is set to a male teen voice (Adam - "pNInz6obpgDQGcFmaJgB")
+  6. You can customize the voice by setting `ELEVENLABS_VOICE_ID` with a different voice ID from your ElevenLabs account
 
 ## Security Notes
 
@@ -64,6 +77,7 @@ With proper environment setup, these features will work:
 - 🤖 AI chat responses
 - 🎭 3D Avatar with lip sync
 - 🔐 User authentication
+- 🗣️ Voice calls with ElevenLabs (male teen voice) - requires ELEVENLABS_API_KEY
 
 ## Troubleshooting
 

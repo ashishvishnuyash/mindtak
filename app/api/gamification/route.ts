@@ -9,15 +9,32 @@ interface GamificationRequest {
   data?: any;
 }
 
+interface UserGamificationStats {
+  id: string;
+  employee_id: string;
+  company_id: string;
+  current_streak: number;
+  longest_streak: number;
+  total_points: number;
+  level: number;
+  badges: string[];
+  challenges_completed: number;
+  last_check_in: Timestamp | null;
+  weekly_goal: number;
+  monthly_goal: number;
+  created_at: any;
+  updated_at: any;
+}
+
 // Initialize or get user gamification stats
-async function getOrCreateUserStats(employeeId: string, companyId: string) {
+async function getOrCreateUserStats(employeeId: string, companyId: string): Promise<UserGamificationStats> {
   const statsRef = collection(db, 'user_gamification');
   const q = query(statsRef, where('employee_id', '==', employeeId), where('company_id', '==', companyId));
   const querySnapshot = await getDocs(q);
   
   if (!querySnapshot.empty) {
     const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+    return { id: doc.id, ...doc.data() } as UserGamificationStats;
   }
   
   // Create new user stats
@@ -38,7 +55,7 @@ async function getOrCreateUserStats(employeeId: string, companyId: string) {
   };
   
   const docRef = await addDoc(statsRef, newStats);
-  return { id: docRef.id, ...newStats };
+  return { id: docRef.id, ...newStats } as UserGamificationStats;
 }
 
 // Check badge eligibility
@@ -131,7 +148,7 @@ async function handleCheckIn(employeeId: string, companyId: string) {
     const userStats = await getOrCreateUserStats(employeeId, companyId);
     
     const now = new Date();
-    const lastCheckIn = (userStats as any).last_check_in?.toDate ? (userStats as any).last_check_in.toDate() : null;
+    const lastCheckIn = userStats.last_check_in?.toDate() ?? null;
     
     let newStreak = (userStats as any).current_streak || 0;
     let pointsToAdd = 10;

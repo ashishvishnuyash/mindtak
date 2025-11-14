@@ -22,10 +22,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Convert webm blob to a proper File object with correct MIME type
+    // OpenAI Whisper API requires the file to have a proper extension and MIME type
+    let fileToTranscribe: File = audioFile;
+
+    // If the file is a webm blob, ensure it has the correct properties
+    if (audioFile.type === 'audio/webm' || audioFile.name.endsWith('.webm')) {
+      // Create a new File object with explicit webm extension and MIME type
+      fileToTranscribe = new File(
+        [audioFile],
+        audioFile.name || 'recording.webm',
+        {
+          type: 'audio/webm',
+          lastModified: Date.now()
+        }
+      );
+    } else if (!audioFile.name || !audioFile.type) {
+      // If file doesn't have name or type, try to infer from blob
+      const blob = audioFile as unknown as Blob;
+      const fileName = audioFile.name || `recording.${blob.type.includes('webm') ? 'webm' : 'wav'}`;
+      const mimeType = blob.type || 'audio/webm';
+      
+      fileToTranscribe = new File(
+        [blob],
+        fileName,
+        {
+          type: mimeType,
+          lastModified: Date.now()
+        }
+      );
+    }
+
     // Convert the file to the format expected by OpenAI
     const openai = getOpenAIClient();
     const transcription = await openai.audio.transcriptions.create({
-      file: audioFile,
+      file: fileToTranscribe,
       model: 'whisper-1',
       language: 'en',
       response_format: 'json',
