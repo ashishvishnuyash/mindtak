@@ -105,7 +105,7 @@ export default function Footer() {
         <div className="border-t border-gray-700/50 pt-6 sm:pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-gray-400 text-xs sm:text-sm">
-              © 2024 Diltak.ai. All rights reserved.
+              © 2025 Diltak.ai. All rights reserved.
             </p>
             <div className="flex items-center space-x-6 text-xs sm:text-sm">
               <Link href="#" className="text-gray-400 hover:text-green-400 transition-colors">

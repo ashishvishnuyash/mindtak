@@ -180,7 +180,7 @@ function EmployeeDashboard() {
 
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -191,9 +191,9 @@ function EmployeeDashboard() {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           >
-            <Brain className="h-16 w-16 text-green-600 mx-auto mb-4" />
+            <Brain className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
           </motion.div>
-          <p className="text-lg text-gray-600">Loading your wellness dashboard...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-300">Loading your wellness dashboard...</p>
         </motion.div>
       </div>
     );
@@ -207,10 +207,41 @@ function EmployeeDashboard() {
   const wellnessStatus = latestReport ? getWellnessStatus(latestReport.overall_wellness) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-emerald-300/20 dark:bg-emerald-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-40 right-20 w-96 h-96 bg-blue-300/20 dark:bg-blue-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, -80, 0],
+            y: [0, 100, 0],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-300/20 dark:bg-teal-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 60, 0],
+            y: [0, -80, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
       <EmployeeNavbar user={user} />
       
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8">
+      <div className="relative max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8 z-10">
         {/* Welcome Section */}
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <motion.div
@@ -218,10 +249,10 @@ function EmployeeDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-2 sm:mb-3 lg:mb-4 tracking-tight leading-tight">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 mb-2 sm:mb-3 lg:mb-4 tracking-tight leading-tight">
               Welcome back, {user.first_name || user.email}!
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 font-light leading-relaxed max-w-full sm:max-w-2xl lg:max-w-3xl">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-300 font-light leading-relaxed max-w-full sm:max-w-2xl lg:max-w-3xl">
               Monitor your mental wellness and track your progress over time with our advanced analytics.
             </p>
           </motion.div>
@@ -233,150 +264,152 @@ function EmployeeDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <Link href="/employee/reports/new">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700 rounded-xl p-3 sm:p-4 lg:p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-blue-200 dark:border-blue-700 rounded-2xl p-3 sm:p-4 lg:p-6 cursor-pointer group hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
-                  <div className="bg-blue-500 p-2 sm:p-3 rounded-xl shadow-sm flex-shrink-0">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 sm:p-3 rounded-xl shadow-lg flex-shrink-0">
                     <Heart className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors text-sm sm:text-base truncate">New Wellness Check</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Record your current state</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-sm sm:text-base truncate">New Wellness Check</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 truncate">Record your current state</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
               </motion.div>
           </Link>
 
           <Link href="/employee/wellness-hub">
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="bg-emerald-100 p-3 rounded-2xl">
-                    <Sparkles className="h-6 w-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 transition-colors">Wellness Toolkit</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Access wellness tools</p>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-emerald-500 transition-colors ml-auto" />
+            <motion.div
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-emerald-200 dark:border-emerald-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-emerald-400 dark:hover:border-emerald-500 transition-all duration-300"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-3 rounded-xl shadow-lg">
+                  <Sparkles className="h-6 w-6 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Wellness Toolkit</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Access wellness tools</p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+              </div>
+            </motion.div>
           </Link>
 
           <Link href="/employee/chat">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-green-200 dark:border-green-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-green-400 dark:hover:border-green-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-green-500 p-3 rounded-xl shadow-sm">
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-xl shadow-lg">
                     <MessageSquare className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-green-600 transition-colors">AI Assistant</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Chat with our wellness AI</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">AI Assistant</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Chat with our wellness AI</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
           </Link>
 
           <Link href="/employee/reports">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-purple-200 dark:border-purple-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-purple-400 dark:hover:border-purple-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-purple-500 p-3 rounded-xl shadow-sm">
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-3 rounded-xl shadow-lg">
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors">View Reports</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Track your progress</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">View Reports</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Track your progress</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
             </Link>
 
             <Link href="/employee/support">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-red-200 dark:border-red-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-red-400 dark:hover:border-red-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-red-500 p-3 rounded-xl shadow-sm">
+                  <div className="bg-gradient-to-br from-red-500 to-red-600 p-3 rounded-xl shadow-lg">
                     <AlertTriangle className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-red-600 transition-colors">Support & Escalation</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Get help when needed</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">Support & Escalation</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Get help when needed</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-red-500 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-red-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
             </Link>
 
             <Link href="/employee/recommendations">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 border border-indigo-200 dark:border-indigo-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-indigo-500 p-3 rounded-xl shadow-sm">
+                  <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 rounded-xl shadow-lg">
                     <Sparkles className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 transition-colors">AI Recommendations</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Personalized wellness tips</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">AI Recommendations</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Personalized wellness tips</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-500 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
             </Link>
 
             <Link href="/employee/gamification">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-yellow-200 dark:border-yellow-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-yellow-400 dark:hover:border-yellow-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-yellow-500 p-3 rounded-xl shadow-sm">
+                  <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 p-3 rounded-xl shadow-lg">
                     <Award className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-yellow-600 transition-colors">Gamification</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Earn points & badges</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">Gamification</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Earn points & badges</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-500 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
             </Link>
 
             <Link href="/employee/community">
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 border border-teal-200 dark:border-teal-700 rounded-xl p-6 cursor-pointer group hover:shadow-lg transition-all duration-300"
+                className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-teal-200 dark:border-teal-700 rounded-2xl p-6 cursor-pointer group hover:shadow-2xl hover:border-teal-400 dark:hover:border-teal-500 transition-all duration-300"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="bg-teal-500 p-3 rounded-xl shadow-sm">
+                  <div className="bg-gradient-to-br from-teal-500 to-teal-600 p-3 rounded-xl shadow-lg">
                     <User className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-teal-600 transition-colors">Community</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Anonymous support space</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Community</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Anonymous support space</p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-teal-500 transition-colors" />
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" />
                 </div>
               </motion.div>
           </Link>
@@ -385,14 +418,14 @@ function EmployeeDashboard() {
         {/* Interactive Stats Overview */}
         {latestReport ? (
           <div className="mb-4 sm:mb-6 lg:mb-8">
-            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-700 shadow-lg">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-green-200 dark:border-green-700 shadow-2xl">
               <CardContent className="p-3 sm:p-4 lg:p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-                  <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100">
+                  <h2 className="text-base sm:text-lg lg:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
                     Current Wellness Snapshot
                   </h2>
                   <Link href="/employee/reports">
-                    <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3">
+                    <Button variant="outline" size="sm" className="border-2 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all">
                       <span className="hidden sm:inline">View Interactive Analytics</span>
                       <span className="sm:hidden">Analytics</span>
                       <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />

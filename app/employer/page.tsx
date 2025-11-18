@@ -47,7 +47,7 @@ export default function EmployerSelectionPage() {
 
   // Show loading state while redirecting
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -60,7 +60,7 @@ export default function EmployerSelectionPage() {
         >
           <Brain className="h-16 w-16 text-green-600 mx-auto mb-4" />
         </motion.div>
-        <p className="text-lg text-gray-600">Redirecting to dashboard...</p>
+        <p className="text-lg text-gray-600 dark:text-gray-400">Redirecting to dashboard...</p>
       </motion.div>
     </div>
   );

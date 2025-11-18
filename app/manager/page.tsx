@@ -108,9 +108,40 @@ export default function ManagerSelectionPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-emerald-300/20 dark:bg-emerald-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-40 right-20 w-96 h-96 bg-blue-300/20 dark:bg-blue-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, -80, 0],
+            y: [0, 100, 0],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-300/20 dark:bg-teal-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 60, 0],
+            y: [0, -80, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
       {/* Header */}
-      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300">
+      <div className="border-b border-white/20 dark:border-gray-800/50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl sticky top-0 z-50 transition-all duration-300 shadow-sm">
         <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14 md:h-16">
             <div className="flex items-center space-x-2 sm:space-x-3">
@@ -158,10 +189,10 @@ export default function ManagerSelectionPage() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 mb-4 leading-tight">
             Welcome back, {currentUser.first_name || currentUser.email}!
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Choose your dashboard view to access your personal wellness tools or manage your team's wellness program.
           </p>
         </motion.div>
@@ -177,7 +208,7 @@ export default function ManagerSelectionPage() {
               whileHover={{ scale: 1.02, y: -5 }}
             >
               <Card
-                className={`bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 cursor-pointer ${option.color.replace('text-', 'border-').replace('bg-', 'border-')} h-full`}
+                className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 hover:shadow-2xl transition-all duration-300 cursor-pointer ${option.color.replace('text-', 'border-').replace('bg-', 'border-')} h-full`}
                 onClick={() => router.push(option.route)}
               >
                 <CardHeader className="text-center pb-4">
@@ -200,7 +231,7 @@ export default function ManagerSelectionPage() {
                     </ul>
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 hover:from-green-700 hover:via-lime-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300" size="lg">
                     <span>Access {option.title}</span>
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -217,7 +248,7 @@ export default function ManagerSelectionPage() {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-12"
         >
-          <Card className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/50 dark:to-green-950/50 border-blue-200 dark:border-blue-800">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-green-200 dark:border-green-700 shadow-xl">
             <CardContent className="p-6">
               <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">

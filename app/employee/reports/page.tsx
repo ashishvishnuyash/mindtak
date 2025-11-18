@@ -217,7 +217,7 @@ export default function EmployeeReportsPage() {
 
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -228,9 +228,9 @@ export default function EmployeeReportsPage() {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           >
-            <Brain className="h-16 w-16 text-green-600 mx-auto mb-4" />
+            <Brain className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
           </motion.div>
-          <p className="text-lg text-gray-600 dark:text-gray-400">Loading your wellness reports...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-300">Loading your wellness reports...</p>
         </motion.div>
       </div>
     );
@@ -241,17 +241,53 @@ export default function EmployeeReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-emerald-300/20 dark:bg-emerald-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 100, 0],
+            y: [0, 50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-40 right-20 w-96 h-96 bg-blue-300/20 dark:bg-blue-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, -80, 0],
+            y: [0, 100, 0],
+            scale: [1, 1.3, 1],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-1/3 w-80 h-80 bg-teal-300/20 dark:bg-teal-600/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 60, 0],
+            y: [0, -80, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
       <EmployeeNavbar user={user} />
 
-      <div className="max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="relative max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 z-10">
         {/* Welcome Section */}
-        <div className="mb-4 sm:mb-6 lg:mb-8">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-yellow-600 mb-2 sm:mb-3 lg:mb-4 leading-tight">My Wellness Reports</h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+        <motion.div 
+          className="mb-4 sm:mb-6 lg:mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 mb-2 sm:mb-3 lg:mb-4 leading-tight">My Wellness Reports</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             Track your mental health journey and view your progress over time.
           </p>
-        </div>
+        </motion.div>
 
 
 
@@ -290,7 +326,7 @@ export default function EmployeeReportsPage() {
               onClick={fetchReports}
               variant="outline"
               size="sm"
-              className="border-green-200 text-green-600 hover:bg-green-50 text-xs sm:text-sm px-2 sm:px-3"
+              className="border-2 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all"
               disabled={refreshing}
             >
               {refreshing ? (
@@ -304,7 +340,7 @@ export default function EmployeeReportsPage() {
               onClick={exportMyReports}
               variant="outline"
               size="sm"
-              className="border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-3"
+              className="border-2 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all"
             >
               <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Export My Reports</span>
@@ -312,7 +348,7 @@ export default function EmployeeReportsPage() {
             </Button>
           </div>
           <Link href="/employee/reports/new">
-            <Button className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-3 sm:px-4 w-full sm:w-auto">
+            <Button className="bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 hover:from-green-700 hover:via-lime-700 hover:to-emerald-700 text-white text-xs sm:text-sm px-3 sm:px-4 w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300">
               <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               New Report
             </Button>
@@ -322,7 +358,7 @@ export default function EmployeeReportsPage() {
         {/* Filters and Search - Only show in list view */}
         {viewMode === 'list' && (
           <div>
-            <Card className="mb-4 sm:mb-6 lg:mb-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+            <Card className="mb-4 sm:mb-6 lg:mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700 shadow-xl">
               <CardContent className="p-3 sm:p-4 lg:p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div className="relative sm:col-span-2 lg:col-span-1">
