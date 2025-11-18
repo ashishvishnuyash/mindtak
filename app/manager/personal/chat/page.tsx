@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { AvatarController, useTTSLipSync } from "@/components/avatar";
 import AvatarSettings, { useAvatarSettings } from "@/components/avatar/AvatarSettings";
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import VoiceCallUI from "@/components/voice-call/VoiceCallUI";
 import Link from 'next/link';
 
 import {
@@ -74,13 +75,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-// Audio recording utilities
+// Audio recording utilities with silence detection
 class AudioRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private stream: MediaStream | null = null;
+  private audioContext: AudioContext | null = null;
+  private analyser: AnalyserNode | null = null;
+  private microphone: MediaStreamAudioSourceNode | null = null;
+  private silenceStartTime: number = 0;
+  private isDetectingSilence: boolean = false;
+  private onSilenceDetected: (() => void) | null = null;
 
-  async startRecording(): Promise<boolean> {
+  async startRecording(onSilenceDetected?: () => void): Promise<boolean> {
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -96,6 +103,7 @@ class AudioRecorder {
       });
 
       this.audioChunks = [];
+      this.onSilenceDetected = onSilenceDetected || null;
 
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -103,11 +111,61 @@ class AudioRecorder {
         }
       };
 
-      this.mediaRecorder.start(1000);
+      this.mediaRecorder.start(1000); // Collect data every second
+
+      // Set up silence detection
+      if (onSilenceDetected) {
+        this.setupSilenceDetection();
+      }
+
       return true;
     } catch (error) {
       console.error("Error starting recording:", error);
       return false;
+    }
+  }
+
+  private setupSilenceDetection() {
+    try {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 2048;
+      this.microphone = this.audioContext.createMediaStreamSource(this.stream!);
+      this.microphone.connect(this.analyser);
+
+      const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      this.isDetectingSilence = true;
+      this.silenceStartTime = Date.now();
+
+      const checkSilence = () => {
+        if (!this.isDetectingSilence || !this.analyser) return;
+
+        this.analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+        const threshold = 20; // Adjust this value to change sensitivity (lower = more sensitive)
+
+        if (average < threshold) {
+          // Silence detected
+          const silenceDuration = Date.now() - this.silenceStartTime;
+          if (silenceDuration >= 3000 && this.onSilenceDetected) {
+            // 3 seconds of silence - trigger processing
+            this.onSilenceDetected();
+            this.isDetectingSilence = false;
+            return;
+          }
+        } else {
+          // Sound detected - reset silence timer
+          this.silenceStartTime = Date.now();
+        }
+
+        if (this.isDetectingSilence) {
+          requestAnimationFrame(checkSilence);
+        }
+      };
+
+      checkSilence();
+    } catch (error) {
+      console.error("Error setting up silence detection:", error);
     }
   }
 
@@ -129,11 +187,21 @@ class AudioRecorder {
   }
 
   private cleanup() {
+    this.isDetectingSilence = false;
+    if (this.microphone) {
+      this.microphone.disconnect();
+      this.microphone = null;
+    }
+    if (this.audioContext) {
+      this.audioContext.close();
+      this.audioContext = null;
+    }
     if (this.stream) {
       this.stream.getTracks().forEach((track) => track.stop());
       this.stream = null;
     }
     this.mediaRecorder = null;
+    this.onSilenceDetected = null;
     this.audioChunks = [];
   }
 
@@ -201,6 +269,15 @@ function ManagerPersonalChatPage() {
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
+  
+  // Keep refs in sync with state for callbacks (must be after state declarations)
+  useEffect(() => {
+    isVoiceModeRef.current = isVoiceMode;
+  }, [isVoiceMode]);
+  
+  useEffect(() => {
+    audioEnabledRef.current = audioEnabled;
+  }, [audioEnabled]);
 
   // Avatar state
   const [currentAvatarEmotion, setCurrentAvatarEmotion] = useState<string>("");
@@ -235,6 +312,11 @@ function ManagerPersonalChatPage() {
   const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoListenTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isVoiceModeRef = useRef(false);
+  const audioEnabledRef = useRef(true);
+  const [showClosedCaptions, setShowClosedCaptions] = useState(false);
 
   useEffect(() => {
     // Allow demo access without authentication
@@ -284,7 +366,13 @@ function ManagerPersonalChatPage() {
 
   // Enhanced TTS with ElevenLabs API (male teen voice)
   const speakText = async (text: string) => {
-    if (!audioEnabled) return;
+    console.log('🗣️ speakText called', { text: text.substring(0, 50) + '...', audioEnabled, audioEnabledRef: audioEnabledRef.current });
+    
+    // Use ref to check audioEnabled (avoid stale closure)
+    if (!audioEnabledRef.current) {
+      console.log('⚠️ Audio disabled, not speaking');
+      return;
+    }
     
     // Stop any current speech
     stopTTS();
@@ -299,6 +387,7 @@ function ManagerPersonalChatPage() {
     
     setCurrentTTSText(text);
     setIsSpeaking(true);
+    console.log('🎵 Requesting TTS from ElevenLabs...');
     
     try {
       // Call ElevenLabs API for text-to-speech
@@ -312,21 +401,61 @@ function ManagerPersonalChatPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Failed to generate speech' }));
+        console.error('❌ ElevenLabs API error:', errorData);
         throw new Error(errorData.error || 'Failed to generate speech');
       }
 
       // Get audio blob from response
       const audioBlob = await response.blob();
+      console.log('✅ Audio blob received from ElevenLabs', { size: audioBlob.size, type: audioBlob.type });
       const audioUrl = URL.createObjectURL(audioBlob);
 
       // Create audio element and play
       const audio = new Audio(audioUrl);
       audioPlayerRef.current = audio;
+      
+      console.log('▶️ Starting audio playback...');
 
       audio.onended = () => {
         setIsSpeaking(false);
         URL.revokeObjectURL(audioUrl);
         audioPlayerRef.current = null;
+        
+        // Auto-start listening after AI finishes speaking (only in voice mode)
+        // Use refs to get the latest state values (not stale closure values)
+        const currentVoiceMode = isVoiceModeRef.current;
+        const currentAudioEnabled = audioEnabledRef.current;
+        console.log('🎵 Audio playback ended, checking if should start listening...', { 
+          isVoiceMode: currentVoiceMode, 
+          audioEnabled: currentAudioEnabled, 
+          isRecording 
+        });
+        
+        if (currentVoiceMode && currentAudioEnabled && !isRecording) {
+          // Wait 500ms before auto-starting to listen
+          autoListenTimerRef.current = setTimeout(() => {
+            // Double-check state before starting (use refs again for latest values)
+            if (!isRecording && !isSpeaking && isVoiceModeRef.current) {
+              console.log('🎤 Auto-starting listening after AI finished speaking');
+              startRecording().catch(err => {
+                console.error('❌ Error starting recording:', err);
+                toast.error('Failed to start listening. Please check microphone permissions.');
+              });
+            } else {
+              console.log('⚠️ Skipping auto-listen - state check failed', { 
+                isRecording, 
+                isSpeaking, 
+                isVoiceMode: isVoiceModeRef.current 
+              });
+            }
+          }, 500);
+        } else {
+          console.log('⚠️ Not starting auto-listen', { 
+            isVoiceMode: currentVoiceMode, 
+            audioEnabled: currentAudioEnabled, 
+            isRecording 
+          });
+        }
       };
 
       audio.onerror = (error) => {
@@ -338,7 +467,16 @@ function ManagerPersonalChatPage() {
       };
 
       // Play audio
-      await audio.play();
+      try {
+        await audio.play();
+        console.log('✅ Audio playback started successfully');
+      } catch (playError) {
+        console.error('❌ Error playing audio:', playError);
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioPlayerRef.current = null;
+        throw playError;
+      }
 
       // If in avatar mode, also trigger lip sync (optional - you may want to sync with audio timing)
       if (isAvatarMode) {
@@ -354,7 +492,21 @@ function ManagerPersonalChatPage() {
       utterance.rate = 0.9;
       utterance.pitch = 1;
       utterance.volume = 1;
-      utterance.onend = () => setIsSpeaking(false);
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        // Auto-start listening after AI finishes speaking (only in voice mode)
+        // Use refs to get the latest state values
+        const currentVoiceMode = isVoiceModeRef.current;
+        const currentAudioEnabled = audioEnabledRef.current;
+        if (currentVoiceMode && currentAudioEnabled && !isRecording) {
+          autoListenTimerRef.current = setTimeout(() => {
+            if (!isRecording && !isSpeaking && isVoiceModeRef.current) {
+              console.log('🎤 Auto-starting listening after AI finished speaking (fallback TTS)');
+              startRecording();
+            }
+          }, 500);
+        }
+      };
       utterance.onerror = () => setIsSpeaking(false);
       synthesisRef.current = utterance;
       window.speechSynthesis.speak(utterance);
@@ -365,6 +517,8 @@ function ManagerPersonalChatPage() {
 
   const processAudioMessage = async (audioBlob: Blob) => {
     try {
+      console.log('🎙️ Processing audio message...', { blobSize: audioBlob.size, blobType: audioBlob.type });
+      
       // Ensure the blob has the correct MIME type for webm
       const blobWithType = audioBlob.type 
         ? audioBlob 
@@ -380,33 +534,85 @@ function ManagerPersonalChatPage() {
       );
       formData.append("audio", audioFile, "recording.webm");
 
+      console.log('📤 Sending audio to transcription API...');
       const transcriptionResponse = await fetch("/api/transcribe", {
         method: "POST",
         body: formData,
       });
+      
       if (!transcriptionResponse.ok) {
         const errorData = await transcriptionResponse.json().catch(() => ({ error: 'Failed to transcribe audio' }));
         throw new Error(errorData.error || "Failed to transcribe audio");
       }
+      
       const { text } = await transcriptionResponse.json();
-      if (text.trim()) {
+      console.log('📝 Transcription received:', text);
+      
+      if (text && text.trim()) {
         setCurrentMessage(text);
+        console.log('💬 Sending transcribed text to AI...');
         await handleSendMessage(text);
+        // Processing is complete - the AI response will be spoken automatically
+        setProcessingAudio(false);
+        console.log('✅ Audio processing complete, waiting for AI response...');
       } else {
+        console.warn('⚠️ No speech detected in recording');
         toast.error("No speech detected in recording");
+        setProcessingAudio(false);
       }
     } catch (error) {
-      console.error("Error processing audio:", error);
+      console.error("❌ Error processing audio:", error);
       toast.error("Failed to process audio message");
+      setProcessingAudio(false);
     }
   };
 
   // Call controls
-  const startCall = () => {
+  const startCall = async () => {
     setIsVoiceMode(true);
     setCallStartTime(new Date());
     setCallDuration(0);
-    toast.success("Voice call started - Click microphone to record");
+    setAudioEnabled(true);
+    
+    // Show a welcome message from AI in voice mode, then auto-start listening
+    if (sessionId) {
+      const voiceWelcome = "I'm here to listen. Please share whatever is on your mind.";
+      await addMessageToDb(voiceWelcome, "ai", sessionId);
+      
+      // Speak the welcome message, then auto-start listening after it finishes
+      if (audioEnabled) {
+        // Wait a bit then speak, and the onended handler will auto-start listening
+        setTimeout(() => {
+          speakText(voiceWelcome);
+        }, 500);
+        
+        // FALLBACK: Start listening after 5 seconds even if welcome message doesn't finish
+        // This ensures listening starts even if TTS fails or takes too long
+        setTimeout(() => {
+          if (!isRecording && isVoiceMode) {
+            console.log('🎤 Fallback: Starting listening after timeout');
+            startRecording();
+          }
+        }, 5000);
+      } else {
+        // If audio is disabled, start listening immediately
+        setTimeout(() => {
+          console.log('🎤 Starting listening immediately (audio disabled)');
+          startRecording();
+        }, 1000);
+      }
+    } else {
+      // If no session, start listening immediately
+      setTimeout(() => {
+        console.log('🎤 Starting listening immediately (no session)');
+        startRecording();
+      }, 1000);
+    }
+    
+    toast.success("🎙️ Voice call started! I'm listening...", {
+      duration: 3000,
+      icon: '🎙️',
+    });
   };
 
   const endCall = async () => {
@@ -429,6 +635,16 @@ function ManagerPersonalChatPage() {
       audioPlayerRef.current.pause();
       audioPlayerRef.current.currentTime = 0;
       audioPlayerRef.current = null;
+    }
+    
+    // Clear all timers
+    if (autoListenTimerRef.current) {
+      clearTimeout(autoListenTimerRef.current);
+      autoListenTimerRef.current = null;
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
     }
     
     toast.info("Call ended - generating report...");
@@ -998,17 +1214,75 @@ function ManagerPersonalChatPage() {
     }
   };
 
-  // Enhanced recording functionality with lip sync feedback
+  // Enhanced recording functionality with lip sync feedback and interrupt
   const startRecording = async () => {
-    const success = await audioRecorderRef.current.startRecording();
-    if (success) {
-      setIsRecording(true);
-      if (isAvatarMode && !isVoiceMode) {
-        toast.success("Microphone test started - speak to see lip sync");
-      } else {
-        toast.success("Recording started");
+    // Don't start if already recording
+    if (isRecording) {
+      console.log('⚠️ Already recording, skipping');
+      return;
+    }
+    
+    // Check if we're in voice mode (use ref for latest value)
+    if (!isVoiceModeRef.current) {
+      console.log('⚠️ Not in voice mode, skipping recording', { isVoiceMode: isVoiceModeRef.current });
+      return;
+    }
+    
+    // TALK TO INTERRUPT: Stop any ongoing AI speech when user starts speaking
+    if (isSpeaking || isTTSPlaying) {
+      window.speechSynthesis.cancel();
+      stopTTS();
+      // Stop any playing audio
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current.currentTime = 0;
+        audioPlayerRef.current = null;
       }
-    } else {
+      setIsSpeaking(false);
+      console.log('🔇 AI speech interrupted by user');
+    }
+    
+    // Clear any existing auto-listen timer
+    if (autoListenTimerRef.current) {
+      clearTimeout(autoListenTimerRef.current);
+      autoListenTimerRef.current = null;
+    }
+    
+    // Clear any existing silence timer
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    
+    // Start recording with silence detection callback
+    const handleSilenceDetected = async () => {
+      // Use a ref check or direct check - don't rely on closure
+      console.log('🔇 3 seconds of silence detected - processing audio', { isRecording });
+      // Stop recording and process audio
+      await stopRecording();
+    };
+    
+    console.log('🎤 Attempting to start recording...', { 
+      isVoiceMode: isVoiceModeRef.current, 
+      audioEnabled: audioEnabledRef.current 
+    });
+    try {
+      const success = await audioRecorderRef.current.startRecording(handleSilenceDetected);
+      if (success) {
+        setIsRecording(true);
+        console.log('✅ Recording started successfully - isRecording set to true');
+        if (isAvatarMode && !isVoiceMode) {
+          toast.success("Microphone test started - speak to see lip sync");
+        }
+        // Don't show toast in autonomous voice mode to avoid interruption
+      } else {
+        console.error('❌ Failed to start recording - startRecording returned false');
+        toast.error(
+          "Failed to start recording. Please check microphone permissions."
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error in startRecording:', error);
       toast.error(
         "Failed to start recording. Please check microphone permissions."
       );
@@ -1016,17 +1290,27 @@ function ManagerPersonalChatPage() {
   };
 
   const stopRecording = async () => {
+    console.log('🛑 Stopping recording...', { isRecording });
     setIsRecording(false);
     setProcessingAudio(true);
-    const audioBlob = await audioRecorderRef.current.stopRecording();
+    
+    try {
+      const audioBlob = await audioRecorderRef.current.stopRecording();
+      console.log('📦 Audio blob received:', { size: audioBlob?.size, type: audioBlob?.type });
 
-    if (audioBlob) {
-      await processAudioMessage(audioBlob);
-    } else {
+      if (audioBlob && audioBlob.size > 0) {
+        console.log('🔄 Processing audio message...');
+        await processAudioMessage(audioBlob);
+      } else {
+        console.warn('⚠️ No audio blob or empty blob received');
+        toast.error("No audio recorded. Please try again.");
+        setProcessingAudio(false);
+      }
+    } catch (error) {
+      console.error('❌ Error stopping recording:', error);
       toast.error("Failed to process audio recording");
+      setProcessingAudio(false);
     }
-
-    setProcessingAudio(false);
   };
 
   const toggleSpeaking = () => {
@@ -1055,6 +1339,21 @@ function ManagerPersonalChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
+      {/* Voice Call UI Overlay */}
+      <VoiceCallUI
+        isActive={isVoiceMode}
+        isRecording={isRecording}
+        isSpeaking={isSpeaking}
+        isProcessing={processingAudio}
+        callDuration={callDuration}
+        onEndCall={endCall}
+        onToggleMute={() => setAudioEnabled(!audioEnabled)}
+        isMuted={!audioEnabled}
+        showClosedCaptions={showClosedCaptions}
+        onToggleClosedCaptions={() => setShowClosedCaptions(!showClosedCaptions)}
+        currentText={currentTTSText || lastAIMessage}
+      />
+      
       {/* Header */}
       <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm transition-colors duration-300 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
