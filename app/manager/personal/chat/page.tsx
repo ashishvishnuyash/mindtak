@@ -1892,11 +1892,11 @@ function ManagerPersonalChatPage() {
               </div>
 
               {/* Avatar Display */}
-              <div className="flex-1 flex items-center justify-center relative bg-gradient-to-br from-purple-200/30 to-blue-200/30 lg:bg-transparent"
+              <div className="flex-1 flex items-center justify-center relative bg-gradient-to-br from-purple-200/30 to-blue-200/30 lg:bg-transparent z-10"
                    style={{
                      backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
                    }}>
-                <div className="relative w-full h-full flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center z-10">
                   <AvatarController
                     emotion={currentAvatarEmotion}
                     speaking={isSpeaking}
