@@ -744,49 +744,6 @@ export default function HomePage() {
       {/* Trust & Statistics */}
       <WellnessStats />
 
-      {/* Diltak.Ai Image Section */}
-      <motion.section
-        className="relative py-12 sm:py-16 z-10"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-8"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Experience the <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Platform</span>
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg">
-              A comprehensive view of our AI-powered wellness ecosystem
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/50 dark:border-gray-700/50 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            whileHover={{ scale: 1.02 }}
-          >
-            <Image
-              src="/Diltak. Ai.png"
-              alt="Diltak.Ai Platform Overview"
-              fill
-              className="object-contain p-4"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
-            />
-          </motion.div>
-        </div>
-      </motion.section>
-
       {/* FAQ Section */}
       <motion.section
         id="faq"
