@@ -2270,10 +2270,12 @@ export default function EmployeeChatPage() {
               </div>
 
               {/* 3D Avatar Display */}
-              <div className="flex-1 relative avatar-split-screen bg-gradient-to-br from-purple-200/30 to-blue-200/30 lg:bg-transparent z-10"
+              <div className="flex-1 relative avatar-split-screen bg-gradient-to-br from-purple-200/30 to-blue-200/30 lg:bg-transparent z-0"
                    style={{
-                     backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
+                     backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)',
+                     pointerEvents: 'none'
                    }}>
+                <div style={{ pointerEvents: 'auto' }}>
                 {!avatarLoadError ? (
                   <AvatarController
                     emotion={currentAvatarEmotion || 'IDLE'}
@@ -2319,10 +2321,11 @@ export default function EmployeeChatPage() {
                     </div>
                   </div>
                 )}
+                </div>
 
                 {/* Avatar Loading Indicator */}
                 {!avatarLoaded && !avatarLoadError && (
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl p-6 text-center pointer-events-none">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl p-6 text-center pointer-events-none z-20">
                     <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto mb-3" />
                     <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">Loading 3D Avatar...</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">This may take a few moments</p>
@@ -2331,7 +2334,7 @@ export default function EmployeeChatPage() {
 
                 {/* Avatar Status Indicator - Repositioned for mobile */}
                 {(isSpeaking || isRecording) && (
-                  <div className="absolute top-4 right-4 lg:top-4 lg:right-4 bg-black/80 text-white px-2 py-1 lg:px-3 lg:py-2 rounded-lg text-xs lg:text-sm flex items-center space-x-1 lg:space-x-2 backdrop-blur-sm z-10 pointer-events-none">
+                  <div className="absolute top-4 right-4 lg:top-4 lg:right-4 bg-black/80 text-white px-2 py-1 lg:px-3 lg:py-2 rounded-lg text-xs lg:text-sm flex items-center space-x-1 lg:space-x-2 backdrop-blur-sm z-20 pointer-events-none">
                     {isRecording && (
                       <>
                         <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-red-500 rounded-full animate-pulse"></div>
