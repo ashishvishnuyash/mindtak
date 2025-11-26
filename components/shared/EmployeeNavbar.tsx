@@ -24,9 +24,10 @@ interface EmployeeNavbarProps {
     role?: string;
     company_name?: string;
   };
+  onNavigate?: () => void; // Callback to close avatar before navigation
 }
 
-export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
+export default function EmployeeNavbar({ user, onNavigate }: EmployeeNavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -35,7 +36,19 @@ export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleNavigation = (path: string) => {
+    if (onNavigate) {
+      onNavigate(); // Close avatar first
+    }
+    setTimeout(() => {
+      router.push(path);
+    }, 100); // Small delay to ensure avatar closes first
+  };
+
   const handleSignOut = async () => {
+    if (onNavigate) {
+      onNavigate(); // Close avatar first
+    }
     // Firebase signout
     const error = await signOut(auth).catch((err) => err);
     if (error) {
@@ -59,69 +72,77 @@ export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-2 xl:space-x-3">
-            <Link href="/employee/dashboard">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/dashboard')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/dashboard' ? 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 text-blue-700 dark:text-blue-300 shadow-sm' : ''
               }`}>
-                Dashboard
-              </Button>
-            </Link>
+              Dashboard
+            </Button>
 
-            <Link href="/employee/chat">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/chat')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/chat' ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 text-green-700 dark:text-green-300 shadow-sm' : ''
               }`}>
-                AI Chat
-              </Button>
-            </Link>
+              AI Chat
+            </Button>
 
-            <Link href="/employee/reports">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-purple-900/30 dark:hover:to-violet-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/reports')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-purple-900/30 dark:hover:to-violet-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/reports' ? 'bg-gradient-to-r from-purple-100 to-violet-100 dark:from-purple-900/40 dark:to-violet-900/40 text-purple-700 dark:text-purple-300 shadow-sm' : ''
               }`}>
-                Reports
-              </Button>
-            </Link>
+              Reports
+            </Button>
 
-            <Link href="/employee/wellness-hub">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-teal-900/30 dark:hover:to-cyan-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/wellness-hub')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-teal-900/30 dark:hover:to-cyan-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/wellness-hub' ? 'bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40 text-teal-700 dark:text-teal-300 shadow-sm' : ''
               }`}>
-                Wellness
-              </Button>
-            </Link>
+              Wellness
+            </Button>
 
-            <Link href="/employee/community">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/community')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/community' ? 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 text-orange-700 dark:text-orange-300 shadow-sm' : ''
               }`}>
-                Community
-              </Button>
-            </Link>
+              Community
+            </Button>
 
-            <Link href="/employee/support">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-red-900/30 dark:hover:to-pink-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/support')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-red-900/30 dark:hover:to-pink-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/support' ? 'bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/40 dark:to-pink-900/40 text-red-700 dark:text-red-300 shadow-sm' : ''
               }`}>
-                Support
-              </Button>
-            </Link>
+              Support
+            </Button>
 
-            <Link href="/employee/recommendations">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/recommendations')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/recommendations' ? 'bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 text-indigo-700 dark:text-indigo-300 shadow-sm' : ''
               }`}>
-                Recommendations
-              </Button>
-            </Link>
+              Recommendations
+            </Button>
 
-            <Link href="/employee/gamification">
-              <Button variant="ghost" className={`text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-yellow-900/30 dark:hover:to-orange-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
+            <Button 
+              variant="ghost" 
+              onClick={() => handleNavigation('/employee/gamification')}
+              className={`text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-yellow-900/30 dark:hover:to-orange-900/30 px-3 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-sm ${
                 pathname === '/employee/gamification' ? 'bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 text-yellow-700 dark:text-yellow-300 shadow-sm' : ''
               }`}>
-                Gamification
-              </Button>
-            </Link>
+              Gamification
+            </Button>
 
             {/* User Actions */}
             <div className="flex items-center space-x-3 border-l border-gray-200/60 dark:border-gray-700/60 pl-4 ml-2">
@@ -165,69 +186,101 @@ export default function EmployeeNavbar({ user }: EmployeeNavbarProps) {
             <div className="lg:hidden absolute top-full left-0 right-0 bg-white/98 dark:bg-gray-900/98 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-700/60 shadow-xl z-50">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
                 <div className="flex flex-col space-y-1">
-                  <Link href="/employee/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/dashboard');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/dashboard' ? 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/40 dark:to-indigo-900/40 text-blue-700 dark:text-blue-300' : ''
                     }`}>
-                      Dashboard
-                    </Button>
-                  </Link>
+                    Dashboard
+                  </Button>
 
-                  <Link href="/employee/chat" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/chat');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/chat' ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 text-green-700 dark:text-green-300' : ''
                     }`}>
-                      AI Chat
-                    </Button>
-                  </Link>
+                    AI Chat
+                  </Button>
 
-                  <Link href="/employee/reports" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-purple-900/30 dark:hover:to-violet-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/reports');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-purple-900/30 dark:hover:to-violet-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/reports' ? 'bg-gradient-to-r from-purple-100 to-violet-100 dark:from-purple-900/40 dark:to-violet-900/40 text-purple-700 dark:text-purple-300' : ''
                     }`}>
-                      Reports
-                    </Button>
-                  </Link>
+                    Reports
+                  </Button>
 
-                  <Link href="/employee/wellness-hub" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-teal-900/30 dark:hover:to-cyan-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/wellness-hub');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-teal-50 hover:to-cyan-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-teal-900/30 dark:hover:to-cyan-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/wellness-hub' ? 'bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40 text-teal-700 dark:text-teal-300' : ''
                     }`}>
-                      Wellness
-                    </Button>
-                  </Link>
+                    Wellness
+                  </Button>
 
-                  <Link href="/employee/community" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/community');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-amber-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-orange-900/30 dark:hover:to-amber-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/community' ? 'bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 text-orange-700 dark:text-orange-300' : ''
                     }`}>
-                      Community
-                    </Button>
-                  </Link>
+                    Community
+                  </Button>
 
-                  <Link href="/employee/support" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-red-900/30 dark:hover:to-pink-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/support');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-red-900/30 dark:hover:to-pink-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/support' ? 'bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/40 dark:to-pink-900/40 text-red-700 dark:text-red-300' : ''
                     }`}>
-                      Support
-                    </Button>
-                  </Link>
+                    Support
+                  </Button>
 
-                  <Link href="/employee/recommendations" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/recommendations');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/recommendations' ? 'bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 text-indigo-700 dark:text-indigo-300' : ''
                     }`}>
-                      Recommendations
-                    </Button>
-                  </Link>
+                    Recommendations
+                  </Button>
 
-                  <Link href="/employee/gamification" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-yellow-900/30 dark:hover:to-orange-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleNavigation('/employee/gamification');
+                    }}
+                    className={`w-full justify-start text-gray-700 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-yellow-900/30 dark:hover:to-orange-900/30 py-3 rounded-lg font-medium transition-all duration-200 ${
                       pathname === '/employee/gamification' ? 'bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 text-yellow-700 dark:text-yellow-300' : ''
                     }`}>
-                      Gamification
-                    </Button>
-                  </Link>
+                    Gamification
+                  </Button>
 
                   <div className="pt-4 border-t border-gray-200/60 dark:border-gray-700/60 space-y-3">
                     {user && (
