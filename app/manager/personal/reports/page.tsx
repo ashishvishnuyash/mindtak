@@ -1,131 +1,236 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import ManagerNavbar from '@/components/shared/ManagerNavbar';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { 
-  TrendingUp, 
-  Calendar, 
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Calendar,
   Plus,
-  ArrowLeft,
-  Shield,
+  Search,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  RefreshCw,
+  Loader2,
+  Sparkles,
   Brain,
   Heart,
   Battery,
-  AlertTriangle,
   Smile,
-  BarChart3,
+  ArrowRight,
   Download,
-  Filter,
-  Search,
-  RefreshCw,
-  Loader2
+  BarChart3
 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useUser } from '@/hooks/use-user';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 import type { MentalHealthReport } from '@/types';
-import { withAuth } from '@/components/auth/with-auth';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { signOut } from 'firebase/auth';
+import InteractiveAnalytics from '@/components/analytics/InteractiveAnalytics';
 
-function ManagerPersonalReportsPage() {
+// Extend MentalHealthReport locally to include metrics fields for type safety
+interface UIMentalHealthReport extends MentalHealthReport {
+  metrics?: {
+    emotional_tone: number;
+    stress_anxiety: number;
+    motivation_engagement: number;
+    social_connectedness: number;
+    self_esteem: number;
+    assertiveness: number;
+    work_life_balance_metric: number;
+    cognitive_functioning: number;
+    emotional_regulation: number;
+    substance_use: number;
+  };
+  metrics_explanation?: {
+    emotional_tone: string;
+    stress_anxiety: string;
+    motivation_engagement: string;
+    social_connectedness: string;
+    self_esteem: string;
+    assertiveness: string;
+    work_life_balance_metric: string;
+    cognitive_functioning: string;
+    emotional_regulation: string;
+    substance_use: string;
+  };
+}
+
+export default function EmployeeReportsPage() {
   const { user, loading: userLoading } = useUser();
-  const [reports, setReports] = useState<MentalHealthReport[]>([]);
+  const [reports, setReports] = useState<UIMentalHealthReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedTimeRange, setSelectedTimeRange] = useState('30d');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRisk, setFilterRisk] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
+  const [viewMode, setViewMode] = useState<'analytics' | 'list'>('analytics');
   const router = useRouter();
 
-  const fetchReports = async () => {
-    if (!user?.id) return;
-
+  // Wrap fetchReports in useCallback
+  const fetchReports = useCallback(async () => {
+    if (!user) return;
     try {
-      setLoading(true);
-      const reportsRef = collection(db, 'mental_health_reports');
+      setRefreshing(true);
+      const reportsCollection = collection(db, 'mental_health_reports');
       const q = query(
-        reportsRef, 
-        where('employee_id', '==', user.id),
-        orderBy('created_at', 'desc')
+        reportsCollection,
+        where('employee_id', '==', user.id)
       );
-      
       const querySnapshot = await getDocs(q);
-      const fetchedReports: MentalHealthReport[] = querySnapshot.docs.map((doc) => ({
+      const data = querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
-        created_at: doc.data().created_at || new Date().toISOString()
-      } as MentalHealthReport));
-
-      setReports(fetchedReports);
+        ...doc.data()
+      })) as UIMentalHealthReport[];
+      // Sort by created_at in JavaScript to avoid Firestore index requirements
+      const sortedData = data.sort((a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setReports(sortedData);
     } catch (error) {
       console.error('Error fetching reports:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchReports();
-    }
   }, [user]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchReports();
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push('/');
+      return;
+    }
+
+    // Allow both employee and manager roles for personal reports
+    if (user && (user.role === 'employee' || user.role === 'manager' || user.role === 'admin')) {
+      fetchReports();
+    } else if (user) {
+      // If user exists but doesn't have the right role, stop loading
+      setLoading(false);
+    }
+  }, [user, userLoading, router, fetchReports]);
+
+  const safeRiskLevel = (value: any): 'low' | 'medium' | 'high' => {
+    if (value === 'medium' || value === 'high') return value;
+    return 'low';
   };
 
-  const getRiskBadgeColor = (riskLevel: string) => {
-    switch (riskLevel) {
-      case 'high': return 'bg-red-100 text-red-700 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+  const getRiskLevelBadge = (riskLevel: 'low' | 'medium' | 'high') => {
+    const colors = {
+      low: 'bg-green-100 text-green-700 border-green-200',
+      medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      high: 'bg-red-100 text-red-700 border-red-200',
+    };
+    const icons = {
+      low: <CheckCircle className="h-3 w-3" />,
+      medium: <Clock className="h-3 w-3" />,
+      high: <AlertTriangle className="h-3 w-3" />,
+    };
+    const safeLevel = safeRiskLevel(riskLevel);
+    return (
+      <Badge className={`${colors[safeLevel]} flex items-center space-x-1`}>
+        {icons[safeLevel]}
+        <span>{safeLevel.toUpperCase()}</span>
+      </Badge>
+    );
+  };
+
+  const exportMyReports = async () => {
+    try {
+      // Build query parameters for the export page
+      const params = new URLSearchParams({
+        type: 'employee',
+        range: '30d',
+        risk: filterRisk
+      });
+
+      // Redirect to the export page
+      router.push(`/export/report?${params.toString()}`);
+    } catch (error) {
+      console.error('Export error:', error);
     }
   };
 
-  const getFilteredReports = () => {
-    const now = new Date();
-    const days = selectedTimeRange === '7d' ? 7 : selectedTimeRange === '30d' ? 30 : 90;
-    const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    
-    return reports.filter(report => new Date(report.created_at) >= cutoffDate);
+  const getTrendIcon = (current: number, previous: number) => {
+    if (current > previous) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (current < previous) return <TrendingDown className="h-4 w-4 text-red-600" />;
+    return <Minus className="h-4 w-4 text-gray-400" />;
   };
 
-  const filteredReports = getFilteredReports();
+  const filteredReports = reports.filter(report => {
+    const matchesSearch = searchTerm === '' ||
+      report.comments?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      new Date(report.created_at).toLocaleDateString().includes(searchTerm);
 
-  const chartData = filteredReports.slice(0, 10).reverse().map((report) => ({
-    date: new Date(report.created_at).toLocaleDateString(),
-    mood: report.mood_rating,
-    stress: 11 - report.stress_level, // Invert for better visualization
-    energy: report.energy_level,
-    wellness: report.overall_wellness,
-  }));
+    const matchesRisk = filterRisk === 'all' || report.risk_level === filterRisk;
 
-  const averageStats = filteredReports.length > 0 ? {
-    mood: Math.round(filteredReports.reduce((sum, r) => sum + (r.mood_rating || 0), 0) / filteredReports.length * 10) / 10,
-    stress: Math.round(filteredReports.reduce((sum, r) => sum + (r.stress_level || 0), 0) / filteredReports.length * 10) / 10,
-    energy: Math.round(filteredReports.reduce((sum, r) => sum + (r.energy_level || 0), 0) / filteredReports.length * 10) / 10,
-    wellness: Math.round(filteredReports.reduce((sum, r) => sum + (r.overall_wellness || 0), 0) / filteredReports.length * 10) / 10,
-  } : { mood: 0, stress: 0, energy: 0, wellness: 0 };
+    return matchesSearch && matchesRisk;
+  });
+
+  const sortedReports = [...filteredReports].sort((a, b) => {
+    switch (sortBy) {
+      case 'oldest':
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case 'wellness-high':
+        return b.overall_wellness - a.overall_wellness;
+      case 'wellness-low':
+        return a.overall_wellness - b.overall_wellness;
+      case 'stress-high':
+        return b.stress_level - a.stress_level;
+      case 'stress-low':
+        return a.stress_level - b.stress_level;
+      default: // newest
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+  });
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" as const }
+    }
+  };
 
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <Loader2 className="h-16 w-16 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Loading your wellness analytics...</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <Brain className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
+          </motion.div>
+          <p className="text-lg text-gray-600 dark:text-gray-300">Loading your wellness reports...</p>
         </motion.div>
       </div>
     );
@@ -136,7 +241,7 @@ function ManagerPersonalReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden lg:ml-64">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div
@@ -168,286 +273,356 @@ function ManagerPersonalReportsPage() {
         />
       </div>
 
-      {/* Header */}
-      <div className="border-b border-white/20 dark:border-gray-800/50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl sticky top-0 z-50 transition-all duration-300 shadow-sm">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Link href="/manager/personal">
-                <Button variant="ghost" size="sm" className="p-2">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">Personal Analytics</h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Your Wellness Reports</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
-                Personal Analytics
-              </Button>
-              <Link href="/manager/dashboard" className="hidden lg:block">
-                <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 text-xs sm:text-sm px-2 sm:px-3">
-                  <Shield className="h-3 w-3 mr-1" />
-                  Management Dashboard
-                </Button>
-              </Link>
-              <ThemeToggle size="sm" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-600 border-green-200 px-2 sm:px-3"
-                onClick={async () => {
-                  try {
-                    await signOut(auth);
-                    router.push('/auth/login');
-                  } catch (error) {
-                    console.error('Logout error:', error);
-                    router.push('/auth/login');
-                  }
-                }}
+      <ManagerNavbar user={user} />
+
+      <div className="relative max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 z-10">
+        {/* Welcome Section */}
+        <motion.div 
+          className="mb-4 sm:mb-6 lg:mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 mb-2 sm:mb-3 lg:mb-4 leading-tight">My Wellness Reports</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+            Track your mental health journey and view your progress over time.
+          </p>
+        </motion.div>
+
+
+
+        {/* View Mode Toggle */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('analytics')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'analytics'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
               >
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
+                <BarChart3 className="h-4 w-4 mr-2 inline" />
+                Interactive Analytics
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'list'
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+              >
+                <Calendar className="h-4 w-4 mr-2 inline" />
+                Report List
+              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header Section */}
-        <div className="mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 bg-clip-text text-transparent mb-4">
-              Personal Wellness Analytics
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
-              Track your personal wellness journey as a leader. Monitor trends, identify patterns, and make data-driven decisions about your mental health.
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => router.push('/manager/personal/reports/new')}>
-              <Plus className="h-4 w-4 mr-2" />
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mb-4 sm:mb-6 lg:mb-8 space-y-3 sm:space-y-0">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <Button
+              onClick={fetchReports}
+              variant="outline"
+              size="sm"
+              className="border-2 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all"
+              disabled={refreshing}
+            >
+              {refreshing ? (
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              )}
+              Refresh
+            </Button>
+            <Button
+              onClick={exportMyReports}
+              variant="outline"
+              size="sm"
+              className="border-2 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all"
+            >
+              <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Export My Reports</span>
+              <span className="sm:hidden">Export</span>
+            </Button>
+          </div>
+          <Link href="/manager/personal/reports/new">
+            <Button className="bg-gradient-to-r from-green-600 via-lime-600 to-emerald-600 hover:from-green-700 hover:via-lime-700 hover:to-emerald-700 text-white text-xs sm:text-sm px-3 sm:px-4 w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300">
+              <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               New Report
             </Button>
-            <select
-              value={selectedTimeRange}
-              onChange={(e) => setSelectedTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-            </select>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="border-green-200 text-green-600 hover:bg-green-50"
-          >
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Refresh
-          </Button>
+          </Link>
         </div>
 
-        {filteredReports.length > 0 ? (
-          <>
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Average Mood</p>
-                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{averageStats.mood}/10</p>
-                    </div>
-                    <Smile className="h-8 w-8 text-blue-600" />
+        {/* Filters and Search - Only show in list view */}
+        {viewMode === 'list' && (
+          <div>
+            <Card className="mb-4 sm:mb-6 lg:mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700 shadow-xl">
+              <CardContent className="p-3 sm:p-4 lg:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="relative sm:col-span-2 lg:col-span-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3 sm:h-4 sm:w-4" />
+                    <Input
+                      placeholder="Search reports..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-8 sm:pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100 text-sm h-8 sm:h-10"
+                    />
                   </div>
-                </CardContent>
-              </Card>
 
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-green-700 dark:text-green-300">Average Energy</p>
-                      <p className="text-3xl font-bold text-green-900 dark:text-green-100">{averageStats.energy}/10</p>
-                    </div>
-                    <Battery className="h-8 w-8 text-green-600" />
+                  <Select value={filterRisk} onValueChange={setFilterRisk}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100">
+                      <Filter className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Filter by risk" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Risk Levels</SelectItem>
+                      <SelectItem value="low">Low Risk</SelectItem>
+                      <SelectItem value="medium">Medium Risk</SelectItem>
+                      <SelectItem value="high">High Risk</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:border-green-500 focus:ring-green-500 text-gray-900 dark:text-gray-100">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="oldest">Oldest First</SelectItem>
+                      <SelectItem value="wellness-high">Highest Wellness</SelectItem>
+                      <SelectItem value="wellness-low">Lowest Wellness</SelectItem>
+                      <SelectItem value="stress-high">Highest Stress</SelectItem>
+                      <SelectItem value="stress-low">Lowest Stress</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <span>{filteredReports.length} of {reports.length} reports</span>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-red-700 dark:text-red-300">Average Stress</p>
-                      <p className="text-3xl font-bold text-red-900 dark:text-red-100">{averageStats.stress}/10</p>
-                    </div>
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Overall Wellness</p>
-                      <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{averageStats.wellness}/10</p>
-                    </div>
-                    <Brain className="h-8 w-8 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Trend Chart */}
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
-                    <TrendingUp className="h-5 w-5 text-blue-500" />
-                    <span>Wellness Trends</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis domain={[0, 10]} />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="mood" stroke="#3B82F6" strokeWidth={2} name="Mood" />
-                      <Line type="monotone" dataKey="stress" stroke="#F59E0B" strokeWidth={2} name="Stress (Inverted)" />
-                      <Line type="monotone" dataKey="energy" stroke="#10B981" strokeWidth={2} name="Energy" />
-                      <Line type="monotone" dataKey="wellness" stroke="#8B5CF6" strokeWidth={2} name="Overall Wellness" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Bar Chart */}
-              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-gray-100">
-                    <BarChart3 className="h-5 w-5 text-green-500" />
-                    <span>Average Metrics</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={[
-                      { name: 'Mood', value: averageStats.mood, fill: '#3B82F6' },
-                      { name: 'Energy', value: averageStats.energy, fill: '#10B981' },
-                      { name: 'Stress', value: averageStats.stress, fill: '#EF4444' },
-                      { name: 'Wellness', value: averageStats.wellness, fill: '#8B5CF6' },
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis domain={[0, 10]} />
-                      <Tooltip />
-                      <Bar dataKey="value" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Reports List */}
-            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between text-gray-900 dark:text-gray-100">
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="h-5 w-5 text-purple-500" />
-                    <span>Recent Reports ({filteredReports.length})</span>
-                  </div>
-                  <Button variant="outline" size="sm" className="border-green-200 text-green-600 hover:bg-green-50">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Data
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {filteredReports.slice(0, 10).map((report) => (
-                    <div 
-                      key={report.id} 
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-300"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="text-center">
-                          <p className="font-medium text-gray-900 dark:text-gray-100">
-                            {new Date(report.created_at).toLocaleDateString()}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(report.created_at).toLocaleTimeString()}
-                          </p>
-                        </div>
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          <div className="text-center">
-                            <p className="text-gray-500 dark:text-gray-400">Mood</p>
-                            <p className="font-semibold text-blue-600">{report.mood_rating}/10</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-500 dark:text-gray-400">Energy</p>
-                            <p className="font-semibold text-green-600">{report.energy_level}/10</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-500 dark:text-gray-400">Stress</p>
-                            <p className="font-semibold text-red-600">{report.stress_level}/10</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-500 dark:text-gray-400">Wellness</p>
-                            <p className="font-semibold text-purple-600">{report.overall_wellness}/10</p>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge className={getRiskBadgeColor(report.risk_level || 'low')}>
-                        {(report.risk_level || 'low').toUpperCase()}
-                      </Badge>
-                    </div>
-                  ))}
                 </div>
               </CardContent>
             </Card>
-          </>
-        ) : (
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <CardContent className="p-12 text-center">
-              <Brain className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No Analytics Data</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">Create your first wellness report to see detailed analytics.</p>
-              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => router.push('/manager/personal/reports/new')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create First Report
+          </div>
+        )}
+
+        {/* Interactive Analytics View */}
+        {viewMode === 'analytics' && sortedReports.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <InteractiveAnalytics
+              data={sortedReports[0]}
+              showComparison={sortedReports.length > 1}
+              previousData={sortedReports[1]}
+            />
+          </motion.div>
+        )}
+
+        {/* Reports List */}
+        {viewMode === 'list' && sortedReports.length > 0 && (
+          <motion.div
+            className="space-y-6"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+          >
+            {sortedReports.map((report, index) => {
+              const previousReport = sortedReports[index + 1] as UIMentalHealthReport | undefined;
+              const r = report as UIMentalHealthReport;
+              return (
+                <motion.div key={report.id} variants={itemVariants}>
+                  <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+                        <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-2xl shadow-lg"
+                          >
+                            <Calendar className="h-6 w-6 text-white" />
+                          </motion.div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                              {new Date(report.created_at).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {new Date(report.created_at).toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                          {getRiskLevelBadge(report.risk_level)}
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                              {report.overall_wellness}/10
+                            </div>
+                            <div className="text-sm text-gray-600">Overall Wellness</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Main Metrics Grid */}
+                      {r.metrics ? (
+                        <div className="mb-6">
+                          <h4 className="text-md font-semibold text-green-700 mb-2 flex items-center">
+                            <Sparkles className="h-4 w-4 mr-2" />AI Metrics Breakdown
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(r.metrics).map(([key, value]) => {
+                              const explanations = r.metrics_explanation || {};
+                              const labels: Record<string, string> = {
+                                emotional_tone: 'Emotional Tone',
+                                stress_anxiety: 'Stress & Anxiety',
+                                motivation_engagement: 'Motivation & Engagement',
+                                social_connectedness: 'Social Connectedness',
+                                self_esteem: 'Self-Esteem',
+                                assertiveness: 'Assertiveness',
+                                work_life_balance_metric: 'Work-Life Balance',
+                                cognitive_functioning: 'Cognitive Functioning',
+                                emotional_regulation: 'Emotional Regulation',
+                                substance_use: 'Substance Use',
+                              };
+                              const colors = [
+                                'bg-green-100 text-green-800',
+                                'bg-yellow-100 text-yellow-800',
+                                'bg-orange-100 text-orange-800',
+                                'bg-red-100 text-red-800',
+                              ];
+                              return (
+                                <div key={key} className={`rounded-lg border p-3 ${colors[Number(value)] || ''}`}>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium">{labels[key] || key}</span>
+                                    <span className="font-bold text-lg">{String(value)}/3</span>
+                                  </div>
+                                  <div className="text-xs text-gray-700">
+                                    {(explanations as Record<string, string>)[key] || ''}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : (
+                        // Fallback: show old metrics if new metrics are not present
+                        <>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <Smile className="h-5 w-5 text-blue-600" />
+                                <span className="text-xl font-semibold text-blue-700">{report.mood_rating}/10</span>
+                                {previousReport && getTrendIcon(report.mood_rating, previousReport.mood_rating)}
+                              </div>
+                              <div className="text-sm text-blue-600 font-medium">Mood</div>
+                            </motion.div>
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl border border-red-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <AlertTriangle className="h-5 w-5 text-red-600" />
+                                <span className="text-xl font-semibold text-red-700">{report.stress_level}/10</span>
+                                {previousReport && getTrendIcon(report.stress_level, previousReport.stress_level)}
+                              </div>
+                              <div className="text-sm text-red-600 font-medium">Stress</div>
+                            </motion.div>
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <Battery className="h-5 w-5 text-green-600" />
+                                <span className="text-xl font-semibold text-green-700">{report.energy_level}/10</span>
+                                {previousReport && getTrendIcon(report.energy_level, previousReport.energy_level)}
+                              </div>
+                              <div className="text-sm text-green-600 font-medium">Energy</div>
+                            </motion.div>
+                            <motion.div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-300" whileHover={{ scale: 1.02, y: -2 }}>
+                              <div className="flex items-center justify-center space-x-1 mb-2">
+                                <Heart className="h-5 w-5 text-purple-600" />
+                                <span className="text-xl font-semibold text-purple-700">{report.work_satisfaction}/10</span>
+                                {previousReport && getTrendIcon(report.work_satisfaction, previousReport.work_satisfaction)}
+                              </div>
+                              <div className="text-sm text-purple-600 font-medium">Work Satisfaction</div>
+                            </motion.div>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.work_life_balance}/10</div>
+                              <div className="text-xs text-gray-600">Work-Life Balance</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.anxiety_level}/10</div>
+                              <div className="text-xs text-gray-600">Anxiety</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.confidence_level}/10</div>
+                              <div className="text-xs text-gray-600">Confidence</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                              <div className="text-lg font-semibold text-gray-700">{report.sleep_quality}/10</div>
+                              <div className="text-xs text-gray-600">Sleep Quality</div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Comments */}
+                      {report.comments && (
+                        <motion.div
+                          className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <h4 className="text-sm font-semibold text-blue-700 mb-2 flex items-center">
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Your Notes
+                          </h4>
+                          <p className="text-gray-700 text-sm leading-relaxed">{report.comments}</p>
+                        </motion.div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+
+        {/* Empty State */}
+        {sortedReports.length === 0 && !loading && (
+          <motion.div
+            className="text-center py-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div
+              animate={{ y: [-10, 10, -10] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Brain className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+            </motion.div>
+            <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">No Reports Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+              Start your wellness journey by creating your first mental health report. Track your progress and gain insights into your well-being.
+            </p>
+            <Link href="/manager/personal/reports/new">
+              <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Plus className="h-5 w-5 mr-2" />
+                Create Your First Report
               </Button>
-            </CardContent>
-          </Card>
+            </Link>
+          </motion.div>
         )}
       </div>
     </div>
   );
 }
-
-export default withAuth(ManagerPersonalReportsPage, ['manager']);

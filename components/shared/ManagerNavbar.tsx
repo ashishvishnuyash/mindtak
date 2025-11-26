@@ -26,7 +26,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-interface EmployeeNavbarProps {
+interface ManagerNavbarProps {
   user?: {
     first_name?: string;
     last_name?: string;
@@ -37,7 +37,7 @@ interface EmployeeNavbarProps {
   onNavigate?: () => void; // Callback to close avatar before navigation
 }
 
-export default function EmployeeNavbar({ user, onNavigate }: EmployeeNavbarProps) {
+export default function ManagerNavbar({ user, onNavigate }: ManagerNavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,14 +75,14 @@ export default function EmployeeNavbar({ user, onNavigate }: EmployeeNavbarProps
   };
 
   const navigationItems = [
-    { path: '/employee/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: 'blue' },
-    { path: '/employee/chat', label: 'AI Chat', icon: MessageSquare, color: 'green' },
-    { path: '/employee/reports', label: 'Reports', icon: FileText, color: 'purple' },
-    { path: '/employee/wellness-hub', label: 'Wellness', icon: Heart, color: 'teal' },
-    { path: '/employee/community', label: 'Community', icon: Users, color: 'orange' },
-    { path: '/employee/support', label: 'Support', icon: HelpCircle, color: 'red' },
-    { path: '/employee/recommendations', label: 'Recommendations', icon: Sparkles, color: 'indigo' },
-    { path: '/employee/gamification', label: 'Gamification', icon: Trophy, color: 'yellow' },
+    { path: '/manager/personal/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: 'blue' },
+    { path: '/manager/personal/chat', label: 'AI Chat', icon: MessageSquare, color: 'green' },
+    { path: '/manager/personal/reports', label: 'Reports', icon: FileText, color: 'purple' },
+    { path: '/manager/personal/wellness-hub', label: 'Wellness', icon: Heart, color: 'teal' },
+    { path: '/manager/personal/community', label: 'Community', icon: Users, color: 'orange' },
+    { path: '/manager/personal/support', label: 'Support', icon: HelpCircle, color: 'red' },
+    { path: '/manager/personal/recommendations', label: 'Recommendations', icon: Sparkles, color: 'indigo' },
+    { path: '/manager/personal/gamification', label: 'Gamification', icon: Trophy, color: 'yellow' },
   ];
 
   const getColorClasses = (color: string, isActive: boolean) => {

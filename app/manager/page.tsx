@@ -89,7 +89,7 @@ export default function ManagerSelectionPage() {
         'Community & gamification',
         'Personal analytics & insights'
       ],
-      route: '/manager/personal'
+      route: '/manager/personal/dashboard'
     },
     {
       id: 'management',

@@ -30,9 +30,7 @@ import {
   BarChart3,
   BookOpen,
   Clock,
-  Award,
-  ArrowLeft,
-  Shield
+  Award
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -43,8 +41,10 @@ import { useCallback } from 'react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import ComprehensiveMetrics from '@/components/dashboard/ComprehensiveMetrics';
 import { ComprehensiveReportExportService } from '@/lib/comprehensive-report-export-service';
+import ManagerNavbar from '@/components/shared/ManagerNavbar';
+// Dashboard component
 
-function ManagerPersonalDashboard() {
+function EmployeeDashboard() {
   const { user, loading: userLoading } = useUser();
   const [reports, setReports] = useState<MentalHealthReport[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +58,7 @@ function ManagerPersonalDashboard() {
     lastReportDate: null as string | null,
   });
   const router = useRouter();
+
 
   const fetchReports = useCallback(async () => {
     try {
@@ -176,9 +177,10 @@ function ManagerPersonalDashboard() {
     wellness: report.overall_wellness,
   }));
 
+
   if (userLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -189,9 +191,9 @@ function ManagerPersonalDashboard() {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           >
-            <Brain className="h-12 w-12 sm:h-16 sm:w-16 text-green-600 mx-auto mb-4" />
+            <Brain className="h-16 w-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
           </motion.div>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300">Loading your personal wellness dashboard...</p>
+          <p className="text-lg text-gray-600 dark:text-gray-300">Loading your wellness dashboard...</p>
         </motion.div>
       </div>
     );
@@ -205,7 +207,7 @@ function ManagerPersonalDashboard() {
   const wellnessStatus = latestReport ? getWellnessStatus(latestReport.overall_wellness) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-x-hidden lg:ml-64">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div
@@ -237,62 +239,7 @@ function ManagerPersonalDashboard() {
         />
       </div>
 
-      {/* Header */}
-      <div className="border-b border-white/20 dark:border-gray-800/50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl sticky top-0 z-50 transition-all duration-300 shadow-sm">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Link href="/manager">
-                <Button variant="ghost" size="sm" className="p-2">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Shield className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100">Personal Wellness</h1>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Your Personal Dashboard</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Button variant="outline" size="sm" className="hidden lg:flex text-green-600 border-green-200 bg-green-50 text-xs px-2 sm:px-3">
-                Personal View
-              </Button>
-              <Link href="/manager/dashboard" className="hidden lg:block">
-                <Button variant="outline" size="sm" className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 text-xs sm:text-sm px-2 sm:px-3">
-                  <Shield className="h-3 w-3 mr-1" />
-                  Management Dashboard
-                </Button>
-              </Link>
-              <Button variant="outline" size="sm" className="p-2">
-                <User className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="p-2">
-                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-              <ThemeToggle size="sm" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-600 border-green-200 px-2 sm:px-3"
-                onClick={async () => {
-                  try {
-                    await auth.signOut();
-                    router.push('/auth/login');
-                  } catch (error) {
-                    console.error('Logout error:', error);
-                    router.push('/auth/login');
-                  }
-                }}
-              >
-                <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ManagerNavbar user={user} />
       
       <div className="relative max-w-7xl mx-auto px-2 sm:px-3 md:px-4 lg:px-8 py-3 sm:py-4 md:py-6 lg:py-8 z-10">
         {/* Welcome Section */}
@@ -311,9 +258,11 @@ function ManagerPersonalDashboard() {
           </motion.div>
         </div>
 
+
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-          <Link href="/manager/personal/reports/new">
+          <Link href="/employee/reports/new">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -332,7 +281,7 @@ function ManagerPersonalDashboard() {
               </motion.div>
           </Link>
 
-          <Link href="/manager/personal/wellness-hub">
+          <Link href="/employee/wellness-hub">
             <motion.div
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.98 }}
@@ -351,7 +300,7 @@ function ManagerPersonalDashboard() {
             </motion.div>
           </Link>
 
-          <Link href="/manager/personal/chat">
+          <Link href="/employee/chat">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -370,7 +319,7 @@ function ManagerPersonalDashboard() {
               </motion.div>
           </Link>
 
-          <Link href="/manager/personal/reports">
+          <Link href="/employee/reports">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -389,7 +338,7 @@ function ManagerPersonalDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/manager/personal/support">
+            <Link href="/employee/support">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -408,7 +357,7 @@ function ManagerPersonalDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/manager/personal/recommendations">
+            <Link href="/employee/recommendations">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -427,7 +376,7 @@ function ManagerPersonalDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/manager/personal/gamification">
+            <Link href="/employee/gamification">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -446,7 +395,7 @@ function ManagerPersonalDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/manager/personal/community">
+            <Link href="/employee/community">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -475,13 +424,13 @@ function ManagerPersonalDashboard() {
                   <h2 className="text-base sm:text-lg lg:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
                     Current Wellness Snapshot
                   </h2>
-                  <Link href="/manager/personal/reports">
-                    <Button variant="outline" size="sm" className="border-2 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all">
+                  <Button variant="outline" size="sm" className="border-2 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all" asChild>
+                    <Link href="/employee/reports">
                       <span className="hidden sm:inline">View Interactive Analytics</span>
                       <span className="sm:hidden">Analytics</span>
                       <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
                 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -723,12 +672,12 @@ function ManagerPersonalDashboard() {
                     <Brain className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                     <p className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">No reports yet</p>
                     <p className="text-sm mb-4">Create your first wellness check to see trends.</p>
-                    <Link href="/manager/personal/reports/new">
-                      <Button className="bg-green-600 hover:bg-green-700 text-white">
+                    <Button className="bg-green-600 hover:bg-green-700 text-white" asChild>
+                      <Link href="/employee/reports/new">
                         <Sparkles className="h-4 w-4 mr-2" />
                         Create Report
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -743,12 +692,12 @@ function ManagerPersonalDashboard() {
                   <Calendar className="h-5 w-5 text-purple-500" />
                   <span>Recent Reports</span>
                 </div>
-                <Link href="/manager/personal/reports">
-                  <Button variant="outline" size="sm" className="border-green-200 text-green-600 hover:bg-green-50">
+                <Button variant="outline" size="sm" className="border-green-200 text-green-600 hover:bg-green-50" asChild>
+                  <Link href="/employee/reports">
                     View All
                     <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -777,12 +726,12 @@ function ManagerPersonalDashboard() {
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <p className="text-lg font-medium text-gray-500 mb-4">No reports yet</p>
-                  <Link href="/manager/personal/reports/new">
-                    <Button className="bg-green-600 hover:bg-green-700 text-white">
+                  <Button className="bg-green-600 hover:bg-green-700 text-white" asChild>
+                    <Link href="/employee/reports/new">
                       <Sparkles className="h-4 w-4 mr-2" />
                       Create Your First Report
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -791,34 +740,34 @@ function ManagerPersonalDashboard() {
 
         {/* Wellness Tips */}
         <div className="mt-8">
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-gray-100 flex items-center">
+              <CardTitle className="text-gray-900 flex items-center">
                 <Star className="h-5 w-5 mr-2 text-yellow-500" />
-                Daily Wellness Tips for Leaders
+                Daily Wellness Tips
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                <div className="text-center p-4 sm:p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-700 hover:shadow-lg transition-all duration-300">
-                  <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm sm:text-base">Lead by Example</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                    Take regular breaks and show your team that wellness matters.
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-300">
+                  <Heart className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Take Breaks</h3>
+                  <p className="text-sm text-gray-600">
+                    Take a 5-minute break every hour to refresh your mind.
                   </p>
                 </div>
-                <div className="text-center p-4 sm:p-6 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700 hover:shadow-lg transition-all duration-300">
-                  <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm sm:text-base">Practice Mindfulness</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                    Try 5 minutes of deep breathing before important meetings.
+                <div className="text-center p-6 bg-green-50 rounded-xl border border-green-200 hover:shadow-lg transition-all duration-300">
+                  <Brain className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Practice Mindfulness</h3>
+                  <p className="text-sm text-gray-600">
+                    Try 5 minutes of deep breathing or meditation.
                   </p>
                 </div>
-                <div className="text-center p-4 sm:p-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700 hover:shadow-lg transition-all duration-300">
-                  <MessageSquare className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-3" />
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 text-sm sm:text-base">Stay Connected</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                    Use our AI assistant for leadership-focused wellness support.
+                <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-200 hover:shadow-lg transition-all duration-300">
+                  <MessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Connect</h3>
+                  <p className="text-sm text-gray-600">
+                    Reach out to our AI assistant or a colleague for support.
                   </p>
                 </div>
               </div>
@@ -845,7 +794,7 @@ function ManagerPersonalDashboard() {
                   console.error('Export error:', error);
                 }
               }}
-              userRole="manager"
+              userRole="employee"
             />
           </motion.div>
         )}
@@ -854,4 +803,4 @@ function ManagerPersonalDashboard() {
   );
 }
 
-export default withAuth(ManagerPersonalDashboard, ['manager']);
+export default withAuth(EmployeeDashboard, ['manager', 'admin']);

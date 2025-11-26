@@ -257,7 +257,7 @@ export default function EmployeeChatPage() {
 
   // Voice/Call state
   const [isVoiceMode, setIsVoiceMode] = useState(false);
-  const [isAvatarMode, setIsAvatarMode] = useState(true);
+  const [isAvatarMode, setIsAvatarMode] = useState(false); // Disabled by default to prevent navigation blocking
 
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -307,6 +307,49 @@ export default function EmployeeChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Custom navigation handler that deactivates avatar before navigating
+  const handleNavigation = (path: string) => {
+    // Immediately deactivate avatar and navigate - don't wait for cleanup
+    if (isAvatarMode) {
+      setIsAvatarMode(false);
+    }
+    // Navigate immediately - React will handle cleanup during unmount
+    router.push(path);
+  };
+
+  // Cleanup avatar on navigation - don't block navigation
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isAvatarMode) {
+        setIsAvatarMode(false);
+        // Note: Modern browsers ignore custom messages in beforeunload
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    // Listen for route changes to deactivate avatar
+    const handleRouteChange = () => {
+      if (isAvatarMode) {
+        setIsAvatarMode(false);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Use Next.js router events if available, otherwise just cleanup on unmount
+    const cleanup = () => {
+      if (isAvatarMode) {
+        setIsAvatarMode(false);
+      }
+    };
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      cleanup();
+    };
+  }, [isAvatarMode]);
+
   const audioRecorderRef = useRef<AudioRecorder>(new AudioRecorder());
   const synthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
@@ -350,6 +393,23 @@ export default function EmployeeChatPage() {
       return () => clearTimeout(timeout);
     }
   }, [isAvatarMode, avatarLoaded, avatarLoadError]);
+
+  // Cleanup avatar when deactivated
+  useEffect(() => {
+    if (!isAvatarMode) {
+      // Force cleanup of avatar resources
+      stopTTS();
+      window.speechSynthesis.cancel();
+      if (audioPlayerRef.current) {
+        audioPlayerRef.current.pause();
+        audioPlayerRef.current = null;
+      }
+      // Reset avatar state
+      setCurrentAvatarEmotion("");
+      setAvatarLoaded(false);
+      setAvatarLoadError(false);
+    }
+  }, [isAvatarMode, stopTTS]);
 
   // Call timer
   useEffect(() => {
@@ -1376,7 +1436,7 @@ export default function EmployeeChatPage() {
   if (!user) return null;
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-hidden">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 dark:from-gray-950 dark:via-slate-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-500 overflow-hidden lg:ml-64">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <motion.div
@@ -1787,7 +1847,7 @@ export default function EmployeeChatPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => router.push("/employee/reports")}
+                        onClick={() => handleNavigation("/employee/reports")}
                       >
                         View All Reports
                       </Button>
@@ -2245,7 +2305,7 @@ export default function EmployeeChatPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 30 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="fixed inset-0 lg:relative lg:w-1/2 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 lg:bg-gradient-to-b lg:from-blue-50 lg:to-gray-50 lg:dark:from-blue-900/20 lg:dark:to-gray-800/20 lg:border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full z-0 lg:z-auto pointer-events-none lg:pointer-events-auto"
+            className="fixed inset-0 lg:relative lg:w-1/2 bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-pink-900/40 lg:bg-gradient-to-b lg:from-blue-50 lg:to-gray-50 lg:dark:from-blue-900/20 lg:dark:to-gray-800/20 lg:border-l border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full z-0 lg:z-auto pointer-events-none"
           >
               {/* Mobile Avatar Background Indicator */}
               <div className="lg:hidden absolute top-0 left-0 right-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm border-b border-white/20 px-4 py-2 z-30 pointer-events-none">
