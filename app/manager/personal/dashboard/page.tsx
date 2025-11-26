@@ -262,7 +262,7 @@ function EmployeeDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-          <Link href="/employee/reports/new">
+          <Link href="/manager/personal/reports/new">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -281,7 +281,7 @@ function EmployeeDashboard() {
               </motion.div>
           </Link>
 
-          <Link href="/employee/wellness-hub">
+          <Link href="/manager/personal/wellness-hub">
             <motion.div
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.98 }}
@@ -300,7 +300,7 @@ function EmployeeDashboard() {
             </motion.div>
           </Link>
 
-          <Link href="/employee/chat">
+          <Link href="/manager/personal/chat">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -319,7 +319,7 @@ function EmployeeDashboard() {
               </motion.div>
           </Link>
 
-          <Link href="/employee/reports">
+          <Link href="/manager/personal/reports">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -338,7 +338,7 @@ function EmployeeDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/employee/support">
+            <Link href="/manager/personal/support">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -357,7 +357,7 @@ function EmployeeDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/employee/recommendations">
+            <Link href="/manager/personal/recommendations">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -376,7 +376,7 @@ function EmployeeDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/employee/gamification">
+            <Link href="/manager/personal/gamification">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -395,7 +395,7 @@ function EmployeeDashboard() {
               </motion.div>
             </Link>
 
-            <Link href="/employee/community">
+            <Link href="/manager/personal/community">
               <motion.div
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.98 }}
@@ -425,7 +425,7 @@ function EmployeeDashboard() {
                     Current Wellness Snapshot
                   </h2>
                   <Button variant="outline" size="sm" className="border-2 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 text-xs sm:text-sm px-2 sm:px-3 shadow-sm hover:shadow-md transition-all" asChild>
-                    <Link href="/employee/reports">
+                    <Link href="/manager/personal/reports">
                       <span className="hidden sm:inline">View Interactive Analytics</span>
                       <span className="sm:hidden">Analytics</span>
                       <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
@@ -673,7 +673,7 @@ function EmployeeDashboard() {
                     <p className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">No reports yet</p>
                     <p className="text-sm mb-4">Create your first wellness check to see trends.</p>
                     <Button className="bg-green-600 hover:bg-green-700 text-white" asChild>
-                      <Link href="/employee/reports/new">
+                      <Link href="/manager/personal/reports/new">
                         <Sparkles className="h-4 w-4 mr-2" />
                         Create Report
                       </Link>
@@ -693,7 +693,7 @@ function EmployeeDashboard() {
                   <span>Recent Reports</span>
                 </div>
                 <Button variant="outline" size="sm" className="border-green-200 text-green-600 hover:bg-green-50" asChild>
-                  <Link href="/employee/reports">
+                  <Link href="/manager/personal/reports">
                     View All
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
@@ -727,7 +727,7 @@ function EmployeeDashboard() {
                   <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                   <p className="text-lg font-medium text-gray-500 mb-4">No reports yet</p>
                   <Button className="bg-green-600 hover:bg-green-700 text-white" asChild>
-                    <Link href="/employee/reports/new">
+                    <Link href="/manager/personal/reports/new">
                       <Sparkles className="h-4 w-4 mr-2" />
                       Create Your First Report
                     </Link>
