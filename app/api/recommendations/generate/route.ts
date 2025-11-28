@@ -55,23 +55,77 @@ async function getUserChatHistory(userId: string, companyId: string, days: numbe
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - days);
     
+    // Query without date filter to avoid composite index requirement
+    // We'll filter by date in JavaScript instead
     const q = query(
       chatRef,
       where('user_id', '==', userId),
       where('company_id', '==', companyId),
-      where('created_at', '>=', sevenDaysAgo),
       orderBy('created_at', 'desc'),
-      limit(20)
+      limit(50) // Get more documents to filter by date
     );
     
     const querySnapshot = await getDocs(q);
-    const sessions: ChatSession[] = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as ChatSession));
+    const sessions: ChatSession[] = querySnapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as ChatSession))
+      .filter(session => {
+        // Filter by date in JavaScript
+        const sessionDate = session.created_at 
+          ? (session.created_at instanceof Date 
+              ? session.created_at 
+              : new Date(session.created_at))
+          : null;
+        return sessionDate && sessionDate >= sevenDaysAgo;
+      })
+      .slice(0, 20); // Limit to 20 most recent after filtering
     
     return sessions;
-  } catch (error) {
+  } catch (error: any) {
+    // If the query still fails (e.g., missing index for user_id + company_id + orderBy),
+    // try a simpler query without orderBy
+    if (error?.code === 'failed-precondition') {
+      try {
+        const chatRef = collection(db, 'chat_sessions');
+        const q = query(
+          chatRef,
+          where('user_id', '==', userId),
+          where('company_id', '==', companyId),
+          limit(50)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - days);
+        
+        const sessions: ChatSession[] = querySnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as ChatSession))
+          .filter(session => {
+            const sessionDate = session.created_at 
+              ? (session.created_at instanceof Date 
+                  ? session.created_at 
+                  : new Date(session.created_at))
+              : null;
+            return sessionDate && sessionDate >= sevenDaysAgo;
+          })
+          .sort((a, b) => {
+            const dateA = a.created_at instanceof Date ? a.created_at : new Date(a.created_at || 0);
+            const dateB = b.created_at instanceof Date ? b.created_at : new Date(b.created_at || 0);
+            return dateB.getTime() - dateA.getTime();
+          })
+          .slice(0, 20);
+        
+        return sessions;
+      } catch (fallbackError) {
+        console.error('Error fetching chat history (fallback):', fallbackError);
+        return [];
+      }
+    }
     console.error('Error fetching chat history:', error);
     return [];
   }

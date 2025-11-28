@@ -11,7 +11,7 @@ import { useUser } from '@/hooks/use-user';
 import { auth } from '@/lib/firebase';
 import AnonymousCommunity from '@/components/community/AnonymousCommunity';
 
-export default function EmployeeCommunityPage() {
+export default function ManagerPersonalCommunityPage() {
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function EmployeeCommunityPage() {
       return;
     }
 
-    if (user?.role !== 'employee') {
+    if (user?.role !== 'manager') {
       return;
     }
   }, [user, userLoading, router]);

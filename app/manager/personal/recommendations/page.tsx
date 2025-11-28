@@ -3,25 +3,34 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import ManagerNavbar from '@/components/shared/ManagerNavbar';
-import { Button } from '@/components/ui/button';
-import { Brain, ArrowRight } from 'lucide-react';
+import { Brain } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
-import { auth } from '@/lib/firebase';
 import AIRecommendations from '@/components/recommendations/AIRecommendations';
 
-export default function EmployeeRecommendationsPage() {
+export default function ManagerRecommendationsPage() {
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (!userLoading && !user) {
+    // Wait for loading to complete before checking
+    if (userLoading) {
+      return;
+    }
+
+    // If loading is done and no user, redirect
+    if (!user) {
       router.push('/');
       return;
     }
 
-    if (user?.role !== 'employee') {
+    // If user exists but wrong role, redirect to appropriate dashboard
+    if (user.role !== 'manager' && user.role !== 'admin') {
+      if (user.role === 'employee') {
+        router.push('/employee/dashboard');
+      } else {
+        router.push('/');
+      }
       return;
     }
   }, [user, userLoading, router]);

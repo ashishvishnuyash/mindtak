@@ -11,7 +11,7 @@ import { useUser } from '@/hooks/use-user';
 import { auth } from '@/lib/firebase';
 import EscalationSupport from '@/components/support/EscalationSupport';
 
-export default function EmployeeSupportPage() {
+export default function ManagerSupportPage() {
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function EmployeeSupportPage() {
       return;
     }
 
-    if (user?.role !== 'employee') {
+    if (user?.role !== 'manager') {
       return;
     }
   }, [user, userLoading, router]);

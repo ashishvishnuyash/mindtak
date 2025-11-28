@@ -533,6 +533,66 @@ export default function HomePage() {
         </div>
       </motion.section>
 
+      {/* Backed By Section */}
+      <motion.section
+        className="relative py-8 sm:py-12 md:py-16 z-10"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            className="text-center mb-8 sm:mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Backed By
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              Trusted by leading organizations and investors
+            </p>
+          </motion.div>
+
+          <motion.div 
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 items-center justify-items-center"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            {[
+              '/BackedBy/image.png',
+              '/BackedBy/Screenshot 2025-11-06 at 3.09.33 PM.png',
+              '/BackedBy/Screenshot 2025-11-06 at 3.12.39 PM.png',
+              '/BackedBy/Screenshot 2025-11-06 at 3.15.14 PM.png',
+              '/BackedBy/Screenshot 2025-11-06 at 3.19.36 PM.png',
+            ].map((imagePath, index) => (
+              <motion.div
+                key={index}
+                className="relative w-full max-w-[180px] h-24 sm:h-28 md:h-32 flex items-center justify-center p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 hover:shadow-lg group"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+              >
+                <Image
+                  src={imagePath}
+                  alt={`Backed by partner ${index + 1}`}
+                  fill
+                  className="object-contain p-2 grayscale group-hover:grayscale-0 transition-all duration-300"
+                  sizes="(max-width: 640px) 150px, (max-width: 1024px) 180px, 200px"
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
       {/* The Diltak AI Advantage Section */}
       <motion.section
         id="advantage"

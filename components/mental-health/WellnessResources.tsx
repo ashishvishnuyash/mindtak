@@ -162,23 +162,7 @@ const WellnessResources = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Logos Image */}
-        <motion.div
-          className="flex justify-center mb-8 sm:mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="relative w-full max-w-4xl h-[150px] sm:h-[200px] md:h-[250px]">
-            <Image
-              src="/logos.png"
-              alt="Partner Logos"
-              fill
-              className="object-contain"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
-            />
-          </div>
-        </motion.div>
+        
 
         {/* Header */}
         <motion.div 
