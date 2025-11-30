@@ -566,6 +566,7 @@ export default function HomePage() {
           >
             {[
               '/BackedBy/image.png',
+              '/BackedBy/image1.png',
               '/BackedBy/Screenshot 2025-11-06 at 3.09.33 PM.png',
               '/BackedBy/Screenshot 2025-11-06 at 3.12.39 PM.png',
               '/BackedBy/Screenshot 2025-11-06 at 3.15.14 PM.png',
