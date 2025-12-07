@@ -70,6 +70,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 // Audio recording utilities with silence detection
 class AudioRecorder {
@@ -291,6 +298,18 @@ export default function EmployeeChatPage() {
 
   // File upload state
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+
+  // Greeting dialog state
+  const [showGreetingDialog, setShowGreetingDialog] = useState(false);
+  const [greetingShown, setGreetingShown] = useState(false);
+
+  // Predefined starting messages
+  const predefinedMessages = [
+    "Hello! How are you today?",
+    "I'd like to discuss team wellness",
+    "I need some management support",
+    "Can you help me with employee wellness strategies?",
+  ];
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -379,6 +398,14 @@ export default function EmployeeChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Show greeting dialog when chat is initialized
+  useEffect(() => {
+    if (sessionId && !greetingShown && messages.length > 0) {
+      setShowGreetingDialog(true);
+      setGreetingShown(true);
+    }
+  }, [sessionId, greetingShown, messages.length]);
 
   // Avatar loading timeout to prevent infinite loading
   useEffect(() => {
@@ -1986,6 +2013,34 @@ export default function EmployeeChatPage() {
                 </div>
               )}
 
+              {/* Predefined Starting Messages */}
+              {messages.length > 0 && currentMessage.length === 0 && !sessionEnded && (
+                <div className="mb-3 px-2 sm:px-4 md:px-6">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex flex-wrap gap-2 sm:gap-2.5 md:gap-3 justify-center items-center">
+                      {predefinedMessages.map((message, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentMessage(message);
+                            // Auto-send after a brief delay for better UX
+                            setTimeout(() => {
+                              handleSendMessage(message);
+                            }, 100);
+                          }}
+                          disabled={loading || sessionEnded}
+                          className="text-xs sm:text-sm px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 h-auto min-h-[44px] rounded-full border-gray-300 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500 transition-colors flex-shrink-0 w-full sm:w-auto"
+                        >
+                          <span className="block text-center whitespace-nowrap">{message}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Main Input Container */}
               <div className="relative">
                 {/* Mobile Avatar Mode Indicator */}
@@ -2614,6 +2669,34 @@ export default function EmployeeChatPage() {
           onToggle={toggleSettings}
         />
       )}
+
+      {/* Greeting Dialog */}
+      <Dialog open={showGreetingDialog} onOpenChange={setShowGreetingDialog}>
+        <DialogContent className="w-[95vw] sm:w-full sm:max-w-md mx-4 sm:mx-auto">
+          <DialogHeader>
+            <DialogTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 sm:space-x-2 text-lg sm:text-xl">
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0" />
+              <span className="break-words">Welcome to Wellness Assistant!</span>
+            </DialogTitle>
+            <DialogDescription className="pt-3 sm:pt-2">
+              <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">
+                Hello {user?.first_name || "there"}! 👋
+              </p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                I'm here to support you. Feel free to share what's on your mind, ask questions, or use the quick message options below to get started.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end pt-4 sm:pt-4">
+            <Button
+              onClick={() => setShowGreetingDialog(false)}
+              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto min-h-[44px] px-6 sm:px-8 text-sm sm:text-base"
+            >
+              Get Started
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
